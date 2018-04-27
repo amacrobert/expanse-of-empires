@@ -1,0 +1,15 @@
+App\Entity\User:
+
+    type: entity
+    table: user
+
+    id: { id: { type: integer, unsigned: true, generator: { strategy: auto } } }
+
+    fields:
+        username: { type: string(24) }
+        email: { type: string }
+        password: { type: string(4096) }
+        date_registered: { type: datetime }
+
+    lifecycleCallbacks:
+        prePersist: [setDateRegisteredToNow]

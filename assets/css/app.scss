@@ -1,0 +1,16 @@
+.sidebar {
+    border-left: 1px solid #777;
+    height: 100vh;
+}
+
+.mapviewport {
+    height: 100vh;
+}
+
+#scene {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+}
