@@ -4,8 +4,9 @@ namespace App\Entity;
 
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
+use JsonSerializable;
 
-class User implements UserInterface {
+class User implements UserInterface, JsonSerializable {
 
     private $id;
 
@@ -30,6 +31,16 @@ class User implements UserInterface {
      * @Assert\Length(min=6)
      */
     private $plain_password;
+
+    public function jsonSerialize() {
+        return [
+            'id' => $this->getId(),
+            'username' => $this->getUsername(),
+            'email' => $this->getEmail(),
+            'roles' => $this->getRoles(),
+            'date_registered' => $this->getDateRegistered()->format('Y-m-d H:i:s'),
+        ];
+    }
 
     public function getRoles() {
         return ['ROLE_USER'];

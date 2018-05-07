@@ -1,0 +1,21 @@
+App\Entity\Match\Match:
+
+    type: entity
+    table: '`match`'
+
+    id: { id: { type: integer, unsigned: true, generator: { strategy: auto } } }
+
+    fields:
+        name:               { type: string }
+        visible:            { type: boolean }
+        speed:              { type: integer, options: { unsigned: true } }
+        date_registration:  { type: datetime }
+        date_npc:           { type: datetime }
+        date_p2p:           { type: datetime }
+        date_completed:     { type: datetime, nullable: true }
+
+    # manyToOne:
+    #     map: { targetEntity: App\Entity\Match\Map }
+    
+    # oneToMany:
+    #     empires: { targetEntity: App\Entity\Match\Empire }

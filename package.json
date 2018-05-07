@@ -14,10 +14,13 @@
         "build": "encore production"
     },
     "dependencies": {
+        "ajv": "^6.4.0",
+        "bootstrap": "^4.1.1",
+        "jquery": "^3.3.1",
         "npm": "^5.8.0",
+        "popper.js": "^1.14.3",
         "prop-types": "^15.6.1",
         "react": "^16.3.2",
-        "react-bootstrap": "^0.32.1",
         "react-dom": "^16.3.2",
         "three": "^0.92.0"
     }

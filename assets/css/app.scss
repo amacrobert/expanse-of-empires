@@ -1,3 +1,5 @@
+@import '~bootstrap/scss/bootstrap';
+
 .sidebar {
     border-left: 1px solid #777;
     height: 100vh;
@@ -13,4 +15,8 @@
     left: 0;
     bottom: 0;
     right: 0;
+}
+
+.match-card {
+    margin-bottom: 1em;
 }
