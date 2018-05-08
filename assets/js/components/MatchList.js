@@ -1,14 +1,13 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-
 import MatchCard from './MatchCard';
-
-//var Col = require('react-bootstrap').Col;
 
 class MatchList extends React.Component {
 
     constructor(props) {
         super(props);
+
+        this.handleKeyboardShortcuts = this.handleKeyboardShortcuts.bind(this);
 
         this.state = {
             matches: []
@@ -29,6 +28,12 @@ class MatchList extends React.Component {
         )
     }
 
+    handleKeyboardShortcuts(e) {
+        console.log('KEY PRESSED');
+        e.stopPropagation();
+        console.log(e);
+    }
+
     render() {
         var matchList = this.state.matches.map((match) => {
             return (
@@ -41,8 +46,8 @@ class MatchList extends React.Component {
         });
 
         return(
-            <div className="col-md-4">
-                <h3>Your Matches</h3>
+            <div className="col-md-4" tabIndex="0" onKeyPress={this.handleKeyboardShortcuts}>
+                <h5>Your Matches</h5>
                 {matchList}
             </div>
         );

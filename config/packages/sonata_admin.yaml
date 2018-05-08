@@ -1,0 +1,18 @@
+sonata_admin:
+    title: 'Sonata Admin'
+    dashboard:
+        blocks:
+            - { type: sonata.admin.block.admin_list, position: left }
+
+sonata_block:
+    blocks:
+        sonata.admin.block.admin_list:
+            contexts: [admin]
+
+services:
+    admin.match:
+        class: App\Admin\Match\MatchAdmin
+        arguments: [~, App\Entity\Match\Match, ~]
+        tags:
+            - { name: sonata.admin, manager_type: orm, label: Matches, group: 'Matches'}
+        public: true

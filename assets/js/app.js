@@ -2,8 +2,9 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import 'bootstrap';
 
-import MatchList from './components/MatchList';
-import MatchCard from './components/MatchCard';
+import Nav from './components/Nav';
+import Home from './components/Home';
+import Match from './components/Match';
 
 class App extends React.Component {
 
@@ -19,6 +20,7 @@ class App extends React.Component {
     };
 
     handleMatchSelect(match) {
+        console.log('handleSelectMatch match: ', match);
         this.setState({activeMatch: match});
     }
 
@@ -37,15 +39,20 @@ class App extends React.Component {
 
     render() {
         const activeMatch = this.state.activeMatch;
-        const activeMatchCard = activeMatch ? <MatchCard match={activeMatch} active={true} /> : <p>select a match on the right</p>
         return (
-            <div className="container-fluid">
-                <div className="row">
-                    <div className="col-md-8">
-                        <p>Logged in as {this.state.user.username}</p>
-                        {activeMatchCard}
-                    </div>
-                    <MatchList onMatchSelect={this.handleMatchSelect} />
+            <div>
+                <Nav
+                    activeMatch={activeMatch}
+                    onExit={this.handleMatchSelect}
+                    user={this.state.user}
+                />
+                <div className="container-fluid">
+
+                   {activeMatch ? (
+                        <Match match={activeMatch} user={this.state.user} onExit={this.handleMatchSelect} />
+                    ) : (
+                        <Home user={this.state.user} onMatchSelect={this.handleMatchSelect} /> 
+                    )}
                 </div>
             </div>
         );

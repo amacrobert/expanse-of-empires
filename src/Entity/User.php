@@ -43,7 +43,12 @@ class User implements UserInterface, JsonSerializable {
     }
 
     public function getRoles() {
-        return ['ROLE_USER'];
+
+        if ($this->getId() == 1) {
+            return ['ROLE_USER', 'ROLE_ADMIN'];
+        }
+
+        return ['ROLE_ADMIN'];
     }
 
     public function getSalt() {

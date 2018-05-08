@@ -1,4 +1,16 @@
-@import '~bootstrap/scss/bootstrap';
+@import './bootstrap-superhero.css';
+//@import '~bootstrap/scss/bootstrap';
+@import url('https://fonts.googleapis.com/css?family=Cinzel+Decorative');
+
+@mixin clickable {
+    cursor: pointer;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
 
 .sidebar {
     border-left: 1px solid #777;
@@ -17,6 +29,31 @@
     right: 0;
 }
 
+.main-nav {
+    margin-bottom: 1rem
+}
+
+.main-nav .navbar-brand {
+    font-family: 'Cinzel Decorative', cursive;
+}
+
+.nav-match-name {
+    border-left: 1px solid white;
+    padding-left: 1rem;
+    margin-left: 1rem;
+    font-weight: bold;
+}
+
 .match-card {
-    margin-bottom: 1em;
+    //background-color: #5cb85c !important;
+    margin-bottom: 0.5rem;
+    @include clickable;
+}
+
+.match-card:hover {
+    //background-color: #4aa73a !important;
+}
+
+.clickable {
+    @include clickable;
 }

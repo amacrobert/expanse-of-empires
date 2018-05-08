@@ -35,6 +35,10 @@ class Match implements JsonSerializable {
         ];
     }
 
+    public function __toString() {
+        return $this->getName() ?: 'New Match';
+    }
+
     public function __construct() {
         $this->empires = new ArrayCollection;
     }
@@ -52,7 +56,7 @@ class Match implements JsonSerializable {
         return $this;
     }
 
-    public function getName(): string {
+    public function getName(): ?string {
         return $this->name;
     }
 
@@ -70,7 +74,7 @@ class Match implements JsonSerializable {
         return $this;
     }
 
-    public function getSpeed(): int {
+    public function getSpeed(): ?int {
         return $this->speed;
     }
 
@@ -79,7 +83,7 @@ class Match implements JsonSerializable {
         return $this;
     }
 
-    public function getDateRegistration(): DateTime {
+    public function getDateRegistration(): ?DateTime {
         return $this->date_registration;
     }
 
@@ -88,7 +92,7 @@ class Match implements JsonSerializable {
         return $this;
     }
 
-    public function getDateNPC(): DateTime {
+    public function getDateNPC(): ?DateTime {
         return $this->date_npc;
     }
 
@@ -97,7 +101,7 @@ class Match implements JsonSerializable {
         return $this;
     }
 
-    public function getDateP2P(): DateTime {
+    public function getDateP2P(): ?DateTime {
         return $this->date_p2p;
     }
 
