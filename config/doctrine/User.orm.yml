@@ -10,6 +10,7 @@ App\Entity\User:
         email: { type: string }
         password: { type: string(4096) }
         date_registered: { type: datetime }
+        api_key: { type: string, unique: true }
 
     lifecycleCallbacks:
         prePersist: [setDateRegisteredToNow]

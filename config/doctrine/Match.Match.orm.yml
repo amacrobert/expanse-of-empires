@@ -17,5 +17,5 @@ App\Entity\Match\Match:
     # manyToOne:
     #     map: { targetEntity: App\Entity\Match\Map }
     
-    # oneToMany:
-    #     empires: { targetEntity: App\Entity\Match\Empire }
+    oneToMany:
+        empires: { targetEntity: App\Entity\Match\Empire, mappedBy: match }

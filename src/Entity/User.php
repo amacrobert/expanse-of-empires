@@ -25,6 +25,7 @@ class User implements UserInterface, JsonSerializable {
     private $email;
     private $password;
     private $date_registered;
+    private $api_key;
 
     // Not mapped
     /**
@@ -49,6 +50,15 @@ class User implements UserInterface, JsonSerializable {
         }
 
         return ['ROLE_ADMIN'];
+    }
+
+    public function getApiKey(): ?string {
+        return $this->api_key;
+    }
+
+    public function setApiKey(?string $api_key) {
+        $this->api_key = $api_key;
+        return $this;
     }
 
     public function getSalt() {

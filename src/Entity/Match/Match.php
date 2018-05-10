@@ -27,11 +27,12 @@ class Match implements JsonSerializable {
             'id'                => $this->getId(),
             'name'              => $this->getName(),
             'speed'             => $this->getSpeed(),
-            'date_registration' => $this->getDateRegistration(),
-            'date_npc'          => $this->getDateNPC(),
-            'date_p2p'          => $this->getDateP2P(),
-            'date_completed'    => $this->getDateCompleted(),
+            'date_registration' => $this->getDateRegistration()->format('Y-m-d H:i:s T'),
+            'date_npc'          => $this->getDateNPC()->format('Y-m-d H:i:s T'),
+            'date_p2p'          => $this->getDateP2P()->format('Y-m-d H:i:s T'),
+            'date_completed'    => $this->getDateCompleted() ? $this->getDateCompleted()->format('Y-m-d H:i:s T') : null,
             'completed'         => $this->getDateCompleted() ? true : false,
+            'phase'             => $this->getPhase(),
         ];
     }
 
@@ -41,6 +42,31 @@ class Match implements JsonSerializable {
 
     public function __construct() {
         $this->empires = new ArrayCollection;
+    }
+
+    public function getPhase() {
+        $now = new DateTime;
+
+        if ($this->getDateCompleted()) {
+            $phase = 'complete';
+        }
+        else if ($now <= $this->getDateRegistration()) {
+            $phase = 'pre-registration';
+        }
+        else if ($this->getDateRegistration() <= $now && $now < $this->getDateNPC()) {
+            $phase = 'registration';
+        }
+        else if ($this->getDateNPC() <= $now && $now < $this->getDateP2P()) {
+            $phase = 'non-player-combat';
+        }
+        else if ($this->getDateP2P() <= now) {
+            $phase = 'expanse-of-empires';
+        }
+        else {
+            throw new \Exception('Match ' . $this->getId() . ' timeline is out of order');
+        }
+
+        return $phase;
     }
 
     public function getId() {

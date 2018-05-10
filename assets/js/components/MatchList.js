@@ -7,15 +7,13 @@ class MatchList extends React.Component {
     constructor(props) {
         super(props);
 
-        this.handleKeyboardShortcuts = this.handleKeyboardShortcuts.bind(this);
-
         this.state = {
             matches: []
         };
     }
 
     componentDidMount() {
-        fetch('/api/matches')
+        fetch('/api/matches', {headers: {'X-AUTH-TOKEN': 'abc'}})
         .then(result => result.json())
         .then(
             (result) => {
@@ -26,12 +24,6 @@ class MatchList extends React.Component {
                 console.log('ERROR:', error);
             }
         )
-    }
-
-    handleKeyboardShortcuts(e) {
-        console.log('KEY PRESSED');
-        e.stopPropagation();
-        console.log(e);
     }
 
     render() {
@@ -46,7 +38,7 @@ class MatchList extends React.Component {
         });
 
         return(
-            <div className="col-md-4" tabIndex="0" onKeyPress={this.handleKeyboardShortcuts}>
+            <div className="col-md-4">
                 <h5>Your Matches</h5>
                 {matchList}
             </div>

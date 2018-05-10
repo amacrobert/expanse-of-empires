@@ -1,5 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import Cookies from 'universal-cookie';
 import 'bootstrap';
 
 import Nav from './components/Nav';
@@ -11,25 +12,47 @@ class App extends React.Component {
     constructor(props) {
         super(props);
 
-        this.handleMatchSelect = this.handleMatchSelect.bind(this);
+        const cookies = new Cookies();
+        //cookies.set('AUTH-TOKEN', 'abc', {path: '/'});
+        const authToken = cookies.get('AUTH-TOKEN');
 
         this.state = {
-            user: {username: ''},
+            user: {authToken: authToken, loaded: false},
             activeMatch: null,
         };
+
+        this.handleMatchSelect = this.handleMatchSelect.bind(this);
+        this.handleLogin = this.handleLogin.bind(this);
+        this.handleLogout = this.handleLogout.bind(this);
     };
 
     handleMatchSelect(match) {
-        console.log('handleSelectMatch match: ', match);
         this.setState({activeMatch: match});
     }
 
+    handleLogin(result) {
+        console.log('appjs login:', result);
+        const cookies = new Cookies();
+        cookies.set('AUTH-TOKEN', result.api_key, {path: '/'});
+        cookies.set('PHPSESSID', result.session, {path: '/'});
+        window.location.href = '/';
+    } 
+
+    handleLogout() {
+        const cookies = new Cookies();
+        cookies.remove('AUTH-TOKEN');
+        window.location.href = '/logout';        
+    }
+
     componentDidMount() {
-        fetch('/api/user')
+        const user = this.state.user;
+
+        fetch('/api/user', {headers: {'X-AUTH-TOKEN': user.authToken}})
         .then(result => result.json())
         .then(
-            (result) => {
-                this.setState({user: result});
+            (user) => {
+                user.loaded = true;
+                this.setState({user: user});
             },
             (error) => {
                 console.log('ERROR:', error);
@@ -43,8 +66,10 @@ class App extends React.Component {
             <div>
                 <Nav
                     activeMatch={activeMatch}
-                    onExit={this.handleMatchSelect}
                     user={this.state.user}
+                    onExit={this.handleMatchSelect}
+                    onLogin={this.handleLogin}
+                    onLogout={this.handleLogout}
                 />
                 <div className="container-fluid">
 

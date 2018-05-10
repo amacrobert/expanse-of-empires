@@ -1,17 +1,15 @@
 security:
     # https://symfony.com/doc/current/security.html#where-do-users-come-from-user-providers
     providers:
-        db_user_login:
+        apikey_user_login:
             entity:
                 class: App\Entity\User
-                property: email
+                property: api_key
 
-        # in_memory:
-        #     memory:
-        #         users:
-        #             Larksmann:
-        #                 password: $2y$12$CcZO40KgqEcpF.dkXb7bOuVbYhKLDfSl3GDNtnbS6mIGsh0J1YsHW
-        #                 roles: ROLE_USER
+        password_user_login:
+            entity:
+                class: App\Entity\User
+                property: username
 
     firewalls:
         dev:
@@ -20,9 +18,21 @@ security:
 
         main:
             anonymous: ~
-            form_login:
-                login_path: login
+
+            json_login:
+                provider: password_user_login
                 check_path: login
+                success_handler: App\Security\AuthenticationHandler
+                failure_handler: App\Security\AuthenticationHandler
+
+            guard:
+                provider: apikey_user_login
+                authenticators:
+                    - App\Security\TokenAuthenticator
+
+            logout:
+                path: /logout
+                target: /
 
             # activate different ways to authenticate
 
@@ -43,12 +53,7 @@ security:
     # Easy way to control access for large sections of your site
     # Note: Only the *first* access control that matches will be used
     access_control:
-        - { path: ^/api, roles: IS_AUTHENTICATED_ANONYMOUSLY }
-        - { path: ^/login, roles: IS_AUTHENTICATED_ANONYMOUSLY }
-        - { path: ^/register, roles: IS_AUTHENTICATED_ANONYMOUSLY }
-        - { path: ^/admin, roles: [ROLE_ADMIN, ROLE_USER] }
-        - { path: ^/, roles: ROLE_USER }
-        # - { path: ^/profile, roles: ROLE_USER }
+        - { path: ^/admin, roles: [ROLE_ADMIN] }
 
     encoders:
         Symfony\Component\Security\Core\User\User:

@@ -13,22 +13,10 @@ use App\Form\UserType;
 use App\Entity\User;
 
 class AuthController extends Controller {
-
     /**
      * @Route("/login", name="login")
      */
-    public function login(
-        Request $request,
-        AuthenticationUtils $auth_utils
-        ) {
-
-        $error = $auth_utils->getLastAuthenticationError();
-        $last_username = $auth_utils->getLastUsername();
-
-        return $this->render('auth/login.html.twig', [
-            'last_username' => $last_username,
-            'error' => $error,
-        ]);
+    public function login(Request $request) {
     }
 
     /**
