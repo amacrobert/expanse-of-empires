@@ -1,0 +1,17 @@
+App\Entity\Chat\Message:
+
+    type: entity
+    table: chat_message
+
+    id: { id: { type: integer, unsigned: true, generator: { strategy: auto } } }
+
+    fields:
+        message: { type: string }
+        date_sent: { type: datetime }
+
+    manyToOne:
+        user: { targetEntity: App\Entity\User }
+        match: { targetEntity: App\Entity\Match\Match }
+
+    lifecycleCallbacks:
+        prePersist: [setDateSentToNow]

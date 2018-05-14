@@ -27,9 +27,5 @@ services:
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
 
-    App\Service\EntityManager:
+    App\Server\SocketApi:
         public: true
-        arguments:
-            $connection: '@doctrine.dbal.default_connection'
-            $configuration: '@doctrine.orm.default_configuration'
-            $event_manager: '@doctrine.dbal.default_connection.event_manager'

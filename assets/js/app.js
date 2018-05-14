@@ -14,10 +14,10 @@ class App extends React.Component {
 
         const cookies = new Cookies();
         //cookies.set('AUTH-TOKEN', 'abc', {path: '/'});
-        const authToken = cookies.get('AUTH-TOKEN');
+        const token = cookies.get('AUTH-TOKEN');
 
         this.state = {
-            user: {authToken: authToken, loaded: false},
+            user: {token: token, loaded: false},
             activeMatch: null,
         };
 
@@ -47,10 +47,12 @@ class App extends React.Component {
     componentDidMount() {
         const user = this.state.user;
 
-        fetch('/api/user', {headers: {'X-AUTH-TOKEN': user.authToken}})
+        fetch('/api/user', {headers: {'X-AUTH-TOKEN': user.token}})
         .then(result => result.json())
         .then(
             (user) => {
+                const cookies = new Cookies();
+                user.token = cookies.get('AUTH-TOKEN');
                 user.loaded = true;
                 this.setState({user: user});
             },

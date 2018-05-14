@@ -37,8 +37,6 @@ class User implements UserInterface, JsonSerializable {
         return [
             'id' => $this->getId(),
             'username' => $this->getUsername(),
-            'email' => $this->getEmail(),
-            'roles' => $this->getRoles(),
             'date_registered' => $this->getDateRegistered()->format('Y-m-d H:i:s'),
         ];
     }

@@ -1,0 +1,28 @@
+.chat-screen {
+    overflow-y: scroll;
+    height: 15rem;
+    background-color: rgba(0,0,0,.1);
+    font-size: .8em;
+    padding: 0 0.5rem;
+}
+
+.chat-screen p {
+    margin: 0;
+    padding: 0;
+}
+
+.chat-line.chat-join {
+    color: rgba(255, 255, 255, .5);
+}
+
+.chat-line {
+    text-indent: -1em;
+    margin-left: 1em;
+}
+
+.chat-input {
+    width: 100%;
+    color: white;
+    border: none;
+    background-color: rgba(0,0,0,.2);
+}

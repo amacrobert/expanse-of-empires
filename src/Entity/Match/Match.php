@@ -59,7 +59,7 @@ class Match implements JsonSerializable {
         else if ($this->getDateNPC() <= $now && $now < $this->getDateP2P()) {
             $phase = 'non-player-combat';
         }
-        else if ($this->getDateP2P() <= now) {
+        else if ($this->getDateP2P() <= $now) {
             $phase = 'expanse-of-empires';
         }
         else {
@@ -91,14 +91,14 @@ class Match implements JsonSerializable {
         return $this;
     }
 
-    public function getMap(): Map {
-        return $this->map;
-    }
+    // public function getMap(): Map {
+    //     return $this->map;
+    // }
 
-    public function setMap(?Map $map) {
-        $this->map = $map;
-        return $this;
-    }
+    // public function setMap(?Map $map) {
+    //     $this->map = $map;
+    //     return $this;
+    // }
 
     public function getSpeed(): ?int {
         return $this->speed;

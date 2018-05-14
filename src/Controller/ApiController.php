@@ -14,6 +14,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use App\Form\UserType;
 use App\Entity\User;
 use App\Entity\Match\Match;
+use App\Entity\Chat\Message;
 
 /**
  * @Route("/api")
@@ -39,9 +40,14 @@ class ApiController extends Controller {
         return $this->json($matches);
     }
 
-    // Overide getUser function until I figure out api auth
-    // protected function getUser() {
-    //     $em = $this->get('App\Service\EntityManager');
-    //     return $em->find(User::class, 1);
-    // }
+    /**
+     * @Route("/match/{match_id}/chat", name="match_chat")
+     */
+    public function getMatchChat($match_id, EntityManagerInterface $em) {
+        $messages = $em->getRepository(Message::class)->findBy([
+            'match' => $em->getReference(Match::class, $match_id),
+        ]);
+
+        return new JsonResponse($messages);
+    }
 }

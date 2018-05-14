@@ -1,0 +1,21 @@
+@import './_mixins.scss';
+
+.match-card {
+    //background-color: #5cb85c !important;
+    margin-bottom: 0.5rem;
+    @include clickable;
+}
+
+.match-card .btn-open {
+    float: right;
+}
+
+.match-card:hover .btn-open {
+    color: #fff;
+    background-color: #778a9d;
+    border-color: #6f8397;
+}
+
+.match-card:hover {
+    //background-color: #4aa73a !important;
+}

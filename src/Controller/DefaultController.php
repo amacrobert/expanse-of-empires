@@ -11,8 +11,6 @@ class DefaultController extends AbstractController {
      * @Route("/", name="homepage")
      */
     public function index() {
-        print_r(json_encode(new \DateTime));
-        exit();
         return $this->render('index.html.twig', []);
     }
 }
