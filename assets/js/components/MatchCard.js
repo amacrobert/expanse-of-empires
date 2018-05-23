@@ -21,12 +21,21 @@ class MatchCard extends React.Component {
 
     render() {
         const match = this.props.match;
+        const matchCardClasses = ['card', 'match-card'];
+        const openButtonClasses = ['btn', 'btn-sm', 'btn-open'];
+        if (match.user_joined) {
+            matchCardClasses.push('match-active');
+            matchCardClasses.push('bg-primary');
+        }
+        else {
+            openButtonClasses.push('btn-light');
+        }
 
         return(
-            <div tabIndex="0" className='card match-card' onClick={this.handleMatchSelect}>
+            <div tabIndex="0" className={matchCardClasses.join(' ')} onClick={this.handleMatchSelect}>
                 <div className="card-header">
                     <span className="align-middle">{match.name}</span>
-                    <span className="btn btn-sm btn-light btn-open">Open</span>
+                    <span className={openButtonClasses.join(' ')}>Open</span>
                 </div>
                 <div className="card-body">
                     <p className="card-text">{match.phase}</p>

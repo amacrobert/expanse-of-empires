@@ -8,8 +8,8 @@ App\Entity\Match\Empire:
     fields:
         date_founded: { type: datetime }
         active: { type: boolean }
-        result: { type: string }
-        placement: { type: integer }
+        result: { type: string, nullable: true }
+        placement: { type: integer, nullable: true }
 
     manyToOne:
         user: { targetEntity: App\Entity\User }

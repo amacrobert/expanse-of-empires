@@ -9,7 +9,7 @@ security:
         password_user_login:
             entity:
                 class: App\Entity\User
-                property: username
+                property: email
 
     firewalls:
         dev:

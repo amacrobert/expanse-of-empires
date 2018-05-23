@@ -1,6 +1,6 @@
 import React from 'react';
-import LoginForm from './LoginForm';
 import UserMenu from './UserMenu';
+import RegisterLoginButtons from './RegisterLoginButtons';
 
 class Nav extends React.Component {
 
@@ -34,15 +34,17 @@ class Nav extends React.Component {
                     </div>
                 </div>
 
-                {user.loaded && user.id && 
+                {user.loaded && user.loggedIn &&
                     <UserMenu
                         user={user}
                         onLogout={this.props.onLogout}
                     />
                 }
 
-                {user.loaded && !user.id &&
-                    <LoginForm onLogin={this.props.onLogin} />
+                {user.loaded && !user.loggedIn &&
+                    <RegisterLoginButtons
+                        onLogin={this.props.onLogin}
+                    />
                 }
 
             </nav>

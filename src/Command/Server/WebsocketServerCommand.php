@@ -2,23 +2,22 @@
 
 namespace App\Command\Server;
 
-use App\Server\SocketApi;
 use Ratchet\Http\HttpServer;
 use Ratchet\Server\IoServer;
 use Ratchet\WebSocket\WsServer;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use App\Controller\SocketController;
 
 class WebsocketServerCommand extends ContainerAwareCommand {
 
     protected $dispatcher;
 
-    public function __construct(EventDispatcherInterface $dispatcher) {
+    public function __construct(SocketController $socket_controller) {
         parent::__construct();
 
-        $this->dispatcher = $dispatcher;
+        $this->socket_controller = $socket_controller;
     }
 
     protected function configure() {
@@ -30,12 +29,9 @@ class WebsocketServerCommand extends ContainerAwareCommand {
 
     protected function execute(InputInterface $input, OutputInterface $output) {
         $container = $this->getContainer();
-        $dispatcher = $this->dispatcher;
         $verbose = $input->getOption('verbose');
 
-        //$socket_api = new SocketApi($this->dispatcher, $container, $verbose);
-        $socket_api = $container->get(SocketApi::class);
-        $websocket_server = new WsServer($socket_api);
+        $websocket_server = new WsServer($this->socket_controller);
         $http_server = new HttpServer($websocket_server);
         $server = IoServer::factory($http_server, 8080);
 

@@ -8,6 +8,7 @@
 
 .match-card .btn-open {
     float: right;
+    border: none;
 }
 
 .match-card:hover .btn-open {
@@ -16,6 +17,12 @@
     border-color: #6f8397;
 }
 
-.match-card:hover {
-    //background-color: #4aa73a !important;
+.match-card.match-active .btn-open {
+    color: #000;
+    background-color: rgba(255, 255, 255, .5);
+}
+
+.match-card.match-active:hover .btn-open {
+    color: white;
+    background-color: rgba(0, 0, 0, .2);
 }

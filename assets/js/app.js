@@ -6,18 +6,15 @@ import 'bootstrap';
 import Nav from './components/Nav';
 import Home from './components/Home';
 import Match from './components/Match';
+import Api from './components/Api';
 
 class App extends React.Component {
 
     constructor(props) {
         super(props);
 
-        const cookies = new Cookies();
-        //cookies.set('AUTH-TOKEN', 'abc', {path: '/'});
-        const token = cookies.get('AUTH-TOKEN');
-
         this.state = {
-            user: {token: token, loaded: false},
+            user: {loaded: false},
             activeMatch: null,
         };
 
@@ -47,13 +44,12 @@ class App extends React.Component {
     componentDidMount() {
         const user = this.state.user;
 
-        fetch('/api/user', {headers: {'X-AUTH-TOKEN': user.token}})
+        Api.getUser()
         .then(result => result.json())
         .then(
             (user) => {
-                const cookies = new Cookies();
-                user.token = cookies.get('AUTH-TOKEN');
                 user.loaded = true;
+                user.loggedIn = user.id ? true : false;
                 this.setState({user: user});
             },
             (error) => {
@@ -86,4 +82,7 @@ class App extends React.Component {
     };
 }
 
-ReactDOM.render(<App />, document.getElementById('root'));
+ReactDOM.render(
+    <App />,
+    document.getElementById('root')
+);

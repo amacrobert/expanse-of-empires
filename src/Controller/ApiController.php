@@ -10,10 +10,12 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
+use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Form\UserType;
 use App\Entity\User;
 use App\Entity\Match\Match;
+use App\Entity\Match\Empire;
 use App\Entity\Chat\Message;
 
 /**
@@ -37,7 +39,23 @@ class ApiController extends Controller {
             'date_completed' => null,
         ]);
 
-        return $this->json($matches);
+        if ($user = $this->getUser()) {
+
+            $user_empires = $em->getRepository(Empire::class)->findBy([
+                'user' => $user,
+                'match' => $matches,
+            ]);
+
+            foreach ($matches as $match) {
+                foreach ($user_empires as $user_empire) {
+                    if ($match->getEmpires()->contains($user_empire)) {
+                        $match->setUserEmpire($user_empire);
+                    }
+                }
+            }
+        }
+
+        return new JsonResponse($matches);
     }
 
     /**

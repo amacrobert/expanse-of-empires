@@ -2,15 +2,15 @@
 
 namespace App\Service\Chat;
 
-use App\Server\SocketApi;
+use App\Controller\SocketController;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\Chat\Message;
 use App\Entity\Match\Match;
 
 class ChatService {
 
-    public function __construct(SocketApi $socket_api, EntityManagerInterface $em) {
-        $this->socket_api = $socket_api;
+    public function __construct(SocketController $socket_controller, EntityManagerInterface $em) {
+        $this->socket_controller = $socket_controller;
         $this->em = $em;
     }
     
@@ -29,6 +29,6 @@ class ChatService {
         // Send the message to the other players
         $output = $chat_message->jsonSerialize();
         $output['action'] = 'chat-receive';
-        $this->socket_api->broadcastToMatch($message->match_id, $output);
+        $this->socket_controller->broadcastToMatch($message->match_id, $output);
     }
 }

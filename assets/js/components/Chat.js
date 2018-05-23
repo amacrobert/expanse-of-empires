@@ -66,9 +66,9 @@ class Chat extends React.Component {
     }
 
     render() {
-        const lines = this.state.lines.map((message) => {
+        const lines = this.state.lines.map((message, index) => {
             return (
-                <ChatLine message={message} />
+                <ChatLine message={message} key={index}/>
             );
         });
 
@@ -78,13 +78,15 @@ class Chat extends React.Component {
                     {lines}
                     <div style={{ float: 'left', clear: "both" }} ref={this.chatEnd}></div>
                 </div>
-                <form onSubmit={this.handleChatSubmit}>
-                    <input
-                        type="text"
-                        ref={this.chatInput}
-                        className="chat-input"
-                        placeholder="Public chat" />
-                </form>
+                {this.props.user.loggedIn &&
+                    <form onSubmit={this.handleChatSubmit}>
+                        <input
+                            type="text"
+                            ref={this.chatInput}
+                            className="chat-input"
+                            placeholder="Public chat" />
+                    </form>
+                }
             </div>
         );
     }

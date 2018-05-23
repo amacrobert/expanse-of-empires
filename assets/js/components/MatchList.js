@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import MatchListSection from './MatchListSection';
+import Api from './Api';
 
 class MatchList extends React.Component {
 
@@ -14,7 +15,7 @@ class MatchList extends React.Component {
     }
 
     componentDidMount() {
-        fetch('/api/matches', {headers: {'X-AUTH-TOKEN': 'abc'}})
+        Api.getMatches()
         .then(result => result.json())
         .then(
             (result) => {
@@ -30,6 +31,7 @@ class MatchList extends React.Component {
     render() {
         if (this.state.matches.length) {
             const matches = {
+                'joined': [],
                 'pre-registration': [],
                 'registration': [],
                 'non-player-combat': [],
@@ -38,12 +40,21 @@ class MatchList extends React.Component {
             };
 
             this.state.matches.forEach((match) => {
-                matches[match.phase].push(match);
+                if (match.user_joined) {
+                    matches['joined'].push(match);
+                }
+                else {
+                    matches[match.phase].push(match);
+                }
             });
 
             return(
                 <div className="col-md-4">
                     <h4>MATCHES</h4>
+                    <MatchListSection
+                        title="Your matches"
+                        matches={matches['joined']}
+                        onMatchSelect={this.props.onMatchSelect} />
                     <MatchListSection
                         title="Registration open"
                         matches={matches['registration']}

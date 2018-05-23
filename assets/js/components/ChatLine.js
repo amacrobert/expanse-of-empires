@@ -12,7 +12,7 @@ class ChatLine extends React.Component {
         let line = '';
 
         return (
-            <div key={this.props.message.id} className={'chat-line ' + message.action}>
+            <div className={'chat-line ' + message.action}>
                 {'chat-join' == message.action && this.renderChatJoin()}
                 {('chat-receive' == message.action || !message.action) && this.renderChatReceive()}
             </div>

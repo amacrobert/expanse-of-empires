@@ -12,3 +12,16 @@
     margin-left: 1rem;
     font-weight: bold;
 }
+
+.btn-login {
+    font-weight: 400;
+    color: #eee;
+    background-color: transparent;
+}
+
+.btn-login:hover,
+.btn-login:focus {
+    font-weight: 400;
+    color: #111;
+    background-color: transparent;
+}

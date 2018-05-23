@@ -1,5 +1,4 @@
 import React from 'react';
-
 import Chat from './Chat';
 
 class Match extends React.Component {

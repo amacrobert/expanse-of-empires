@@ -3,6 +3,7 @@
 namespace App\Entity\Match;
 
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use JsonSerializable;
 use DateTime;
 
@@ -33,6 +34,7 @@ class Match implements JsonSerializable {
             'date_completed'    => $this->getDateCompleted() ? $this->getDateCompleted()->format('Y-m-d H:i:s T') : null,
             'completed'         => $this->getDateCompleted() ? true : false,
             'phase'             => $this->getPhase(),
+            'user_joined'       => (bool)$this->getUserEmpire(),
         ];
     }
 
@@ -67,6 +69,15 @@ class Match implements JsonSerializable {
         }
 
         return $phase;
+    }
+
+    public function getUserEmpire(): ?Empire {
+        return $this->user_empire;
+    }
+
+    public function setUserEmpire(?Empire $user_empire) {
+        $this->user_empire = $user_empire;
+        return $this;
     }
 
     public function getId() {
@@ -145,7 +156,7 @@ class Match implements JsonSerializable {
         return $this;
     }
 
-    public function getEmpires(): ArrayCollection {
+    public function getEmpires(): Collection {
         return $this->empires;
     }
 
