@@ -3,6 +3,7 @@ import Cookies from 'universal-cookie';
 
 const Api = {
     login: login,
+    register: register,
     getUser: getUser,
     getMatches: getMatches,
 };
@@ -20,6 +21,14 @@ function getUser() {
 
 function getMatches() {
     return request('/api/matches');
+}
+
+function register(email, username, password) {
+    return request('/api/register', 'POST', {
+        email: email,
+        username: username,
+        password: password,
+    });
 }
 
 function request(url, method = 'GET', body = {}) {
