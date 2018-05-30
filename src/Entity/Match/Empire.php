@@ -2,7 +2,7 @@
 
 namespace App\Entity\Match;
 
-use App\Entity\User;
+use App\Entity\User\User;
 use Doctrine\Common\Collections\ArrayCollection;
 use JsonSerializable;
 use DateTime;

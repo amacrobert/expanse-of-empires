@@ -5,7 +5,8 @@ namespace App\Service\User;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Exception\RegistrationException;
-use App\Entity\User;
+use App\Entity\User\User;
+use App\Entity\User\ValidationToken;
 
 class AuthService {
 
@@ -26,6 +27,7 @@ class AuthService {
 
 
         $user = new User;
+        $this->em->persist($user);
         $password = $this->encoder->encodePassword($user, $plain_password);
         $api_key = $this->generateApiKey();
 
@@ -36,8 +38,10 @@ class AuthService {
             ->setApiKey($api_key)
         ;
 
-        $this->em->persist($user);
-        $this->em->flush($user);
+        $validation_token = new ValidationToken($user);
+        $this->em->persist($validation_token);
+
+        $this->em->flush([$user, $validation_token]);
 
         return [
             'user' => $user,

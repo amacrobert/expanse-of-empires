@@ -12,5 +12,5 @@ App\Entity\Match\Empire:
         placement: { type: integer, nullable: true }
 
     manyToOne:
-        user: { targetEntity: App\Entity\User }
+        user: { targetEntity: App\Entity\User\User }
         match: { targetEntity: App\Entity\Match\Match, inversedBy: empires }

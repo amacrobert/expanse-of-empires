@@ -4,7 +4,7 @@ namespace App\Entity\Chat;
 
 use JsonSerializable;
 use DateTime;
-use App\Entity\User;
+use App\Entity\User\User;
 use App\Entity\Match\Match;
 
 class Message implements JsonSerializable {

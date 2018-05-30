@@ -10,7 +10,7 @@ App\Entity\Chat\Message:
         date_sent: { type: datetime }
 
     manyToOne:
-        user: { targetEntity: App\Entity\User }
+        user: { targetEntity: App\Entity\User\User }
         match: { targetEntity: App\Entity\Match\Match }
 
     lifecycleCallbacks:

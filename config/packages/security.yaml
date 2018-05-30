@@ -3,12 +3,12 @@ security:
     providers:
         apikey_user_login:
             entity:
-                class: App\Entity\User
+                class: App\Entity\User\User
                 property: api_key
 
         password_user_login:
             entity:
-                class: App\Entity\User
+                class: App\Entity\User\User
                 property: email
 
     firewalls:
@@ -60,6 +60,6 @@ security:
             algorithm: bcrypt
             cost: 12
 
-        App\Entity\User:
+        App\Entity\User\User:
             algorithm: bcrypt
             cost: 12

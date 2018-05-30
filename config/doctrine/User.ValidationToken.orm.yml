@@ -1,0 +1,17 @@
+App\Entity\User\ValidationToken:
+
+    type: entity
+    table: validation_token
+
+    id: { id: { type: integer, unsigned: true, generator: { strategy: auto } } }
+
+    fields:
+        date_created: { type: datetime }
+        date_expired: { type: datetime, nullable: true }
+        token: { type: string }
+
+    manyToOne:
+        user: { targetEntity: App\Entity\User\User }
+
+    lifecycleCallbacks:
+        prePersist: [prePersist]

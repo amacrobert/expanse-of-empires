@@ -1,5 +1,6 @@
 import React from 'react';
 import Chat from './Chat';
+import MapViewport from './MapViewport';
 
 class Match extends React.Component {
 
@@ -46,8 +47,7 @@ class Match extends React.Component {
 
         return(
             <div className="row">
-                <div className="col-md-8">
-                </div>
+                <MapViewport />
                 <Chat
                     user={this.props.user}
                     match={this.props.match}

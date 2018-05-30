@@ -13,7 +13,7 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Form\UserType;
-use App\Entity\User;
+use App\Entity\User\User;
 use App\Entity\Match\Match;
 use App\Entity\Match\Empire;
 use App\Entity\Chat\Message;

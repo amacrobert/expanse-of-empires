@@ -4,18 +4,23 @@
 @import './match-card';
 @import url('https://fonts.googleapis.com/css?family=Cinzel+Decorative');
 
-.mapviewport {
-    height: 100vh;
-}
-
-#scene {
-    position: absolute;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    right: 0;
-}
-
 .clickable {
     @include clickable;
+}
+
+.mapviewport {
+    position: relative;
+    // top: 0;
+    // left: 0;
+    // right: 0;
+    // bottom: 0;
+}
+
+.three-canvas {
+    position: absolute;
+    top: -16px;
+    left: -8px;
+    bottom: -16px;
+    right: -16px;
+    height: calc(100vh - 48px - 0px);
 }

@@ -10,7 +10,7 @@ use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Form\UserType;
-use App\Entity\User;
+use App\Entity\User\User;
 
 class AuthController extends Controller {
     /**

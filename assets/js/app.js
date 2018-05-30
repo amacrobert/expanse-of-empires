@@ -60,25 +60,22 @@ class App extends React.Component {
 
     render() {
         const activeMatch = this.state.activeMatch;
-        return (
-            <div>
-                <Nav
-                    activeMatch={activeMatch}
-                    user={this.state.user}
-                    onExit={this.handleMatchSelect}
-                    onLogin={this.handleLogin}
-                    onLogout={this.handleLogout}
-                />
-                <div className="container-fluid">
-
-                   {activeMatch ? (
-                        <Match match={activeMatch} user={this.state.user} onExit={this.handleMatchSelect} />
-                    ) : (
-                        <Home user={this.state.user} onMatchSelect={this.handleMatchSelect} /> 
-                    )}
-                </div>
+        return ([
+            <Nav
+                activeMatch={activeMatch}
+                user={this.state.user}
+                onExit={this.handleMatchSelect}
+                onLogin={this.handleLogin}
+                onLogout={this.handleLogout}
+            />,
+            <div className="container-fluid">
+               {activeMatch ? (
+                    <Match match={activeMatch} user={this.state.user} onExit={this.handleMatchSelect} />
+                ) : (
+                    <Home user={this.state.user} onMatchSelect={this.handleMatchSelect} /> 
+                )}
             </div>
-        );
+        ]);
     };
 }
 

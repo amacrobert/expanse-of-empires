@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Entity;
+namespace App\Entity\User;
 
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -26,6 +26,7 @@ class User implements UserInterface, JsonSerializable {
     private $password;
     private $date_registered;
     private $api_key;
+    private $validated = false;
 
     // Not mapped
     /**
@@ -47,6 +48,15 @@ class User implements UserInterface, JsonSerializable {
         }
 
         return ['ROLE_ADMIN'];
+    }
+
+    public function isValidated() {
+        return $this->validated;
+    }
+
+    public function setValidated($validated) {
+        $this->validated = $validated;
+        return $this;
     }
 
     public function getApiKey(): ?string {

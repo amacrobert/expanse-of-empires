@@ -7,7 +7,7 @@ use Ratchet\MessageComponentInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\EventDispatcher\GenericEvent;
 use Doctrine\ORM\EntityManagerInterface;
-use App\Entity\User;
+use App\Entity\User\User;
 
 class SocketController implements MessageComponentInterface {
 
@@ -35,7 +35,7 @@ class SocketController implements MessageComponentInterface {
 
         $match_id = $message->match_id;
         if ($token = $message->token ?? null) {
-            $user = $this->em->getRepository(\App\Entity\User::class)->findOneBy([
+            $user = $this->em->getRepository(User::class)->findOneBy([
                 'api_key' => $token
             ]);
         }
