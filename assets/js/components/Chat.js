@@ -74,7 +74,7 @@ class Chat extends React.Component {
 
         return(
             <div className="col-md-4">
-                <div className="chat-screen" onClick={() => {this.chatInput.current.focus()}}>
+                <div className="chat-screen" onClick={(e) => {e.preventDefault(); this.chatInput.current.focus()}}>
                     {lines}
                     <div style={{ float: 'left', clear: "both" }} ref={this.chatEnd}></div>
                 </div>
