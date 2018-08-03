@@ -61,7 +61,7 @@ THREE.OrbitControls = function ( object, domElement ) {
 
     // Set to false to disable panning
     this.enablePan = true;
-    this.panSpeed = 1.0;
+    this.panSpeed = 0.25;
     this.screenSpacePanning = false; // if true, pan in screen-space
     this.keyPanSpeed = 2.0; // pixels moved per arrow key push
 
@@ -91,7 +91,11 @@ THREE.OrbitControls = function ( object, domElement ) {
     };
 
     // Mouse buttons
-    this.mouseButtons = { ORBIT: THREE.MOUSE.LEFT, ZOOM: THREE.MOUSE.MIDDLE, PAN: THREE.MOUSE.RIGHT };
+    this.mouseButtons = {
+        PAN: THREE.MOUSE.LEFT,
+        ZOOM: THREE.MOUSE.MIDDLE,
+        ORBIT: THREE.MOUSE.RIGHT
+    };
 
     // for reset
     this.target0 = this.target.clone();
@@ -860,7 +864,7 @@ THREE.OrbitControls = function ( object, domElement ) {
 
         handleKeyUp( event );
 
-    }   
+    }
 
     function onTouchStart( event ) {
 

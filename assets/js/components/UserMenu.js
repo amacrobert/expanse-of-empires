@@ -5,10 +5,9 @@ class UserMenu extends React.Component {
 
     constructor(props) {
         super(props);
-        this.handleLogout = this.handleLogout.bind(this);
     }
 
-    handleLogout() {
+    handleLogout = () => {
         this.props.onLogout();
     }
 

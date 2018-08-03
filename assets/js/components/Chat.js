@@ -13,7 +13,6 @@ class Chat extends React.Component {
 
         this.chatInput = React.createRef();
         this.chatEnd = React.createRef();
-        this.handleChatSubmit = this.handleChatSubmit.bind(this);
     }
 
     componentDidMount() {
@@ -50,7 +49,7 @@ class Chat extends React.Component {
         this.chatEnd.current.scrollIntoView(options);
     }
 
-    handleChatSubmit(e) {
+    handleChatSubmit = (e) => {
         e.preventDefault();
 
         const chatInput = this.chatInput.current.value;
@@ -59,7 +58,7 @@ class Chat extends React.Component {
             this.props.onChatSubmit({
                 'action': 'chat-send',
                 'message': chatInput
-            });            
+            });
         }
 
         this.chatInput.current.value = '';
@@ -84,7 +83,10 @@ class Chat extends React.Component {
                             type="text"
                             ref={this.chatInput}
                             className="chat-input"
-                            placeholder="Public chat" />
+                            placeholder="Public chat"
+                            onFocus={() => this.props.setFocus('chat')}
+                            onBlur={() => this.props.setFocus()}
+                            />
                     </form>
                 }
             </div>

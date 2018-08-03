@@ -4,10 +4,6 @@ import Register from './Register';
 
 class RegisterLoginButtons extends React.Component {
 
-    constructor(props) {
-        super(props);
-    }
-
     render() {
         return(
             <div className="button-group">

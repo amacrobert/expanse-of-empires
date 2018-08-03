@@ -11,11 +11,9 @@ class MatchCard extends React.Component {
         const dateNPC = new Date(match.date_npc);
         const dateP2P = new Date(match.date_p2p);
         const dateCompleted = match.date_completed ? new Date(match.date_completed) : null;
-
-        this.handleMatchSelect = this.handleMatchSelect.bind(this);
     }
 
-    handleMatchSelect(e) {
+    handleMatchSelect = (e) => {
         this.props.onMatchSelect(this.props.match);
     }
 

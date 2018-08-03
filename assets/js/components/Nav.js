@@ -4,13 +4,7 @@ import RegisterLoginButtons from './RegisterLoginButtons';
 
 class Nav extends React.Component {
 
-    constructor(props) {
-        super(props);
-
-        this.handleExit = this.handleExit.bind(this);
-    }
-
-    handleExit() {
+    handleExit = () => {
         this.props.onExit();
     }
 

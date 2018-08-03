@@ -18,14 +18,13 @@ class MapViewport extends React.Component {
         this.animate = this.animate.bind(this);
         this.getHexMesh = this.getHexMesh.bind(this);
         this.getCastleObject = this.getCastleObject.bind(this);
-        this.updateHexHud = this.updateHexHud.bind(this);
         this.onMouseDown = this.onMouseDown.bind(this);
         this.onMouseUp = this.onMouseUp.bind(this);
 
-        this.mouse = {x: 0, y: 0};
         this.raycaster = new THREE.Raycaster();
         this.mouse = new THREE.Vector2();
         this.targetList = [];
+        this.inFocus = true;
     }
 
     componentDidMount() {
@@ -75,7 +74,7 @@ class MapViewport extends React.Component {
                 hexMesh.position.x = worldX;
                 hexMesh.position.z = worldZ;
                 this.targetList.push(hexMesh);
-                hexMesh.visible = Math.random() > .5;
+                hexMesh.visible = Math.random() < .85;
                 hexMesh.userData.coordinates = {
                     x: x,
                     y: z
@@ -98,7 +97,7 @@ class MapViewport extends React.Component {
                         that.scene.add(castleLight);
 
                     });
-                }   
+                }
             }
         }
 
@@ -174,7 +173,7 @@ class MapViewport extends React.Component {
 
         this.raycaster.setFromCamera(this.mouse.down, this.camera);
         var intersects = this.raycaster.intersectObjects( this.targetList );
-        
+
         // if there is one (or more) intersections
         if (intersects.length > 0) {
             this.selectedHex = intersects[0].object;
@@ -185,14 +184,10 @@ class MapViewport extends React.Component {
             this.selectionGlow.position.z = hexPosition.z;
             var data = this.selectedHex.userData;
             console.log(data);
-
-            updateHexHud();
         }
         else {
             this.selectionGlow.visible = false;
             this.selectedHex = null;
-
-            updateHexHud();
         }
     }
 
@@ -222,6 +217,7 @@ class MapViewport extends React.Component {
     }
 
     animate() {
+        this.controls.enabled = this.props.inFocus;
         this.controls.update();
         this.renderScene()
         this.frameId = window.requestAnimationFrame(this.animate)
@@ -233,7 +229,13 @@ class MapViewport extends React.Component {
 
     render() {
         return(
-            <div className="col-md-8 mapviewport">
+            <div
+                className="col-md-8 mapviewport"
+                tabIndex={1}
+                onClick={() => this.props.setFocus('map')}
+                onBlur={() => console.log('blur')}
+                onFocus={() => console.log('focus')}
+                >
                 <div className="three-canvas" ref={this.mount}></div>
             </div>
         );

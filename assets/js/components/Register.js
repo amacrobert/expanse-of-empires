@@ -15,17 +15,14 @@ class Register extends React.Component {
             email: '',
             submitting: false,
         };
- 
+
         this.email = React.createRef();
         this.username = React.createRef();
         this.password1 = React.createRef();
         this.password2 = React.createRef();
-        this.handleRegisterSubmit = this.handleRegisterSubmit.bind(this);
-        this.renderForm = this.renderForm.bind(this);
-        this.renderCompleteMessage = this.renderCompleteMessage.bind(this);
     }
 
-    handleRegisterSubmit(e) {
+    handleRegisterSubmit = (e) => {
         e.preventDefault();
 
         this.setState({
@@ -96,7 +93,7 @@ class Register extends React.Component {
         ]);
     }
 
-    renderCompleteMessage() {
+    renderCompleteMessage = () => {
         return(
             <Modal.Body>
                 <p>We sent an email to <strong>{this.state.email}</strong> with a link to complete your registration.</p>
@@ -105,7 +102,7 @@ class Register extends React.Component {
         );
     }
 
-    renderForm() {
+    renderForm = () => {
         var errorAlerts = this.state.errors.map((error, index) => {
             return (
                 <Alert

@@ -10,11 +10,9 @@ class Login extends React.Component {
 
         this.email = React.createRef();
         this.password = React.createRef();
-
-        this.handleLogin = this.handleLogin.bind(this);
     }
 
-    handleLogin(e) {
+    handleLogin = (e) => {
         e.preventDefault();
 
         Api.login(this.email.current.value, this.password.current.value)
@@ -35,7 +33,7 @@ class Login extends React.Component {
                 console.log('LOGIN API ERROR:', error);
             }
         );
-    }
+    };
 
     componentDidMount() {
         this.email.current.focus();

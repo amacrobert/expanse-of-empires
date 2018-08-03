@@ -8,12 +8,12 @@ class Match extends React.Component {
         super(props);
         this.socketApi = new WebSocket('ws://127.0.0.1:8080');
 
-        this.socketApiSend = this.socketApiSend.bind(this);
-        this.handleExit = this.handleExit.bind(this);
+        this.state = {
+            focus: null,
+        };
     }
 
     componentDidMount() {
-
         this.socketApi.onopen = () => {
             this.socketApiSend({action: 'iam'});
         };
@@ -23,7 +23,7 @@ class Match extends React.Component {
         };
     }
 
-    socketApiSend(message) {
+    socketApiSend = (message) => {
         if (!this.socketApi.readyState) {
             return;
         }
@@ -38,21 +38,29 @@ class Match extends React.Component {
         this.socketApi.close();
     }
 
-    handleExit() {
+    handleExit = () => {
         this.props.onExit();
-    }
+    };
+
+    setFocus = (focus = null) => {
+        this.setState({focus: focus});
+    };
 
     render() {
         const match = this.props.match;
 
         return(
             <div className="row">
-                <MapViewport />
+                <MapViewport
+                    inFocus={this.state.focus !== 'chat'}
+                    setFocus={this.setFocus}
+                />
                 <Chat
                     user={this.props.user}
                     match={this.props.match}
                     onChatSubmit={this.socketApiSend}
-                    socketApi={this.socketApi} />
+                    socketApi={this.socketApi}
+                    setFocus={this.setFocus} />
             </div>
         );
     }
