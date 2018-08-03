@@ -1,0 +1,15 @@
+App\Entity\Map\Territory:
+
+    type: entity
+    table: territory
+
+    id: { id: { type: integer, unsigned: true, generator: { strategy: auto } } }
+
+    fields:
+        axial_r: { type: integer }
+        axial_q: { type: integer }
+        starting_position: { type: boolean, nullable: false, options: { default: false } }
+
+    manyToOne:
+        map: { targetEntity: App\Entity\Map\Map }
+        terrain: { targetEntity: App\Entity\Map\Terrain }

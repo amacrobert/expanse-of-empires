@@ -1,0 +1,11 @@
+App\Entity\Map\Terrain:
+
+    type: entity
+    table: terrain
+
+    id: { id: { type: integer, unsigned: true, generator: { strategy: auto } } }
+
+    fields:
+        name: { type: string }
+        base_tide_cost: { type: integer, unsigned: true, nullable: false }
+        base_supply_output: { type: integer, unsigned: true }

@@ -1,0 +1,13 @@
+App\Entity\Map\Map:
+
+    type: entity
+    table: map
+
+    id: { id: { type: integer, unsigned: true, generator: { strategy: auto } } }
+
+    fields:
+        name: { type: string }
+        description: { type: text }
+
+    oneToMany:
+        territories: { targetEntity: App\Entity\Map\Territory, mappedBy: map }

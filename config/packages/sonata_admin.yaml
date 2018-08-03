@@ -16,3 +16,10 @@ services:
         tags:
             - { name: sonata.admin, manager_type: orm, label: Matches, group: 'Matches'}
         public: true
+
+    admin.terrain:
+        class: App\Admin\Map\TerrainAdmin
+        arguments: [~, App\Entity\Map\Terrain, ~]
+        tags:
+            - { name: sonata.admin, manager_type: orm, label: 'Terrain Types', group: 'Maps'}
+        public: true

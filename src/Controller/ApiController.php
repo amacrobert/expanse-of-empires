@@ -20,7 +20,6 @@ use App\Entity\Chat\Message;
 use App\Service\User\AuthService;
 use App\Exception\RegistrationException;
 
-
 /**
  * @Route("/api")
  */
