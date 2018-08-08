@@ -17,45 +17,34 @@ class App extends React.Component {
             user: {loaded: false},
             activeMatch: null,
         };
-
-        this.handleMatchSelect = this.handleMatchSelect.bind(this);
-        this.handleLogin = this.handleLogin.bind(this);
-        this.handleLogout = this.handleLogout.bind(this);
     };
 
-    handleMatchSelect(match) {
+    handleMatchSelect = (match) => {
         this.setState({activeMatch: match});
     }
 
-    handleLogin(result) {
+    handleLogin = (result) => {
         console.log('appjs login:', result);
         const cookies = new Cookies();
         cookies.set('AUTH-TOKEN', result.api_key, {path: '/'});
         cookies.set('PHPSESSID', result.session, {path: '/'});
         window.location.href = '/';
-    } 
+    }
 
-    handleLogout() {
-        const cookies = new Cookies();
+    handleLogout = () => {
+        let cookies = new Cookies();
         cookies.remove('AUTH-TOKEN');
-        window.location.href = '/logout';        
+        window.location.href = '/logout';
     }
 
     componentDidMount() {
-        const user = this.state.user;
+        let user = this.state.user;
 
-        Api.getUser()
-        .then(result => result.json())
-        .then(
-            (user) => {
-                user.loaded = true;
-                user.loggedIn = user.id ? true : false;
-                this.setState({user: user});
-            },
-            (error) => {
-                console.log('ERROR:', error);
-            }
-        )
+        Api.getUser().then(user => {
+            user.loaded = true;
+            user.loggedIn = user.id ? true : false;
+            this.setState({user: user});
+        });
     }
 
     render() {
@@ -72,7 +61,7 @@ class App extends React.Component {
                {activeMatch ? (
                     <Match match={activeMatch} user={this.state.user} onExit={this.handleMatchSelect} />
                 ) : (
-                    <Home user={this.state.user} onMatchSelect={this.handleMatchSelect} /> 
+                    <Home user={this.state.user} onMatchSelect={this.handleMatchSelect} />
                 )}
             </div>
         ]);

@@ -15,24 +15,18 @@ class Login extends React.Component {
     handleLogin = (e) => {
         e.preventDefault();
 
-        Api.login(this.email.current.value, this.password.current.value)
-        .then(
-            (result) => {
-                if (result.status == 200) {
-                    result.json().then((data) => {
-                        this.props.onLogin(data);
-                    });
-                }
-                else {
-                    result.json().then((message) => {
-                        console.log('ERROR:', message.error);
-                    });
-                }
-            },
-            (error) => {
-                console.log('LOGIN API ERROR:', error);
+        Api.login(this.email.current.value, this.password.current.value).then(result => {
+            if (result.status == 200) {
+                result.json().then((data) => {
+                    this.props.onLogin(data);
+                });
             }
-        );
+            else {
+                result.json().then((message) => {
+                    console.log('ERROR:', message.error);
+                });
+            }
+        });
     };
 
     componentDidMount() {

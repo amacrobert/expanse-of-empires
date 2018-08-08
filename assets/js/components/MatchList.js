@@ -15,17 +15,10 @@ class MatchList extends React.Component {
     }
 
     componentDidMount() {
-        Api.getMatches()
-        .then(result => result.json())
-        .then(
-            (result) => {
-                console.log('MATCHES:', result);
-                this.setState({matches: result});
-            },
-            (error) => {
-                console.log('ERROR:', error);
-            }
-        )
+        Api.getMatches().then(result => {
+            console.log('MATCHES:', result);
+            this.setState({matches: result});
+        });
     }
 
     render() {
