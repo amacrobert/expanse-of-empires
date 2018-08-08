@@ -12,7 +12,7 @@ function login(email, password) {
     return request('/login', 'POST', {
         username: email,
         password: password,
-    });
+    }, false);
 }
 
 function getUser() {
@@ -28,10 +28,10 @@ function register(email, username, password) {
         email: email,
         username: username,
         password: password,
-    });
+    }, false);
 }
 
-function request(url, method = 'GET', body = {}) {
+function request(url, method = 'GET', body = {}, parseResponse = true) {
     const cookies = new Cookies();
     let headers = {'content-type': 'application/json'};
 
@@ -48,7 +48,16 @@ function request(url, method = 'GET', body = {}) {
         options.body = JSON.stringify(body);
     }
 
-    return fetch(url, options);
+    if (parseResponse) {
+        return fetch(url, options)
+            .then(result => result.json())
+            .catch(error => console.warn(error))
+        ;
+    }
+    else {
+        return fetch(url, options).catch(error => console.warn(error));
+    }
+
 }
 
 export default Api;
