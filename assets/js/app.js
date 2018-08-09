@@ -56,8 +56,9 @@ class App extends React.Component {
                 onExit={this.handleMatchSelect}
                 onLogin={this.handleLogin}
                 onLogout={this.handleLogout}
+                key='nav'
             />,
-            <div className="container-fluid">
+            <div className="container-fluid" key='container'>
                {activeMatch ? (
                     <Match match={activeMatch} user={this.state.user} onExit={this.handleMatchSelect} />
                 ) : (
