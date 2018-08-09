@@ -1,5 +1,5 @@
 import React from 'react';
-//require('../map.js');
+import MapUtil from '../services/map-util';
 
 var THREE = require('three');
 require('../three/controls/OrbitControls.js');
@@ -13,14 +13,6 @@ class MapViewport extends React.Component {
 
         this.mount = new React.createRef();
 
-        this.start = this.start.bind(this);
-        this.stop = this.stop.bind(this);
-        this.animate = this.animate.bind(this);
-        this.getHexMesh = this.getHexMesh.bind(this);
-        this.getCastleObject = this.getCastleObject.bind(this);
-        this.onMouseDown = this.onMouseDown.bind(this);
-        this.onMouseUp = this.onMouseUp.bind(this);
-
         this.raycaster = new THREE.Raycaster();
         this.mouse = new THREE.Vector2();
         this.targetList = [];
@@ -29,16 +21,16 @@ class MapViewport extends React.Component {
 
     componentDidMount() {
         this.renderer = new THREE.WebGLRenderer({ antialias: true});
-        this.element = this.renderer.domElement;
-        this.mount.current.appendChild(this.element);
+        var element = this.renderer.domElement;
+        this.mount.current.appendChild(element);
         this.renderer.setSize(this.mount.current.offsetWidth, this.mount.current.offsetHeight);
         this.scene = new THREE.Scene();
 
-        this.camera = new THREE.PerspectiveCamera(45, this.mount.current.offsetWidth / this.mount.current.offsetHeight, .1, 100);
-        this.camera.position.set(0, 20, -10);
+        this.camera = new THREE.PerspectiveCamera(45, this.mount.current.offsetWidth / this.mount.current.offsetHeight, .1, 200);
+        this.camera.position.set(0, 40, 20);
+        this.controls = new THREE.OrbitControls(this.camera, element);
+        this.controls.target.set(0, 0, 0);
         this.scene.add(this.camera);
-        this.controls = new THREE.OrbitControls(this.camera, this.element);
-        this.controls.target.set(this.camera.position.x, 0, this.camera.position.z + 10);
 
         // selection glow
         this.selectionGlow = new THREE.Mesh(
@@ -62,44 +54,21 @@ class MapViewport extends React.Component {
         // fog
         //var skyColor = new THREE.Color(0x7EC0EE);
         var skyColor = new THREE.Color(0x4E5D6C);
-        this.scene.fog = new THREE.Fog(skyColor, 20, 100);
+        this.scene.fog = new THREE.Fog(skyColor, 50, 200);
         this.scene.background = skyColor;
 
         // hex grid
-        for (var x = 0; x < 20; x++) {
-            for (var z = 0; z < 20; z++) {
-                var hexMesh = this.getHexMesh();
-                var worldX = (x * (1.7320508075688767) + ((z % 2) * (1.7320508075688767 / 2))) - 16.45;
-                var worldZ = (z * 1.5) - 15;
-                hexMesh.position.x = worldX;
-                hexMesh.position.z = worldZ;
-                this.targetList.push(hexMesh);
-                hexMesh.visible = Math.random() < .85;
-                hexMesh.userData.coordinates = {
-                    x: x,
-                    y: z
-                };
-                hexMesh.userData.worldCoordinates = {
-                    x: worldX,
-                    z: worldZ
-                };
-                this.scene.add(hexMesh);
-
-                var that = this;
-                if (hexMesh.visible && Math.random() < .05) {
-                    this.getCastleObject(worldX, worldZ).then(function(castle) {
-                        that.scene.add(castle);
-
-                        var castleLight = new THREE.PointLight(0xFFFFFF, 2, 2, 2);
-                        castleLight.position.x = castle.position.x;
-                        castleLight.position.y = 1;
-                        castleLight.position.z = castle.position.z;
-                        that.scene.add(castleLight);
-
-                    });
-                }
-            }
-        }
+        console.log(this.props);
+        this.props.map.state.forEach(territory => {
+            console.log(territory);
+            let hexMesh = this.getHexMesh();
+            let realCoords = MapUtil.axialToReal(territory.coordinates.q, territory.coordinates.r);
+            hexMesh.position.x = realCoords.x;
+            hexMesh.position.z = realCoords.z;
+            this.targetList.push(hexMesh);
+            hexMesh.userData = territory;
+            this.scene.add(hexMesh);
+        });
 
         this.camera.lookAt(0, -1, 0);
 
@@ -110,48 +79,30 @@ class MapViewport extends React.Component {
         this.start();
     }
 
-    getHexMesh() {
+    getHexMesh = () => {
         var hexShape = new THREE.Shape();
-        var angle = 1.7320508075688767;
-        var h = angle * 0.5;
-        hexShape.moveTo(h, 0.5);
-        hexShape.lineTo(0, 1);
-        hexShape.lineTo(-h, 0.5);
-        hexShape.lineTo(-h, -0.5);
-        hexShape.lineTo(0, -1);
-        hexShape.lineTo(h, -0.5);
-        hexShape.lineTo(h, 0.5);
+        let points = MapUtil.hexPoints;
+
+        // counter-clockwise
+        hexShape.moveTo(points.top.x, points.top.z, 0);
+        hexShape.lineTo(points.topLeft.x, points.topLeft.z, 0);
+        hexShape.lineTo(points.bottomLeft.x, points.bottomLeft.z, 0);
+        hexShape.lineTo(points.bottom.x, points.bottom.z, 0);
+        hexShape.lineTo(points.bottomRight.x, points.bottomRight.z, 0);
+        hexShape.lineTo(points.topRight.x, points.topRight.z, 0);
+        hexShape.lineTo(points.top.x, points.top.z, 0);
 
         var hexGeometry = new THREE.ShapeGeometry(hexShape);
         var hexMaterial = new THREE.MeshLambertMaterial({ color: 0xEEEEEE });
         var hexMesh = new THREE.Mesh(hexGeometry, hexMaterial);
-        hexMesh.rotation.x = -Math.PI / 2;
 
+        hexMesh.rotation.x = -Math.PI / 2;
         hexMesh.scale.x = hexMesh.scale.y = .98;
 
         return hexMesh;
     }
 
-    getCastleObject(x, z) {
-        return new Promise(function(resolve, reject) {
-            var mtlLoader = new THREE.MTLLoader();
-            mtlLoader.load('/models/fortress/SM_Fortress.mtl', function(materials) {
-                materials.preload();
-
-                var objLoader = new THREE.OBJLoader();
-                objLoader.setMaterials(materials);
-                objLoader.load('/models/fortress/SM_Fortress.obj', function(object) {
-                    object.scale.x = object.scale.y = object.scale.z = .006;
-                    object.position.x = x;
-                    object.position.z = z;
-                    object.position.y = .01;
-                    resolve(object);
-                })
-            });
-        });
-    }
-
-    onMouseDown(event) {
+    onMouseDown = (event) => {
         var bounds = this.mount.current.getBoundingClientRect();
         this.mouse.down = {
             x: ((event.clientX - bounds.left) / this.renderer.domElement.clientWidth) * 2 - 1,
@@ -159,7 +110,7 @@ class MapViewport extends React.Component {
         };
     }
 
-    onMouseUp(event) {
+    onMouseUp = (event) => {
         var bounds = this.mount.current.getBoundingClientRect();
         this.mouse.up = {
             x: ((event.clientX - bounds.left) / this.renderer.domElement.clientWidth) * 2 - 1,
@@ -183,21 +134,11 @@ class MapViewport extends React.Component {
             this.selectionGlow.position.x = hexPosition.x;
             this.selectionGlow.position.z = hexPosition.z;
             var data = this.selectedHex.userData;
-            console.log(data);
+            console.log(data.coordinates);
         }
         else {
             this.selectionGlow.visible = false;
             this.selectedHex = null;
-        }
-    }
-
-    updateHexHud() {
-        if (this.selectedHex) {
-            var data = this.selectedHex.userData;
-            $('.coordinates').html('(' + data.coordinates.x + ', ' + data.coordinates.y + ')');
-        }
-        else {
-            $('.coordinates').html('');
         }
     }
 
@@ -206,24 +147,24 @@ class MapViewport extends React.Component {
         this.mount.current.removeChild(this.renderer.domElement);
     }
 
-    start() {
+    start = () => {
         if (!this.frameId) {
             this.frameId = requestAnimationFrame(this.animate);
         }
     }
 
-    stop() {
+    stop = () => {
         cancelAnimationFrame(this.frameId);
     }
 
-    animate() {
+    animate = () => {
         this.controls.enabled = this.props.inFocus;
         this.controls.update();
         this.renderScene()
         this.frameId = window.requestAnimationFrame(this.animate)
     }
 
-    renderScene() {
+    renderScene = () => {
         this.renderer.render(this.scene, this.camera);
     }
 

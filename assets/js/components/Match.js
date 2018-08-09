@@ -1,6 +1,7 @@
 import React from 'react';
 import Chat from './Chat';
 import MapViewport from './MapViewport';
+import Api from './Api';
 
 class Match extends React.Component {
 
@@ -10,10 +11,16 @@ class Match extends React.Component {
 
         this.state = {
             focus: null,
+            map: {name: 'Loading', state: null},
         };
     }
 
     componentDidMount() {
+
+        Api.getMatchMap(this.props.match.id).then(map => {
+            this.setState({map: map});
+        });
+
         this.socketApi.onopen = () => {
             this.socketApiSend({action: 'iam'});
         };
@@ -25,7 +32,7 @@ class Match extends React.Component {
 
     socketApiSend = (message) => {
         if (!this.socketApi.readyState) {
-            return;
+            this.socketApi = new WebSocket('ws://127.0.0.1:8080');
         }
 
         message.token = this.props.user.token;
@@ -49,18 +56,24 @@ class Match extends React.Component {
     render() {
         const match = this.props.match;
 
-        return(
+        return this.state.map.state ? (
             <div className="row">
                 <MapViewport
                     inFocus={this.state.focus !== 'chat'}
                     setFocus={this.setFocus}
-                />
+                    map={this.state.map} />
                 <Chat
                     user={this.props.user}
                     match={this.props.match}
                     onChatSubmit={this.socketApiSend}
                     socketApi={this.socketApi}
                     setFocus={this.setFocus} />
+            </div>
+         ) : (
+            <div className="row">
+                <div className="col-md-12">
+                    Loading...
+                </div>
             </div>
         );
     }

@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import ChatLine from './ChatLine';
+import Api from './Api';
 
 class Chat extends React.Component {
 
@@ -17,8 +18,7 @@ class Chat extends React.Component {
 
     componentDidMount() {
 
-        fetch('/api/match/' + this.props.match.id + '/chat')
-        .then((result) => result.json())
+        Api.getMatchChat(this.props.match.id)
         .then((data) => {
             data.forEach((line) => {
                 this.addLine(line);

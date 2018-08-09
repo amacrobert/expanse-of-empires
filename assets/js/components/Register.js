@@ -54,8 +54,7 @@ class Register extends React.Component {
             return;
         }
 
-        Api.register(email, username, password)
-        .then((result) => {
+        Api.register(email, username, password).then((result) => {
             if (result.status == 200) {
                 result.json().then((data) => {
                     console.log(data);

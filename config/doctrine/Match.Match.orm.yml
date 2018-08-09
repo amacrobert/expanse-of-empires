@@ -14,8 +14,8 @@ App\Entity\Match\Match:
         date_p2p:           { type: datetime }
         date_completed:     { type: datetime, nullable: true }
 
-    # manyToOne:
-    #     map: { targetEntity: App\Entity\Match\Map }
-    
+    manyToOne:
+        map: { targetEntity: App\Entity\Map\Map }
+
     oneToMany:
         empires: { targetEntity: App\Entity\Match\Empire, mappedBy: match }

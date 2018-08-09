@@ -6,6 +6,8 @@ const Api = {
     register: register,
     getUser: getUser,
     getMatches: getMatches,
+    getMatchChat: getMatchChat,
+    getMatchMap: getMatchMap,
 };
 
 function login(email, password) {
@@ -21,6 +23,14 @@ function getUser() {
 
 function getMatches() {
     return request('/api/matches');
+}
+
+function getMatchMap(matchId) {
+    return request('/api/match/' + matchId + '/map');
+}
+
+function getMatchChat(matchId) {
+    return request('/api/match/' + matchId + '/chat');
 }
 
 function register(email, username, password) {

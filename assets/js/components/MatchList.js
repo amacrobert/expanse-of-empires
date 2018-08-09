@@ -16,7 +16,7 @@ class MatchList extends React.Component {
 
     componentDidMount() {
         Api.getMatches().then(result => {
-            console.log('MATCHES:', result);
+            console.log('Matches:', result);
             this.setState({matches: result});
         });
     }

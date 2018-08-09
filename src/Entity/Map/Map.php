@@ -15,12 +15,18 @@ class Map implements JsonSerializable {
 
     public function jsonSerialize() {
         return [
-            'name'  => $this->getName(),
+            'name'          => $this->getName(),
+            'description'   => $this->getDescription(),
+            'state'         => $this->getTerritories()->toArray(),
         ];
     }
 
     public function __construct() {
         $this->territories = new ArrayColleciton;
+    }
+
+    public function __toString() {
+        return $this->getName() ?: 'New Map';
     }
 
     public function getId() {

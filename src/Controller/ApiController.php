@@ -72,6 +72,19 @@ class ApiController extends Controller {
     }
 
     /**
+     * @Route("/match/{match_id}/map", name="match_map")
+     */
+    public function getMatchMap($match_id, EntityManagerInterface $em) {
+        if ($match = $em->getRepository(Match::class)->find($match_id)) {
+            return new JsonResponse($match->getMap());
+        }
+
+        return new JsonResponse([
+            'message' => 'Match not found'
+        ], 400);
+    }
+
+    /**
      * @Route("/register", name="register", methods={"POST"})
      */
     public function register(Request $request, AuthService $auth) {

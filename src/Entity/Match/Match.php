@@ -6,6 +6,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use JsonSerializable;
 use DateTime;
+use App\Entity\Map\Map;
 
 class Match implements JsonSerializable {
 
@@ -34,6 +35,7 @@ class Match implements JsonSerializable {
             'date_completed'    => $this->getDateCompleted() ? $this->getDateCompleted()->format('Y-m-d H:i:s T') : null,
             'completed'         => $this->getDateCompleted() ? true : false,
             'phase'             => $this->getPhase(),
+            'map_name'          => $this->getMap() ? $this->getMap()->getName() : 'Map not chosen yet',
             'user_joined'       => (bool)$this->getUserEmpire(),
         ];
     }
@@ -102,14 +104,14 @@ class Match implements JsonSerializable {
         return $this;
     }
 
-    // public function getMap(): Map {
-    //     return $this->map;
-    // }
+    public function getMap(): ?Map {
+        return $this->map;
+    }
 
-    // public function setMap(?Map $map) {
-    //     $this->map = $map;
-    //     return $this;
-    // }
+    public function setMap(?Map $map) {
+        $this->map = $map;
+        return $this;
+    }
 
     public function getSpeed(): ?int {
         return $this->speed;

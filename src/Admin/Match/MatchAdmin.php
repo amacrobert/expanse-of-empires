@@ -19,6 +19,7 @@ class MatchAdmin extends AbstractAdmin {
                 ->add('visible', null, ['help' => 'Allow users to see this match. Keep it invisible until it\'s ready for action'])
             ->end()
             ->with('Gameplay', ['class' => 'col-md-6'])
+                ->add('map')
                 ->add('speed', null, [
                     'data' => $match->getSpeed() ?: 100,
                     'help' => 'Percent speed distribution of tide and supply. Set lower for longer matches.'

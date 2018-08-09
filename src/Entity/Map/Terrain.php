@@ -1,13 +1,22 @@
 <?php
 
 namespace App\Entity\Map;
+use JsonSerializable;
 
-class Terrain {
+class Terrain implements JsonSerializable {
 
     protected $id;
     protected $name;
     protected $base_tide_cost;
     protected $base_supply_output;
+
+    public function jsonSerialize() {
+        return [
+            'type'      => $this->getName(),
+            'tide'      => $this->getBaseTideCost(),
+            'supply'    => $this->getBaseSupplyOutput(),
+        ];
+    }
 
     public function __toString() {
         return $this->getName() ?: 'New Terrain';
