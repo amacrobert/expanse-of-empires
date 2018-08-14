@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import ChatLine from './ChatLine';
-import Api from './Api';
+import Api from '../services/api';
 
 class Chat extends React.Component {
 
@@ -9,7 +9,8 @@ class Chat extends React.Component {
         super(props);
 
         this.state = {
-            lines: []
+            lines: [],
+            open: false,
         };
 
         this.chatInput = React.createRef();
@@ -27,7 +28,7 @@ class Chat extends React.Component {
             this.scrollToBottom(true);
         })
 
-        this.props.socketApi.addEventListener('message', (payload) => {
+        this.props.socket.addEventListener('message', (payload) => {
             const message = JSON.parse(payload.data);
 
             switch (message.action) {
@@ -39,15 +40,17 @@ class Chat extends React.Component {
         });
     }
 
-    addLine(line) {
+    addLine = (line) => {
         this.setState({lines: this.state.lines.concat(line)});
         this.scrollToBottom();
-    }
+    };
 
-    scrollToBottom(snap = false) {
-        const options = snap ? {} : { behavior: 'smooth' };
-        this.chatEnd.current.scrollIntoView(options);
-    }
+    scrollToBottom = (snap = false) => {
+        if (this.state.open) {
+            const options = snap ? {} : { behavior: 'smooth' };
+            this.chatEnd.current.scrollIntoView(options);
+        }
+    };
 
     handleChatSubmit = (e) => {
         e.preventDefault();
@@ -62,33 +65,52 @@ class Chat extends React.Component {
         }
 
         this.chatInput.current.value = '';
-    }
+    };
+
+    toggleOpen = () => {
+        this.setState({
+            open: !this.state.open,
+        }, () => this.scrollToBottom(true));
+    };
 
     render() {
+
         const lines = this.state.lines.map((message, index) => {
             return (
                 <ChatLine message={message} key={index}/>
             );
         });
 
-        return(
-            <div className="col-md-4">
-                <div className="chat-screen" onClick={(e) => {e.preventDefault(); this.chatInput.current.focus()}}>
-                    {lines}
-                    <div style={{ float: 'left', clear: "both" }} ref={this.chatEnd}></div>
+        const inputField = (
+            <form onSubmit={this.handleChatSubmit}>
+                <input
+                    type="text"
+                    ref={this.chatInput}
+                    className="chat-input"
+                    placeholder="Public chat"
+                    onFocus={() => this.props.setFocus('chat')}
+                    onBlur={() => this.props.setFocus()}
+                    />
+            </form>
+        );
+
+        let chatCollapseClass = ['chat-collapse'];
+        if (this.state.open) {
+            chatCollapseClass.push('show');
+        }
+
+        return (
+            <div className="chat">
+                <div className="chat-header" onClick={this.toggleOpen}>
+                    Public Chat
                 </div>
-                {this.props.user.loggedIn &&
-                    <form onSubmit={this.handleChatSubmit}>
-                        <input
-                            type="text"
-                            ref={this.chatInput}
-                            className="chat-input"
-                            placeholder="Public chat"
-                            onFocus={() => this.props.setFocus('chat')}
-                            onBlur={() => this.props.setFocus()}
-                            />
-                    </form>
-                }
+                <div className={chatCollapseClass.join(' ')}>
+                    <div className="chat-screen" onClick={(e) => {e.preventDefault(); this.chatInput.current.focus()}}>
+                        { lines }
+                        <div style={{ float: 'left', clear: "both" }} ref={this.chatEnd}></div>
+                    </div>
+                    { this.props.user.loggedIn && inputField }
+                </div>
             </div>
         );
     }

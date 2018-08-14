@@ -1,7 +1,24 @@
+@import './_mixins.scss';
+
+.chat {
+    position: fixed;
+    bottom: 0;
+    right: 8px;
+    width: 20rem;
+}
+
+.chat-header {
+    background-color: rgba(255, 255, 255, .6);
+    color: #111;
+    padding: 4px;
+    border-bottom: 2px solid black;
+    @include clickable;
+}
+
 .chat-screen {
     overflow-y: scroll;
     height: 15rem;
-    background-color: rgba(0,0,0,.8);
+    background-color: rgba(0,0,0,.7);
     font-size: .8em;
     padding: 0 0.5rem;
 }
@@ -25,4 +42,16 @@
     color: white;
     border: none;
     background-color: rgba(0,0,0,.5);
+    height: 2rem;
+}
+
+.chat-collapse {
+    height: 0;
+    opacity: 0;
+    transition: height 100ms ease-out, opacity 200ms ease-out;
+}
+
+.chat-collapse.show {
+    opacity: 1;
+    height: 17rem;
 }
