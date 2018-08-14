@@ -9,12 +9,13 @@ class Home extends React.Component {
 
     render() {
         return(
-            <div className="row">
-                <div className="col-md-8">
+            <div className="row mt-2">
+                <MatchList onMatchSelect={this.props.onMatchSelect} />
+
+                <div className="col-md-12">
                     <h2>Welcome</h2>
                     <p>Select a match on the right to begin</p>
                 </div>
-                <MatchList onMatchSelect={this.props.onMatchSelect} />
             </div>
         );
     }

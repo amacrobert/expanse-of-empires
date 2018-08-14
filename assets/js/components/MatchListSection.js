@@ -13,7 +13,7 @@ class MatchList extends React.Component {
             return [];
         }
 
-        var matchList = this.props.matches.map((match, index) => {
+        var matchCards = this.props.matches.map((match, index) => {
             return (
                 <MatchCard
                     key={index}
@@ -23,9 +23,11 @@ class MatchList extends React.Component {
             );
         });
 
-        return([
+        return ([
             <h5 key={this.props.title + '-title'}>{this.props.title}</h5>,
-            matchList
+            <div key={this.props.title + '-row'} className="row">
+                {matchCards}
+            </div>
         ]);
     }
 }

@@ -53,16 +53,20 @@ class Empire implements JsonSerializable {
         return $this->date_founded;
     }
 
-    public function setDateFounded(DateTime $date_founded) {
+    public function setDateFounded(DateTime $date_founded): Empire {
         $this->date_founded = $date_founded;
         return $this;
     }
 
-    public function isActive(): boolean {
-        return (boolean)$this->active;
+    public function setDateFoundedToNow(): Empire {
+        return $this->setDateFounded(new DateTime);
     }
 
-    public function setActive(boolean $active) {
+    public function isActive(): bool {
+        return (bool)$this->active;
+    }
+
+    public function setActive(bool $active) {
         $this->$active = $active;
         return $this;
     }

@@ -6,7 +6,7 @@ import 'bootstrap';
 import Nav from './components/Nav';
 import Home from './components/Home';
 import Match from './components/Match';
-import Api from './components/Api';
+import Api from './services/api';
 
 class App extends React.Component {
 
@@ -58,13 +58,13 @@ class App extends React.Component {
                 onLogout={this.handleLogout}
                 key='nav'
             />,
-            <div className="container-fluid" key='container'>
-               {activeMatch ? (
-                    <Match match={activeMatch} user={this.state.user} onExit={this.handleMatchSelect} />
-                ) : (
+           activeMatch ? (
+                <Match match={activeMatch} user={this.state.user} onExit={this.handleMatchSelect} />
+            ) : (
+                <div className="container-fluid" key='container'>
                     <Home user={this.state.user} onMatchSelect={this.handleMatchSelect} />
-                )}
-            </div>
+                </div>
+            )
         ]);
     };
 }

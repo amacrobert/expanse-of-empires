@@ -1,0 +1,18 @@
+App\Entity\Match\TerritoryState:
+
+    type: entity
+    table: territory_state
+
+    id: { id: { type: integer, unsigned: true, generator: { strategy: auto } } }
+
+    fields:
+        fortification:
+            type: integer
+            options: {unsigned: true, default: 0}
+            nullable: false
+
+    manyToOne:
+        match: { targetEntity: App\Entity\Match\Match, inversedBy: territory_states }
+        empire: { targetEntity: App\Entity\Match\Empire }
+        territory: { targetEntity: App\Entity\Map\Territory }
+        building: { targetEntity: App\Entity\Match\Building }

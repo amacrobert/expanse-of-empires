@@ -7,7 +7,7 @@ App\Entity\Map\Map:
 
     fields:
         name: { type: string }
-        description: { type: text }
+        description: { type: text, nullable: true }
 
     oneToMany:
         territories: { targetEntity: App\Entity\Map\Territory, mappedBy: map }

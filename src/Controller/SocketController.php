@@ -8,6 +8,7 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\EventDispatcher\GenericEvent;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\User\User;
+use Exception;
 
 class SocketController implements MessageComponentInterface {
 
@@ -21,6 +22,24 @@ class SocketController implements MessageComponentInterface {
         $this->dispatcher = $dispatcher;
         $this->verbose = $verbose;
         $this->em = $em;
+    }
+
+    public function broadcastToMatch($match_id, $message, $exclude_user_ids = []) {
+
+        print 'broadcasting: ' . $message['action'] . PHP_EOL;
+        $message = json_encode($message);
+
+        foreach ($this->connections_by_match[$match_id] as $user_connections) {
+            foreach ($user_connections as $user_id => $connection) {
+                if (!in_array($user_id, $exclude_user_ids)) {
+                    $connection->send($message);
+                }
+            }
+        }
+    }
+
+    public function broadcastToUser($match_id, $user_id, $message) {
+        //
     }
 
     public function onOpen(ConnectionInterface $connection) {
@@ -47,18 +66,19 @@ class SocketController implements MessageComponentInterface {
 
         $user_id = $user->getId() ?? 'anon';
 
-        if ($message->action == 'iam') {
+        // Add user to connection list if not already in it
+        if (!isset($this->connections_by_match[$match_id])) {
+            $this->connections_by_match[$match_id] = [];
 
-            if (!isset($this->connections_by_match[$match_id])) {
-                $this->connections_by_match[$match_id] = [];
-
-                if (!isset($this->connections_by_match[$match_id][$user_id])) {
-                    $this->connections_by_match[$match_id][$user_id] = [];
-                }
+            if (!isset($this->connections_by_match[$match_id][$user_id])) {
+                $this->connections_by_match[$match_id][$user_id] = [];
             }
+        }
 
-            $this->connections_by_match[$match_id][$user_id][] = $from_connection;
+        $this->connections_by_match[$match_id][$user_id][] = $from_connection;
 
+        // 'iam' messages are just a user announcing their presence
+        if ($message->action == 'iam') {
             if ($user->getId()) {
                 $this->broadcastToMatch($match_id, [
                     'action' => 'chat-join',
@@ -66,14 +86,19 @@ class SocketController implements MessageComponentInterface {
                 ]);
             }
         }
-
-        $event = new GenericEvent($message, ['user' => $user]);
-
-        if ($message->action == 'chat-send') {
-            $this->dispatcher->dispatch('socket.chat.send', $event);
+        // All other messages received go to the event handler.
+        else {
+            $event = new GenericEvent($message, ['user' => $user]);
+            $event_name = 'socket.' . str_replace('-', '.', $message->action);
+            try {
+                $this->dispatcher->dispatch($event_name, $event);
+            }
+            catch (Exception $e) {
+                // TODO: Broadcast error to user
+                print $e->getMessage() . PHP_EOL;
+                //print $e->getTraceAsString();
+            }
         }
-
-        //exit();
     }
 
     public function onClose(ConnectionInterface $closed_connection) {
@@ -86,7 +111,7 @@ class SocketController implements MessageComponentInterface {
         }
     }
 
-    public function onError(ConnectionInterface $connection, \Exception $e) {
+    public function onError(ConnectionInterface $connection, Exception $e) {
         if ($this->verbose) {
             print (string)$e;
         }
@@ -102,18 +127,5 @@ class SocketController implements MessageComponentInterface {
 
         $connection->send('Server Error');
         $connection->close();
-    }
-
-    public function broadcastToMatch($match_id, $message, $exclude_user_ids = []) {
-        $user = $message['user'];
-        $message = json_encode($message);
-
-        foreach ($this->connections_by_match[$match_id] as $user_connections) {
-            foreach ($user_connections as $user_id => $connection) {
-                if (!in_array($user_id, $exclude_user_ids)) {
-                    $connection->send($message);
-                }
-            }
-        }
     }
 }

@@ -18,8 +18,15 @@ services:
         public: true
 
     admin.terrain:
-        class: App\Admin\Map\TerrainAdmin
+        class: App\Admin\Types\TerrainAdmin
         arguments: [~, App\Entity\Map\Terrain, ~]
         tags:
-            - { name: sonata.admin, manager_type: orm, label: 'Terrain Types', group: 'Maps'}
+            - { name: sonata.admin, manager_type: orm, label: 'Terrain Types', group: 'Types'}
+        public: true
+
+    admin.building:
+        class: App\Admin\Types\BuildingAdmin
+        arguments: [~, App\Entity\Match\Building, ~]
+        tags:
+            - { name: sonata.admin, manager_type: orm, label: 'Building Types', group: 'Types'}
         public: true

@@ -20,6 +20,7 @@ class Match implements JsonSerializable {
     private $date_p2p;
     private $date_completed;
     private $empires;
+    private $territory_states;
 
     // unmapped
     private $user_empire = null;
@@ -82,8 +83,25 @@ class Match implements JsonSerializable {
         return $this;
     }
 
+
     public function getId() {
         return $this->id;
+    }
+
+    public function getTerritoryStates(): ?Collection {
+        return $this->territory_states;
+    }
+
+    public function addTerritoryState(TerritoryState $ts): Match {
+        $ts->setMatch($this);
+        $this->territory_states->add($ts);
+        return $this;
+    }
+
+    public function removeTerritoryState(TerritoryState $ts): Match {
+        $ts->setMatch(null);
+        $this->territory_states->removeElement($ts);
+        return $this;
     }
 
     public function isVisible(): bool {

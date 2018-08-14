@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import Modal from './Modal/Modal';
-import Api from './Api';
+import Api from '../services/api';
 
 class Login extends React.Component {
 

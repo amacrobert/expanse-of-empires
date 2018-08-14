@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import MatchListSection from './MatchListSection';
-import Api from './Api';
+import Api from '../services/api';
 
 class MatchList extends React.Component {
 
@@ -41,8 +41,8 @@ class MatchList extends React.Component {
                 }
             });
 
-            return(
-                <div className="col-md-4">
+            return (
+                <div className="col-md-12">
                     <h4>MATCHES</h4>
                     <MatchListSection
                         title="Your matches"

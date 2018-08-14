@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import Modal from './Modal/Modal';
 import Alert from './Alert';
-import Api from './Api';
+import Api from '../services/api';
 
 class Register extends React.Component {
 

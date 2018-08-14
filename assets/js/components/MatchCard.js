@@ -21,6 +21,7 @@ class MatchCard extends React.Component {
         const match = this.props.match;
         const matchCardClasses = ['card', 'match-card'];
         const openButtonClasses = ['btn', 'btn-sm', 'btn-open'];
+
         if (match.user_joined) {
             matchCardClasses.push('match-active');
             matchCardClasses.push('bg-primary');
@@ -30,14 +31,16 @@ class MatchCard extends React.Component {
         }
 
         return(
-            <div tabIndex="0" className={matchCardClasses.join(' ')} onClick={this.handleMatchSelect}>
-                <div className="card-header">
-                    <span className="align-middle">{match.name}</span>
-                    <span className={openButtonClasses.join(' ')}>Open</span>
-                </div>
-                <div className="card-body">
-                    <p className="card-text">{match.phase}</p>
-                    {match.speed != 100 ? <p className="card-text">Speed: {match.speed}% </p> : null}
+            <div className="col-md-4">
+                <div className={matchCardClasses.join(' ')} onClick={this.handleMatchSelect}>
+                    <div className="card-header">
+                        <span className="align-middle">{match.name}</span>
+                        <span className={openButtonClasses.join(' ')}>Open</span>
+                    </div>
+                    <div className="card-body">
+                        <p className="card-text">{match.phase}</p>
+                        <p className="card-text">Speed: {match.speed}%</p>
+                    </div>
                 </div>
             </div>
         );

@@ -15,14 +15,14 @@ class Map implements JsonSerializable {
 
     public function jsonSerialize() {
         return [
-            'name'          => $this->getName(),
-            'description'   => $this->getDescription(),
-            'state'         => $this->getTerritories()->toArray(),
+            'name'              => $this->getName(),
+            'description'       => $this->getDescription(),
+            'state'             => $this->getTerritories()->toArray(),
         ];
     }
 
     public function __construct() {
-        $this->territories = new ArrayColleciton;
+        $this->territories = new ArrayCollection;
     }
 
     public function __toString() {
@@ -37,7 +37,7 @@ class Map implements JsonSerializable {
         return $this->name;
     }
 
-    public function setName(?string $name) {
+    public function setName(?string $name): Map {
         $this->name = $name;
         return $this;
     }
@@ -46,7 +46,7 @@ class Map implements JsonSerializable {
         return $this->description;
     }
 
-    public function setDescription(?string $description) {
+    public function setDescription(?string $description): Map {
         $this->description = $description;
         return $this;
     }
@@ -55,13 +55,24 @@ class Map implements JsonSerializable {
         return $this->territories;
     }
 
-    public function addTerritory(?Territory $territory) {
+    public function getTerritoriesById(): ?array {
+        $territories = $this->getTerritories()->toArray();
+        $territories_by_id = [];
+
+        foreach ($territories as $territory) {
+            $territories_by_id[$territory->getId()] = $territory;
+        }
+
+        return $territories_by_id;
+    }
+
+    public function addTerritory(?Territory $territory): Map {
         $this->territories[] = $territory;
         $territory->setMap($this);
         return $this;
     }
 
-    public function removeTerritory(?Territory $territory) {
+    public function removeTerritory(?Territory $territory): Map {
         $this->territories->removeElement($territory);
         $territory->setMap(null);
         return $this;

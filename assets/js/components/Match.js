@@ -1,72 +1,144 @@
 import React from 'react';
-import Chat from './Chat';
+import _ from 'underscore';
+import update from 'immutability-helper';
+import Api from '../services/api';
+import MatchUtil from '../services/match-util';
 import MapViewport from './MapViewport';
-import Api from './Api';
+import MatchHud from './MatchHud';
+import Chat from './Chat';
 
 class Match extends React.Component {
 
     constructor(props) {
         super(props);
-        this.socketApi = new WebSocket('ws://127.0.0.1:8080');
+        this.startSocket();
 
         this.state = {
             focus: null,
             map: {name: 'Loading', state: null},
+            empire: null,
+            selectedTerritory: null,
         };
     }
 
     componentDidMount() {
-
         Api.getMatchMap(this.props.match.id).then(map => {
             this.setState({map: map});
         });
-
-        this.socketApi.onopen = () => {
-            this.socketApiSend({action: 'iam'});
-        };
-
-        this.socketApi.onerror = (error) => {
-            console.log('error');
-        };
     }
 
-    socketApiSend = (message) => {
-        if (!this.socketApi.readyState) {
-            this.socketApi = new WebSocket('ws://127.0.0.1:8080');
+    startSocket = (close = false) => {
+        if (close) {
+            this.socket.close();
         }
 
-        message.token = this.props.user.token;
-        message.match_id = this.props.match.id;
+        this.socket = new WebSocket('ws://127.0.0.1:8080');
 
-        this.socketApi.send(JSON.stringify(message));
+        this.socket.addEventListener('message', (payload) => {
+            const message = JSON.parse(payload.data);
+            console.log('Received socket message:', message);
+
+            switch (message.action) {
+                case 'territory-update':
+                    console.log('territory update:', message.territory);
+                    this.updateTerritory(message.territory);
+                    break;
+            }
+        });
+
+        this.socket.onopen = () => {
+            this.socketSend({action: 'iam'});
+        };
+
+        this.socket.onerror = (error) => {
+            this.startSocket(true);
+        };
+    };
+
+    updateTerritory = (newTerritory) => {
+        let map = this.state.map;
+        const index = _.findIndex(map.state, (t) => (t.id == newTerritory.id));
+        map.state[index] = newTerritory;
+        this.setState({map: map});
+
+        // Update HUD if updated territory is selected
+        if (this.state.selectedTerritory.id === newTerritory.id) {
+            this.setState({ selectedTerritory: newTerritory });
+        }
+    };
+
+    socketSend = (message) => {
+        if (this.socket.readyState !== WebSocket.OPEN) {
+            console.log('Attempting to reconnect to socket server...');
+            this.startSocket(true);
+
+            window.setTimeout(() => {
+                this.socketSend(message)
+            }, 1000);
+        }
+        else {
+            message.token = this.props.user.token;
+            message.match_id = this.props.match.id;
+
+            this.socket.send(JSON.stringify(message));
+        }
+
     }
 
     componentWillUnmount() {
-        this.socketApi.close();
+        this.socket.close();
     }
 
     handleExit = () => {
         this.props.onExit();
     };
 
+    onTerritorySelect = (coordinates) => {
+        if (coordinates) {
+            const territory = MatchUtil.getTerritory(this.state.map.state, coordinates.q, coordinates.r);
+            this.setState({ selectedTerritory: territory });
+            console.log(territory);
+        }
+        else {
+            this.setState({ selectedTerritory: null });
+        }
+    };
+
     setFocus = (focus = null) => {
         this.setState({focus: focus});
+    };
+
+    startEmpire = () => {
+        this.socketSend({
+            action: 'empire-start',
+            territory_id: this.state.selectedTerritory.id,
+        });
     };
 
     render() {
         const match = this.props.match;
 
         return this.state.map.state ? (
-            <div className="row">
+            <div className="match-container">
                 <MapViewport
+                    user={this.props.user}
                     inFocus={this.state.focus !== 'chat'}
                     setFocus={this.setFocus}
-                    map={this.state.map} />
+                    map={this.state.map}
+                    match={this.props.match}
+                    selectedTerritory={this.state.selectedTerritory}
+                    onTerritorySelect={this.onTerritorySelect} />
+                <MatchHud
+                    user={this.props.user}
+                    match={this.props.match}
+                    sockApi={this.socket}
+                    selectedTerritory={this.state.selectedTerritory}
+                    startEmpire={this.startEmpire} />
                 <Chat
                     user={this.props.user}
                     match={this.props.match}
-                    onChatSubmit={this.socketApiSend}
-                    socketApi={this.socketApi}
+                    onChatSubmit={this.socketSend}
+                    socket={this.socket}
                     setFocus={this.setFocus} />
             </div>
          ) : (

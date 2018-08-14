@@ -9,7 +9,9 @@ App\Entity\Map\Territory:
         axial_r: { type: integer }
         axial_q: { type: integer }
         starting_position: { type: boolean, nullable: false, options: { default: false } }
+        initial_fortification: { type: integer, length: 1, options: { unsigned: true } }
 
     manyToOne:
         map: { targetEntity: App\Entity\Map\Map }
         terrain: { targetEntity: App\Entity\Map\Terrain }
+        initial_building: { targetEntity: App\Entity\Match\Building }

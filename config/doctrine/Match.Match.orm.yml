@@ -19,3 +19,4 @@ App\Entity\Match\Match:
 
     oneToMany:
         empires: { targetEntity: App\Entity\Match\Empire, mappedBy: match }
+        territory_states: { targetEntity: App\Entity\Match\TerritoryState, mappedBy: match }
