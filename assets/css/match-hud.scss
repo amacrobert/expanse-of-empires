@@ -1,0 +1,26 @@
+.match-container {
+    position: relative;
+}
+
+.match-hud {
+    position: absolute;
+    background-color: rgba(32, 32, 32, 0.7);
+    right: 8px;
+    top: 8px;
+    width: 20rem;
+    padding: 4px
+}
+
+.match-hud p {
+    font-size: 0.9em;
+}
+
+.coordinates {
+    text-align: center;
+    font-size: 1.5em;
+    font-family: monospace;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.25);
+    padding-bottom: 5px;
+    margin-bottom: 5px;
+}
+
