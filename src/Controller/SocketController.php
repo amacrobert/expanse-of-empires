@@ -26,7 +26,7 @@ class SocketController implements MessageComponentInterface {
 
     public function broadcastToMatch($match_id, $message, $exclude_user_ids = []) {
 
-        print 'broadcasting: ' . $message['action'] . PHP_EOL;
+        print 'Sending: ' . json_encode($message) . PHP_EOL;
         $message = json_encode($message);
 
         foreach ($this->connections_by_match[$match_id] as $user_connections) {
@@ -49,8 +49,8 @@ class SocketController implements MessageComponentInterface {
 
     public function onMessage(ConnectionInterface $from_connection, $message) {
 
+        print 'Received: ' . $message . PHP_EOL;
         $message = json_decode($message);
-        print_r($message) . PHP_EOL;
 
         $match_id = $message->match_id;
         if ($token = $message->token ?? null) {
@@ -75,7 +75,10 @@ class SocketController implements MessageComponentInterface {
             }
         }
 
-        $this->connections_by_match[$match_id][$user_id][] = $from_connection;
+        if (!in_array($from_connection, $this->connections_by_match[$match_id][$user_id])) {
+            print "ADDING CONNECTION\n";
+            $this->connections_by_match[$match_id][$user_id][] = $from_connection;
+        }
 
         // 'iam' messages are just a user announcing their presence
         if ($message->action == 'iam') {
@@ -105,7 +108,7 @@ class SocketController implements MessageComponentInterface {
         foreach ($this->connections as $key => $connection) {
             if ($closed_connection === $connection) {
                 unset($this->connections[$key]);
-                echo '[' . date('c') . '] Connection closed' . PHP_EOL;
+                echo 'CONNECTION CLOSED' . PHP_EOL;
                 break;
             }
         }
