@@ -39,7 +39,7 @@ class MapViewport extends React.Component {
         // selection glow
         this.selectionGlow = new THREE.Mesh(
             new THREE.SphereGeometry(.98, 6, 10),
-            new THREE.MeshPhongMaterial({color: 0x00FFFF, transparent: true, opacity: 0.2, depthWrite: false})
+            new THREE.MeshPhongMaterial({color: 0xFFFFFF, transparent: true, opacity: 0.5, depthWrite: false})
         );
         this.selectionGlow.rotation.y = Math.PI / 6;
         this.selectionGlow.scale.y = 2;
@@ -79,15 +79,6 @@ class MapViewport extends React.Component {
         this.renderer.domElement.addEventListener('mousedown', this.onMouseDown, false);
         this.renderer.domElement.addEventListener('mouseup', this.onMouseUp, false);
         this.renderer.domElement.addEventListener('mousemove', this.onMouseMove, false);
-
-        // Border test---------------
-        this.scene.add(GraphicsUtil.getBorderSection({q:0, r: 0}, 'left'));
-        this.scene.add(GraphicsUtil.getBorderSection({q:0, r: 0}, 'topLeft'));
-        this.scene.add(GraphicsUtil.getBorderSection({q:0, r: 0}, 'topRight'));
-        this.scene.add(GraphicsUtil.getBorderSection({q:0, r: 0}, 'right'));
-        this.scene.add(GraphicsUtil.getBorderSection({q:0, r: 0}, 'bottomRight'));
-        this.scene.add(GraphicsUtil.getBorderSection({q:0, r: 0}, 'bottomLeft'));
-        // --------------------------
 
         this.start();
     }
@@ -200,20 +191,24 @@ class MapViewport extends React.Component {
     updateScene = () => {
         // iterate territories and determine if any graphics elements need to be updated
         this.props.map.state.forEach(territory => {
-            const hex = this.getHex(territory.q, territory.r);
+            const q = territory.q;
+            const r = territory.r;
+            const hex = this.getHex(q, r);
 
             if (hex) {
 
                 // Add graphics object to userData if none exists
                 if (!hex.userData.graphics) {
-                    hex.userData.graphics = {};
+                    hex.userData.graphics = {
+                        borders: {},
+                    };
                 }
 
                 // Delete starting position sprite
                 if (!MatchUtil.showStartPosition(this.props.match, territory)
                     && hex.userData.graphics.startingPositionSprite
                 ) {
-                    console.log('REMOVING STARTING POSITION SPRITE:', territory, hex);
+                    console.log('REMOVING STARTING POSITION SPRITE');
                     this.scene.remove(hex.userData.graphics.startingPositionSprite);
                     hex.userData.graphics.startingPositionSprite = null;
                 }
@@ -221,10 +216,48 @@ class MapViewport extends React.Component {
                 else if (MatchUtil.showStartPosition(this.props.match, territory)
                     && !hex.userData.graphics.startingPositionSprite
                 ) {
-                    console.log('ADDING STARTING POSITION SPRITE:', territory, hex);
+                    console.log('ADDING STARTING POSITION SPRITE');
                     GraphicsUtil.getSprite('startingPosition', territory.q, territory.r).then(sprite => {
                         hex.userData.graphics.startingPositionSprite = sprite;
                         this.scene.add(sprite);
+                    });
+                }
+
+                // BORDERS
+                if (territory.empire_id) {
+                    let borderingHexes = {
+                        left: this.getHex(q - 1, r),
+                        topLeft: this.getHex(q, r - 1),
+                        topRight: this.getHex(q + 1, r - 1),
+                        right: this.getHex(q + 1, r),
+                        bottomRight: this.getHex(q, r + 1),
+                        bottomLeft: this.getHex(q - 1, r + 1),
+                    };
+
+                    Object.keys(borderingHexes).forEach((rotation) => {
+                        let borderingHex = borderingHexes[rotation];
+                        let borderingTerritory;
+
+                        if (borderingHex) {
+                            borderingTerritory = MatchUtil.getTerritory(
+                                this.props.map.state,
+                                borderingHex.userData.coordinates.q,
+                                borderingHex.userData.coordinates.r
+                            );
+                        }
+
+                        // Add missing border sections
+                        if (!borderingHex || borderingTerritory.empire_id !== territory.empire_id) {
+                            if (!hex.userData.graphics.borders[rotation]) {
+                                let newBorderSection = GraphicsUtil.getBorderSection(territory, rotation);
+                                console.log('ADDING BORDER SECTION');
+                                hex.userData.graphics.borders[rotation] = newBorderSection;
+                                this.scene.add(newBorderSection);
+                            }
+                        }
+
+                        // @TODO: Remove border sections that sould no longer exist
+                        // Note: need to check for territories that don't have empire id
                     });
                 }
             }

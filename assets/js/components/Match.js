@@ -62,7 +62,7 @@ class Match extends React.Component {
         this.setState({map: map});
 
         // Update HUD if updated territory is selected
-        if (this.state.selectedTerritory.id === newTerritory.id) {
+        if (this.state.selectedTerritory && this.state.selectedTerritory.id === newTerritory.id) {
             this.setState({ selectedTerritory: newTerritory });
         }
     };

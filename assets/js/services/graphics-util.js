@@ -120,6 +120,8 @@ class GraphicsUtil {
         borderMesh.position.x = realCoords.x;
         borderMesh.position.z = realCoords.z;
 
+        borderMesh.scale.x = borderMesh.scale.y = .94;
+
         return borderMesh;
     }
 };
