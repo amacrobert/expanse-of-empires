@@ -18,11 +18,12 @@ class GraphicsUtil {
         this.hexShape.lineTo(points.top.x, points.top.z);
 
         this.hexGeometry = new THREE.ShapeGeometry(this.hexShape);
-        this.hexMaterial = new THREE.MeshLambertMaterial({ color: 0xEEEEEE });
+        this.hexMaterial = new THREE.MeshLambertMaterial({ color: 0x78AB46 });
 
         // Sprite assets
         this.sprites = {
-            startingPosition: this.loadSprite(require('../../img/starting-position.png')),
+            //startingPosition: this.loadSprite(require('../../img/starting-position.png')),
+            startingPosition: this.loadSprite(require('../../img/down-arrow.svg')),
         };
 
         // Hex hover selection
@@ -49,7 +50,7 @@ class GraphicsUtil {
         borderShape.lineTo(borderPoints[3].x, borderPoints[3].z);
         borderShape.lineTo(borderPoints[0].x, borderPoints[0].z);
         this.borderGeometry = new THREE.ShapeGeometry(borderShape);
-        this.borderMaterial = new THREE.MeshLambertMaterial({ color: 0x3333FF });
+        this.borderMaterial = new THREE.MeshLambertMaterial({ color: 0x3333FF, transparent: true, opacity: 0.5 });
     }
 
     loadSprite = (file) => {
@@ -66,9 +67,12 @@ class GraphicsUtil {
     getSprite = (name, q = 0, r = 0) => {
         return this.sprites[name].then(sprite => {
             let clone = sprite.clone();
-            clone.center = new THREE.Vector2(.5, .12);
+            //clone.center = new THREE.Vector2(.5, .12);
+            clone.center = new THREE.Vector2(.5, 0);
+            clone.scale.set(1,2,1);
             let realCoords = MapUtil.axialToReal(q, r);
-            clone.position.set(realCoords.x, .055, realCoords.z);
+            //clone.position.set(realCoords.x, .055, realCoords.z);
+            clone.position.set(realCoords.x, 0, realCoords.z);
             return clone;
         });
     };
@@ -111,7 +115,7 @@ class GraphicsUtil {
         };
     };
 
-    getBorderSection = (territory, rotation) => {
+    getBorderSectionMesh = (territory, rotation) => {
         var borderMesh = new THREE.Mesh(this.borderGeometry, this.borderMaterial);
         borderMesh.rotation.z = MapUtil.borderRotation[rotation];
         borderMesh.rotation.x = -Math.PI / 2;
@@ -124,6 +128,7 @@ class GraphicsUtil {
 
         return borderMesh;
     }
+
 };
 
 export default new GraphicsUtil();

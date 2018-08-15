@@ -50,9 +50,9 @@ class MapViewport extends React.Component {
         this.scene.add(GraphicsUtil.getHoverOutline());
 
         // light
-        this.scene.add(new THREE.AmbientLight(0xFFFFFF, .5));
+        this.scene.add(new THREE.AmbientLight(0xFFFFFF, .8));
 
-        var sun = new THREE.PointLight(0xFFFF77, 2, 50, 1);
+        var sun = new THREE.PointLight(0xFFFFFF, 2, 50, 1);
         sun.position.x = 0;
         sun.position.y = 40;
         sun.position.z = 0;
@@ -249,7 +249,7 @@ class MapViewport extends React.Component {
                         // Add missing border sections
                         if (!borderingHex || borderingTerritory.empire_id !== territory.empire_id) {
                             if (!hex.userData.graphics.borders[rotation]) {
-                                let newBorderSection = GraphicsUtil.getBorderSection(territory, rotation);
+                                let newBorderSection = GraphicsUtil.getBorderSectionMesh(territory, rotation);
                                 console.log('ADDING BORDER SECTION');
                                 hex.userData.graphics.borders[rotation] = newBorderSection;
                                 this.scene.add(newBorderSection);
