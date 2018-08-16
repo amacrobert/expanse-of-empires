@@ -2,11 +2,9 @@ import React from 'react';
 import MapUtil from '../services/map-util';
 import GraphicsUtil from '../services/graphics-util';
 import MatchUtil from '../services/match-util';
-
 const THREE = require('three');
+
 require('../three/controls/OrbitControls.js');
-require('../three/loaders/MTLLoader.js');
-require('../three/loaders/OBJLoader.js');
 
 class MapViewport extends React.Component {
 
@@ -25,7 +23,12 @@ class MapViewport extends React.Component {
     componentDidMount() {
         const phase = MatchUtil.getPhase(this.props.match);
 
-        this.renderer = new THREE.WebGLRenderer({ antialias: true});
+        this.renderer = new THREE.WebGLRenderer({
+            antialias: true,
+        });
+        this.renderer.shadowMapEnabled = true;
+        this.renderer.showMapType = THREE.PCFSoftShadowMap;
+
         this.mount.current.appendChild(this.renderer.domElement);
         this.renderer.setSize(this.mount.current.offsetWidth, this.mount.current.offsetHeight);
         this.scene = new THREE.Scene();
@@ -39,8 +42,14 @@ class MapViewport extends React.Component {
         // selection glow
         this.selectionGlow = new THREE.Mesh(
             new THREE.SphereGeometry(.98, 6, 10),
-            new THREE.MeshPhongMaterial({color: 0xFFFFFF, transparent: true, opacity: 0.5, depthWrite: false})
+            new THREE.MeshPhongMaterial({
+                color: 0xFFFFFF,
+                transparent: true,
+                opacity: 0.5,
+                depthWrite: false,
+            })
         );
+        this.selectionGlow.castShadow = false;
         this.selectionGlow.rotation.y = Math.PI / 6;
         this.selectionGlow.scale.y = 2;
         this.selectionGlow.visible = false;
@@ -49,12 +58,12 @@ class MapViewport extends React.Component {
         // Load the hover outline
         this.scene.add(GraphicsUtil.getHoverOutline());
 
-        // light
-        this.scene.add(new THREE.AmbientLight(0xFFFFFF, .8));
-
-        var sun = new THREE.PointLight(0xFFFFFF, 2, 50, 1);
+        // // light
+        this.scene.add(new THREE.AmbientLight(0xFFFFFF, .5));
+        var sun = new THREE.PointLight(0xFFFFFF, 1, 150, 1);
+        sun.castShadow = true;
         sun.position.x = 0;
-        sun.position.y = 40;
+        sun.position.y = 50;
         sun.position.z = 0;
         this.scene.add(sun);
 
@@ -201,6 +210,7 @@ class MapViewport extends React.Component {
                 if (!hex.userData.graphics) {
                     hex.userData.graphics = {
                         borders: {},
+                        building: null,
                     };
                 }
 
@@ -252,13 +262,66 @@ class MapViewport extends React.Component {
                                 let newBorderSection = GraphicsUtil.getBorderSectionMesh(territory, rotation);
                                 console.log('ADDING BORDER SECTION');
                                 hex.userData.graphics.borders[rotation] = newBorderSection;
-                                this.scene.add(newBorderSection);
+                                //this.scene.add(newBorderSection);
                             }
                         }
 
                         // @TODO: Remove border sections that sould no longer exist
                         // Note: need to check for territories that don't have empire id
                     });
+
+                    // merge border meshes and add to scene
+                    if (hex.userData.graphics.borders && !hex.userData.graphics.borderMerged) {
+                        var borderMergedGeo = new THREE.Geometry();
+
+                        Object.keys(hex.userData.graphics.borders).forEach(key => {
+                            let borderMesh = hex.userData.graphics.borders[key];
+                            borderMergedGeo.merge(borderMesh.geometry, borderMesh.matrix);
+                        });
+
+                        var borderMerged = new THREE.Mesh(borderMergedGeo, GraphicsUtil.borderMaterial);
+                        borderMerged.castShadow = true;
+                        console.log('ADDING MERGED BORDER MESH');
+                        hex.userData.graphics.borderMerged = borderMerged;
+                        this.scene.add(borderMerged);
+
+                    }
+                }
+
+                // BUILDINGS
+                // Add or replace building if it's missing
+                let buildingName = territory.building ? territory.building.machine_name : null;
+
+                if (territory.building
+                    && (!hex.userData.graphics.building || hex.userData.graphics.building.name !== buildingName)
+                ) {
+
+                    // Remove building to be replaced
+                    if (hex.userData.graphics.building) {
+                        console.log('REPLACING BUILDING: ' + building.name.toUpperCase());
+                        this.scene.remove(hex.userData.graphics.building);
+                        hex.userData.graphics.building = null;
+                    }
+
+                    GraphicsUtil.getBuilding(buildingName, q, r).then(building => {
+                        console.log('ADDING BUILDING: ' + building.name.toUpperCase());
+                        hex.userData.graphics.building = building;
+                        this.scene.add(building);
+
+                        //light
+                        let realCoords = MapUtil.axialToReal(q, r);
+                        let buildingLight = new THREE.PointLight(0xFFFFFF, 1, 3, 2);
+                        buildingLight.position.x = realCoords.x;
+                        buildingLight.position.y = .3;
+                        buildingLight.position.z = realCoords.z;
+                        this.scene.add(buildingLight);
+                    })
+                }
+                // Remove destroyed building
+                else if (!territory.building && hex.userData.graphics.building) {
+                    console.log('REMOVING BUILDING: ' + building.name.toUpperCase());
+                    this.scene.remove(hex.userData.graphics.building);
+                    hex.userData.graphics.building = null;
                 }
             }
         });

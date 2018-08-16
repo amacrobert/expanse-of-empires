@@ -1,4 +1,6 @@
 import MapUtil from './map-util';
+require('../three/loaders/MTLLoader.js');
+require('../three/loaders/OBJLoader.js');
 
 const THREE = require('three');
 
@@ -6,6 +8,10 @@ class GraphicsUtil {
 
     constructor() {
         const points = MapUtil.hexPoints;
+
+        // Initialize loaders
+        this.textureLoader = new THREE.TextureLoader();
+        this.mtlLoader = new THREE.MTLLoader();
 
         // Hex mesh assets
         this.hexShape = new THREE.Shape();
@@ -18,12 +24,27 @@ class GraphicsUtil {
         this.hexShape.lineTo(points.top.x, points.top.z);
 
         this.hexGeometry = new THREE.ShapeGeometry(this.hexShape);
-        this.hexMaterial = new THREE.MeshLambertMaterial({ color: 0x78AB46 });
+        this.hexMaterial = new THREE.MeshPhongMaterial({ color: 0x78AB46 });
 
         // Sprite assets
         this.sprites = {
             //startingPosition: this.loadSprite(require('../../img/starting-position.png')),
             startingPosition: this.loadSprite(require('../../img/down-arrow.svg')),
+        };
+
+        // OBJ assets
+        this.buildings = {
+            castle: this.loadObj(
+                '/models/castle/SM_Fort.obj',
+                '/models/castle/SM_Fort.mtl',
+                {x: .008, y: .020, z: .008}
+            ),
+            mill: this.loadObj(
+                '/models/mill/PUSHILIN_windmill.obj',
+                '/models/mill/PUSHILIN_windmill.mtl',
+                {x: 0.25, y: 0.25, z: 0.25},
+                {x: 0, y: 0.25, z: 0}
+            ),
         };
 
         // Hex hover selection
@@ -50,13 +71,12 @@ class GraphicsUtil {
         borderShape.lineTo(borderPoints[3].x, borderPoints[3].z);
         borderShape.lineTo(borderPoints[0].x, borderPoints[0].z);
         this.borderGeometry = new THREE.ShapeGeometry(borderShape);
-        this.borderMaterial = new THREE.MeshLambertMaterial({ color: 0x3333FF, transparent: true, opacity: 0.5 });
+        this.borderMaterial = new THREE.MeshLambertMaterial({ color: 0x3333FF, transparent: true, opacity: 1 });
     }
 
     loadSprite = (file) => {
-        const textureLoader = new THREE.TextureLoader;
         return new Promise((resolve, reject) => {
-            textureLoader.load(file, texture => {
+            this.textureLoader.load(file, texture => {
                 const material = new THREE.SpriteMaterial({ map: texture, color: 0xffffff });
                 const sprite = new THREE.Sprite(material);
                 resolve(sprite);
@@ -77,6 +97,47 @@ class GraphicsUtil {
         });
     };
 
+    loadObj = (objFile, materialFile, scale = {x: 1, y: 1, z: 1}, position = {x: 0, y: 0, z: 0}) => {
+        return new Promise((resolve, reject) => {
+            this.mtlLoader.load(materialFile, materials => {
+                materials.preload();
+
+                console.log('materials:', materials);
+
+                if (materials.materials.SM_FortSG1) {
+                    materials.materials.SM_FortSG1.color.r = .1;
+                    materials.materials.SM_FortSG1.color.g = .1;
+                    materials.materials.SM_FortSG1.color.b = 1;
+                }
+
+                if (materials.materials.SM_FortSG2) {
+                    materials.materials.SM_FortSG2.visible = false;
+                }
+
+                let objLoader = new THREE.OBJLoader();
+                objLoader.setMaterials(materials);
+                objLoader.load(objFile, (object) => {
+                    object.scale.set(scale.x, scale.y, scale.z);
+                    object.position.set(position.x, position.y, position.z);
+                    object.castShadow = true;
+                    resolve(object);
+                }, (error) => console.log(error));
+            }, (error) => console.log(error));
+        })
+    };
+
+    getBuilding = (name, q = 0, r = 0) => {
+        return this.buildings[name].then(object => {
+            let clone = object.clone();
+            clone.name = name;
+            let realCoords = MapUtil.axialToReal(q, r);
+            clone.position.x = realCoords.x;
+            clone.position.z = realCoords.z;
+            return clone;
+        });
+    };
+
+
     getHexMesh = (territory) => {
         var hexMesh = new THREE.Mesh(this.hexGeometry, this.hexMaterial);
 
@@ -88,6 +149,8 @@ class GraphicsUtil {
         const realCoords = MapUtil.axialToReal(territory.q, territory.r);
         hexMesh.position.x = realCoords.x;
         hexMesh.position.z = realCoords.z;
+
+        hexMesh.receiveShadow = true;
 
         return hexMesh;
     };
@@ -116,7 +179,7 @@ class GraphicsUtil {
     };
 
     getBorderSectionMesh = (territory, rotation) => {
-        var borderMesh = new THREE.Mesh(this.borderGeometry, this.borderMaterial);
+        var borderMesh = new THREE.Mesh(this.borderGeometry);
         borderMesh.rotation.z = MapUtil.borderRotation[rotation];
         borderMesh.rotation.x = -Math.PI / 2;
         borderMesh.position.y = 0.01;
@@ -125,10 +188,10 @@ class GraphicsUtil {
         borderMesh.position.z = realCoords.z;
 
         borderMesh.scale.x = borderMesh.scale.y = .94;
+        borderMesh.updateMatrix();
 
         return borderMesh;
-    }
-
+    };
 };
 
 export default new GraphicsUtil();

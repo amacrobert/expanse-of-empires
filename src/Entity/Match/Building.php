@@ -11,7 +11,8 @@ class Building implements JsonSerializable {
 
     public function jsonSerialize() {
         return [
-            'name'  => $this->getName(),
+            'name'          => $this->getName(),
+            'machine_name'  => str_replace(' ', '-', strtolower($this->getName())),
         ];
     }
 
