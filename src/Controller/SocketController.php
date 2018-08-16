@@ -70,11 +70,10 @@ class SocketController implements MessageComponentInterface {
         if (!isset($this->connections_by_match[$match_id])) {
             $this->connections_by_match[$match_id] = [];
 
-            if (!isset($this->connections_by_match[$match_id][$user_id])) {
-                $this->connections_by_match[$match_id][$user_id] = [];
-            }
         }
-
+        if (!isset($this->connections_by_match[$match_id][$user_id])) {
+            $this->connections_by_match[$match_id][$user_id] = [];
+        }
         if (!in_array($from_connection, $this->connections_by_match[$match_id][$user_id])) {
             print "ADDING CONNECTION\n";
             $this->connections_by_match[$match_id][$user_id][] = $from_connection;
