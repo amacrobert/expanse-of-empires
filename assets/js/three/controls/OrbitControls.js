@@ -86,6 +86,8 @@ THREE.OrbitControls = function ( object, domElement ) {
         A: 65,
         S: 83,
         D: 68,
+        Q: 81,
+        E: 69,
         PLUS: 187,
         MINUS: 189
     };
@@ -573,6 +575,8 @@ THREE.OrbitControls = function ( object, domElement ) {
 
     function handleKeyDown( event ) {
 
+        // console.log(event.keyCode);
+
         switch ( event.keyCode ) {
 
             case scope.keys.UP:
@@ -604,6 +608,15 @@ THREE.OrbitControls = function ( object, domElement ) {
 
             case scope.keys.MINUS:
                 break;
+
+            case scope.keys.Q:
+                rotateLeft( Math.PI / 12 );
+                break;
+
+            case scope.keys.E:
+                rotateLeft( -Math.PI / 12 );
+                break;
+
 
         }
 

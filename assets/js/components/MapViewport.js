@@ -5,6 +5,7 @@ import MatchUtil from '../services/match-util';
 const THREE = require('three');
 
 require('../three/controls/OrbitControls.js');
+const Stats = require('../extra/stats.min.js');
 
 class MapViewport extends React.Component {
 
@@ -18,6 +19,10 @@ class MapViewport extends React.Component {
         this.mouse = new THREE.Vector2();
         this.targetList = [];
         this.inFocus = true;
+
+        this.stats = new Stats();
+        this.stats.showPanel(0);
+        document.body.appendChild(this.stats.dom);
     }
 
     componentDidMount() {
@@ -185,12 +190,15 @@ class MapViewport extends React.Component {
 
     animate = () => {
 
-        this.updateScene();
+        this.stats.begin();
 
+        this.updateScene();
         this.controls.enabled = this.props.inFocus;
         this.controls.update();
         this.renderScene()
         this.frameId = window.requestAnimationFrame(this.animate);
+
+        this.stats.end();
     };
 
     renderScene = () => {
