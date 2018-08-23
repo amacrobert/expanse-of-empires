@@ -106,12 +106,12 @@ class ApiController extends Controller {
     }
 
     /**
-     * @Route("/match/{match_id}/map", name="match_map")
+     * @Route("/match/{match_id}", name="match_details")
      */
-    public function getMatchMap($match_id, MatchService $match_service, EntityManagerInterface $em) {
+    public function getMatchDetails($match_id, MatchService $match_service, EntityManagerInterface $em) {
         if ($match = $em->getRepository(Match::class)->find($match_id)) {
-            $match_service->hydrateMapState($match);
-            return new JsonResponse($match->getMap());
+            $details = $match_service->getDetails($match);
+            return new JsonResponse($details);
         }
 
         return new JsonResponse([

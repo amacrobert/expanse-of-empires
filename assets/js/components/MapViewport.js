@@ -7,6 +7,8 @@ const THREE = require('three');
 require('../three/controls/OrbitControls.js');
 const Stats = require('../extra/stats.min.js');
 
+const assets = new GraphicsUtil();
+
 class MapViewport extends React.Component {
 
     constructor(props) {
@@ -47,10 +49,10 @@ class MapViewport extends React.Component {
         // selection glow
         this.selectionGlow = new THREE.Mesh(
             new THREE.SphereGeometry(.98, 6, 10),
-            new THREE.MeshPhongMaterial({
+            new THREE.MeshBasicMaterial({
                 color: 0xFFFFFF,
                 transparent: true,
-                opacity: 0.5,
+                opacity: 0.4,
                 depthWrite: false,
             })
         );
@@ -61,9 +63,9 @@ class MapViewport extends React.Component {
         this.scene.add(this.selectionGlow);
 
         // Load the hover outline
-        this.scene.add(GraphicsUtil.getHoverOutline());
+        this.scene.add(assets.getHoverOutline());
 
-        // // light
+        // light
         this.scene.add(new THREE.AmbientLight(0xFFFFFF, .5));
         var sun = new THREE.PointLight(0xFFFFFF, 1, 150, 1);
         sun.castShadow = true;
@@ -81,7 +83,7 @@ class MapViewport extends React.Component {
         this.props.map.state.forEach(territory => {
             let q = territory.q;
             let r = territory.r;
-            let hexMesh = GraphicsUtil.getHexMesh(territory);
+            let hexMesh = assets.getHexMesh(territory);
             this.targetList.push(hexMesh);
             this.scene.add(hexMesh);
 
@@ -93,6 +95,7 @@ class MapViewport extends React.Component {
         this.renderer.domElement.addEventListener('mousedown', this.onMouseDown, false);
         this.renderer.domElement.addEventListener('mouseup', this.onMouseUp, false);
         this.renderer.domElement.addEventListener('mousemove', this.onMouseMove, false);
+        window.addEventListener('resize', this.onWindowResize, false);
 
         this.start();
     }
@@ -121,13 +124,13 @@ class MapViewport extends React.Component {
     onMouseDown = (event) => {
         let bounds = this.mount.current.getBoundingClientRect();
         let element = this.renderer.domElement;
-        this.mouse.down = GraphicsUtil.mouseToReal(bounds, element, event.clientX, event.clientY);
+        this.mouse.down = assets.mouseToReal(bounds, element, event.clientX, event.clientY);
     };
 
     onMouseUp = (event) => {
         let bounds = this.mount.current.getBoundingClientRect();
         let element = this.renderer.domElement;
-        this.mouse.up = GraphicsUtil.mouseToReal(bounds, element, event.clientX, event.clientY);
+        this.mouse.up = assets.mouseToReal(bounds, element, event.clientX, event.clientY);
 
         // Only register hex click if mouse up in in same position as mouse down
         if (JSON.stringify(this.mouse.down) != JSON.stringify(this.mouse.up)) {
@@ -164,18 +167,24 @@ class MapViewport extends React.Component {
     onMouseMove = (event) => {
         let bounds = this.mount.current.getBoundingClientRect();
         let element = this.renderer.domElement;
-        this.mouse.hover = GraphicsUtil.mouseToReal(bounds, element, event.clientX, event.clientY);
+        this.mouse.hover = assets.mouseToReal(bounds, element, event.clientX, event.clientY);
 
         this.raycaster.setFromCamera(this.mouse.hover, this.camera);
         let intersects = this.raycaster.intersectObjects(this.targetList);
 
         if (intersects.length) {
             this.hoveredHex = intersects[0].object;
-            GraphicsUtil.setHoverOutline(this.hoveredHex.userData.coordinates);
+            assets.setHoverOutline(this.hoveredHex.userData.coordinates);
         }
         else {
-            GraphicsUtil.setHoverOutline(null);
+            assets.setHoverOutline(null);
         }
+    };
+
+    onWindowResize = () => {
+        this.camera.aspect = this.mount.current.offsetWidth / this.mount.current.offsetHeight;
+        this.camera.updateProjectionMatrix();
+        this.renderer.setSize(this.mount.current.offsetWidth, this.mount.current.offsetHeight);
     };
 
     start = () => {
@@ -229,15 +238,22 @@ class MapViewport extends React.Component {
                     console.log('REMOVING STARTING POSITION SPRITE');
                     this.scene.remove(hex.userData.graphics.startingPositionSprite);
                     hex.userData.graphics.startingPositionSprite = null;
+
+                    this.scene.remove(hex.userData.graphics.simpleShadow);
+                    hex.userData.graphics.simpleShadow = null;
                 }
                 // Add starting position sprite
                 else if (MatchUtil.showStartPosition(this.props.match, territory)
                     && !hex.userData.graphics.startingPositionSprite
                 ) {
                     console.log('ADDING STARTING POSITION SPRITE');
-                    GraphicsUtil.getSprite('startingPosition', territory.q, territory.r).then(sprite => {
+                    assets.getSprite('startingPosition', territory.q, territory.r).then(sprite => {
                         hex.userData.graphics.startingPositionSprite = sprite;
                         this.scene.add(sprite);
+
+                        let simpleShadow = assets.getSimpleShadow(territory);
+                        hex.userData.graphics.simpleShadow = simpleShadow;
+                        this.scene.add(simpleShadow);
                     });
                 }
 
@@ -267,7 +283,7 @@ class MapViewport extends React.Component {
                         // Add missing border sections
                         if (!borderingHex || borderingTerritory.empire_id !== territory.empire_id) {
                             if (!hex.userData.graphics.borders[rotation]) {
-                                let newBorderSection = GraphicsUtil.getBorderSectionMesh(territory, rotation);
+                                let newBorderSection = assets.getBorderSectionMesh(territory, rotation);
                                 console.log('ADDING BORDER SECTION');
                                 hex.userData.graphics.borders[rotation] = newBorderSection;
                                 //this.scene.add(newBorderSection);
@@ -287,7 +303,7 @@ class MapViewport extends React.Component {
                             borderMergedGeo.merge(borderMesh.geometry, borderMesh.matrix);
                         });
 
-                        var borderMerged = new THREE.Mesh(borderMergedGeo, GraphicsUtil.borderMaterial);
+                        var borderMerged = new THREE.Mesh(borderMergedGeo, assets.borderMaterial);
                         borderMerged.castShadow = true;
                         console.log('ADDING MERGED BORDER MESH');
                         hex.userData.graphics.borderMerged = borderMerged;
@@ -311,18 +327,17 @@ class MapViewport extends React.Component {
                         hex.userData.graphics.building = null;
                     }
 
-                    GraphicsUtil.getBuilding(buildingName, q, r).then(building => {
+                    assets.getBuilding(buildingName, q, r).then(building => {
                         console.log('ADDING BUILDING: ' + building.name.toUpperCase());
                         hex.userData.graphics.building = building;
                         this.scene.add(building);
 
-                        //light
-                        let realCoords = MapUtil.axialToReal(q, r);
-                        let buildingLight = new THREE.PointLight(0xFFFFFF, 1, 3, 2);
-                        buildingLight.position.x = realCoords.x;
-                        buildingLight.position.y = .3;
-                        buildingLight.position.z = realCoords.z;
-                        this.scene.add(buildingLight);
+                        // simple shadow
+                        let buildingShadow = assets.getSimpleShadow(territory);
+                        buildingShadow.scale.setScalar(2);
+                        buildingShadow.opacity = 1;
+                        hex.userData.graphics.simpleShadow = buildingShadow;
+                        this.scene.add(buildingShadow);
                     })
                 }
                 // Remove destroyed building
@@ -330,6 +345,8 @@ class MapViewport extends React.Component {
                     console.log('REMOVING BUILDING: ' + building.name.toUpperCase());
                     this.scene.remove(hex.userData.graphics.building);
                     hex.userData.graphics.building = null;
+                    this.scene.remove(hex.userData.graphics.simpleShadow);
+                    hex.userData.graphics.simpleShadow = null;
                 }
             }
         });

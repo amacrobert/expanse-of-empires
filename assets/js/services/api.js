@@ -29,13 +29,13 @@ const getMatches = () => {
     });
 }
 
-const getMatchMap = matchId => {
-    return request('/api/match/' + matchId + '/map');
-}
-
 const getMatchChat = matchId => {
     return request('/api/match/' + matchId + '/chat');
 }
+
+const getMatchDetails = matchId => {
+    return request('/api/match/' + matchId);
+};
 
 const register = (email, username, password) => {
     return request('/api/register', 'POST', {
@@ -85,5 +85,5 @@ export default {
     getUser,
     getMatches,
     getMatchChat,
-    getMatchMap,
+    getMatchDetails,
 };

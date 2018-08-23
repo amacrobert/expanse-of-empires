@@ -22,9 +22,26 @@ class GraphicsUtil {
         this.hexShape.lineTo(points.bottomRight.x, points.bottomRight.z);
         this.hexShape.lineTo(points.topRight.x, points.topRight.z);
         this.hexShape.lineTo(points.top.x, points.top.z);
-
         this.hexGeometry = new THREE.ShapeGeometry(this.hexShape);
         this.hexMaterial = new THREE.MeshPhongMaterial({ color: 0x78AB46 });
+
+        // Simple shadow object
+        let shadowTexture = this.textureLoader.load(require('../../img/shadow.png'));
+        shadowTexture.offset = new THREE.Vector2(0.5, 0.5);
+        let shadowShape = new THREE.Shape();
+        shadowShape.moveTo(-1, -1);
+        shadowShape.lineTo(1, -1);
+        shadowShape.lineTo(1, 1);
+        shadowShape.lineTo(-1, 1);
+        shadowShape.lineTo(-1, -1);
+        let shadowGeometry = new THREE.ShapeGeometry(shadowShape);
+        this.shadowMesh = new THREE.Mesh(shadowGeometry, new THREE.MeshPhongMaterial({
+            map: shadowTexture,
+            transparent: true,
+            opacity: 0.5,
+        }));
+        this.shadowMesh.rotation.x = -Math.PI / 2;
+        this.shadowMesh.position.y = .001;
 
         // Sprite assets
         this.sprites = {
@@ -77,7 +94,7 @@ class GraphicsUtil {
     loadSprite = (file) => {
         return new Promise((resolve, reject) => {
             this.textureLoader.load(file, texture => {
-                const material = new THREE.SpriteMaterial({ map: texture, color: 0xffffff });
+                const material = new THREE.SpriteMaterial({ map: texture, color: 0xffffff, transparent: true });
                 const sprite = new THREE.Sprite(material);
                 resolve(sprite);
             });
@@ -87,12 +104,10 @@ class GraphicsUtil {
     getSprite = (name, q = 0, r = 0) => {
         return this.sprites[name].then(sprite => {
             let clone = sprite.clone();
-            //clone.center = new THREE.Vector2(.5, .12);
             clone.center = new THREE.Vector2(.5, 0);
             clone.scale.set(1,2,1);
             let realCoords = MapUtil.axialToReal(q, r);
-            //clone.position.set(realCoords.x, .055, realCoords.z);
-            clone.position.set(realCoords.x, 0, realCoords.z);
+            clone.position.set(realCoords.x, .002, realCoords.z);
             return clone;
         });
     };
@@ -137,13 +152,12 @@ class GraphicsUtil {
         });
     };
 
-
     getHexMesh = (territory) => {
         var hexMesh = new THREE.Mesh(this.hexGeometry, this.hexMaterial);
 
         // Rotate from x/y coordinates to x/z
         hexMesh.rotation.x = -Math.PI / 2;
-        hexMesh.scale.x = hexMesh.scale.y = .98;
+        hexMesh.scale.x = hexMesh.scale.y = .985;
 
         // Move the mesh to its real map position
         const realCoords = MapUtil.axialToReal(territory.q, territory.r);
@@ -153,6 +167,15 @@ class GraphicsUtil {
         hexMesh.receiveShadow = true;
 
         return hexMesh;
+    };
+
+    getSimpleShadow = (territory) => {
+        let shadowMesh = this.shadowMesh.clone();
+        let real = MapUtil.axialToReal(territory.q, territory.r);
+        shadowMesh.position.x = real.x;
+        shadowMesh.position.z = real.z;
+
+        return shadowMesh;
     };
 
     getHoverOutline = () => {
@@ -194,4 +217,4 @@ class GraphicsUtil {
     };
 };
 
-export default new GraphicsUtil();
+export default GraphicsUtil;

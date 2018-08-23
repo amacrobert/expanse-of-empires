@@ -5,10 +5,19 @@
 .match-hud {
     position: absolute;
     background-color: rgba(32, 32, 32, 0.7);
+    padding: 4px
+}
+
+.match-hud-right {
     right: 8px;
     top: 8px;
     width: 20rem;
-    padding: 4px
+}
+
+.match-hud-left {
+    left: 8px;
+    top: 8px;
+    width: 12rem;
 }
 
 .match-hud p {

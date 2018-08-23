@@ -16,14 +16,19 @@ class Empire implements JsonSerializable {
     private $active = true;
     private $result;
     private $placement;
+    private $color;
 
     public function jsonSerialize() {
         return [
-            'result'        => $this->getResult(),
-            'date_founded'  => $this->getDateFounded(),
-            'active'        => $this->isActive(),
-            'result'        => $this->getResult(),
-            'placement'     => $this->getPlacement(),
+            'username'          => $this->getUser()->getUsername(),
+            'result'            => $this->getResult(),
+            'date_founded'      => $this->getDateFounded(),
+            'active'            => $this->isActive(),
+            'result'            => $this->getResult(),
+            'placement'         => $this->getPlacement(),
+            'color'             => $this->getColor(),
+            'id'                => $this->getId(),
+            'territory_count'   => $this->territory_count ?? null,
         ];
     }
 
@@ -31,11 +36,20 @@ class Empire implements JsonSerializable {
         return $this->id;
     }
 
+    public function getColor(): ?string {
+        return $this->color;
+    }
+
+    public function setColor(?string $color): Empire {
+        $this->color = $color;
+        return $this;
+    }
+
     public function getUser(): User {
         return $this->user;
     }
 
-    public function setUser(User $user) {
+    public function setUser(User $user): Empire {
         $this->user = $user;
         return $this;
     }
@@ -44,7 +58,7 @@ class Empire implements JsonSerializable {
         return $this->match;
     }
 
-    public function setMatch(Match $match) {
+    public function setMatch(Match $match): Empire {
         $this->match = $match;
         return $this;
     }
@@ -66,21 +80,26 @@ class Empire implements JsonSerializable {
         return (bool)$this->active;
     }
 
-    public function setActive(bool $active) {
+    public function setActive(bool $active): Empire {
         $this->$active = $active;
         return $this;
     }
 
-    public function getResult($result): string {
+    public function getResult(): ?string {
         return $this->result;
     }
 
-    public function setResult(?string $result) {
+    public function setResult(?string $result): Empire {
         $this->result = $result;
         return $this;
     }
 
     public function getPlacement(): ?int {
         return $this->placement;
+    }
+
+    public function setPlacement(?int $placement) {
+        $this->placement = $placement;
+        return $this;
     }
 }

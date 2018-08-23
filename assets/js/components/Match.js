@@ -16,15 +16,24 @@ class Match extends React.Component {
         this.state = {
             focus: null,
             map: {name: 'Loading', state: null},
-            empire: null,
+            empiresById: {},
             selectedTerritory: null,
         };
     }
 
     componentDidMount() {
-        Api.getMatchMap(this.props.match.id).then(map => {
-            this.setState({map: map});
+        Api.getMatchDetails(this.props.match.id).then(match => {
+
+            let empiresById = {};
+            match.empires.forEach(empire => empiresById[empire.id] = empire);
+            this.setState({empiresById: empiresById});
+
+            this.setState({
+                map: match.map,
+                empiresById: empiresById,
+            });
         });
+
     }
 
     startSocket = (close = false) => {
@@ -56,10 +65,21 @@ class Match extends React.Component {
     };
 
     updateTerritory = (newTerritory) => {
+        let empiresById = this.state.empiresById;
         let map = this.state.map;
         const index = _.findIndex(map.state, (t) => (t.id == newTerritory.id));
+        let oldTerritory = Object.assign(map.state[index]);
         map.state[index] = newTerritory;
+
+        if (empiresById[oldTerritory.empire_id]) {
+            empiresById[oldTerritory.empire_id.territory_count]--;
+        }
+        if (empiresById[newTerritory.empire_id]) {
+            empiresById[newTerritory.empire_id.territory_count]++;
+        }
+
         this.setState({map: map});
+        this.setState({empiresById: empiresById});
 
         // Update HUD if updated territory is selected
         if (this.state.selectedTerritory && this.state.selectedTerritory.id === newTerritory.id) {
@@ -131,8 +151,10 @@ class Match extends React.Component {
                 <MatchHud
                     user={this.props.user}
                     match={this.props.match}
-                    sockApi={this.socket}
+                    socket={this.socket}
                     selectedTerritory={this.state.selectedTerritory}
+                    empires={Object.values(this.state.empiresById)}
+                    empiresById={this.state.empiresById}
                     startEmpire={this.startEmpire} />
                 <Chat
                     user={this.props.user}

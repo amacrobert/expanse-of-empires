@@ -98,4 +98,43 @@ class MatchService {
             $territory->setState($territory_state);
         }
     }
+
+    public function getDetails($match) {
+        $this->hydrateMapState($match);
+
+        $empires = $match->getEmpires();
+        $territories = $match->getMap()->getTerritories();
+        $territory_counts_by_empire_id = [];
+
+        foreach ($territories as $territory) {
+            $empire_id = $territory->empire_id;
+            if (isset($territory_counts_by_empire_id[$empire_id])) {
+                $territory_counts_by_empire_id[$empire_id]++;
+            }
+            else {
+                $territory_counts_by_empire_id[$empire_id] = 1;
+            }
+        }
+
+        foreach ($empires as $empire) {
+            $count = $territory_counts_by_empire_id[$empire->getId()] ?? 0;
+            $empire->territory_count = $count;
+        }
+
+        return [
+            'id'                => $match->getId(),
+            'name'              => $match->getName(),
+            'speed'             => $match->getSpeed(),
+            'date_registration' => $match->getDateRegistration()->format('Y-m-d H:i:s T'),
+            'date_npc'          => $match->getDateNPC()->format('Y-m-d H:i:s T'),
+            'date_p2p'          => $match->getDateP2P()->format('Y-m-d H:i:s T'),
+            'date_completed'    => $match->getDateCompleted() ? $match->getDateCompleted()->format('Y-m-d H:i:s T') : null,
+            'completed'         => $match->getDateCompleted() ? true : false,
+            'phase'             => $match->getPhase(),
+            'map_name'          => $match->getMap() ? $match->getMap()->getName() : 'Map not chosen yet',
+            'user_joined'       => (bool)$match->getUserEmpire(),
+            'empires'           => $match->getEmpires()->toArray(),
+            'map'               => $match->getMap(),
+        ];
+    }
 }
