@@ -8,6 +8,8 @@ import Home from './components/Home';
 import Match from './components/Match';
 import Api from './services/api';
 
+import MatchStore from './store/MatchStore';
+
 class App extends React.Component {
 
     constructor(props) {
@@ -59,7 +61,11 @@ class App extends React.Component {
                 key='nav'
             />,
            activeMatch ? (
-                <Match match={activeMatch} user={this.state.user} onExit={this.handleMatchSelect} />
+                <Match
+                    matchStore={MatchStore}
+                    match={activeMatch}
+                    user={this.state.user}
+                    onExit={this.handleMatchSelect} />
             ) : (
                 <div className="container-fluid" key='container'>
                     <Home user={this.state.user} onMatchSelect={this.handleMatchSelect} />

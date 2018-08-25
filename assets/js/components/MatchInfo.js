@@ -10,8 +10,6 @@ export default class MatchInfo extends React.Component {
     render() {
         const phase = MatchUtil.getPhase(this.props.match);
 
-        console.log('MatchInfo Props', this.props);
-
         const empireList = Object.values(this.props.empires).map(empire => (
             <p>{empire.username} ({empire.territory_count})</p>
         ));

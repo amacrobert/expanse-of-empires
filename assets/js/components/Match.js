@@ -6,7 +6,11 @@ import MatchUtil from '../services/match-util';
 import MapViewport from './MapViewport';
 import MatchHud from './MatchHud';
 import Chat from './Chat';
+import MatchStore from '../store/MatchStore';
+import { observer } from 'mobx-react';
 
+
+@observer
 class Match extends React.Component {
 
     constructor(props) {
@@ -21,19 +25,8 @@ class Match extends React.Component {
         };
     }
 
-    componentDidMount() {
-        Api.getMatchDetails(this.props.match.id).then(match => {
-
-            let empiresById = {};
-            match.empires.forEach(empire => empiresById[empire.id] = empire);
-            this.setState({empiresById: empiresById});
-
-            this.setState({
-                map: match.map,
-                empiresById: empiresById,
-            });
-        });
-
+    componentWillMount() {
+        MatchStore.fetchMatch(this.props.match);
     }
 
     startSocket = (close = false) => {
@@ -115,7 +108,7 @@ class Match extends React.Component {
 
     onTerritorySelect = (coordinates) => {
         if (coordinates) {
-            const territory = MatchUtil.getTerritory(this.state.map.state, coordinates.q, coordinates.r);
+            const territory = MatchUtil.getTerritory(MatchStore.map.state, coordinates.q, coordinates.r);
             this.setState({ selectedTerritory: territory });
             console.log(territory);
         }
@@ -136,25 +129,26 @@ class Match extends React.Component {
     };
 
     render() {
-        const match = this.props.match;
 
-        return this.state.map.state ? (
+        const match = MatchStore.match;
+
+        return MatchStore.map.state ? (
             <div className="match-container">
                 <MapViewport
                     user={this.props.user}
                     inFocus={this.state.focus !== 'chat'}
                     setFocus={this.setFocus}
-                    map={this.state.map}
-                    match={this.props.match}
+                    map={MatchStore.map}
+                    match={MatchStore.match}
                     selectedTerritory={this.state.selectedTerritory}
                     onTerritorySelect={this.onTerritorySelect} />
                 <MatchHud
                     user={this.props.user}
-                    match={this.props.match}
+                    match={MatchStore.match}
                     socket={this.socket}
                     selectedTerritory={this.state.selectedTerritory}
-                    empires={Object.values(this.state.empiresById)}
-                    empiresById={this.state.empiresById}
+                    empires={MatchStore.empires}
+                    empiresById={MatchStore.empiresById}
                     startEmpire={this.startEmpire} />
                 <Chat
                     user={this.props.user}
