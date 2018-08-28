@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import Cookies from 'universal-cookie';
 import 'bootstrap';
@@ -8,74 +8,57 @@ import Home from './components/Home';
 import Match from './components/Match';
 import Api from './services/api';
 
+import { Provider, observer } from 'mobx-react';
+import UserStore from './store/UserStore';
 import MatchStore from './store/MatchStore';
 
-class App extends React.Component {
+@observer
+class App extends Component {
 
     constructor(props) {
         super(props);
 
-        this.state = {
-            user: {loaded: false},
-            activeMatch: null,
-        };
+        this.userStore = new UserStore;
+        this.matchStore = new MatchStore(this.userStore);
     };
 
-    handleMatchSelect = (match) => {
-        this.setState({activeMatch: match});
-    }
-
-    handleLogin = (result) => {
-        console.log('appjs login:', result);
+    login = (result) => {
         const cookies = new Cookies();
         cookies.set('AUTH-TOKEN', result.api_key, {path: '/'});
         cookies.set('PHPSESSID', result.session, {path: '/'});
         window.location.href = '/';
-    }
+    };
 
-    handleLogout = () => {
+    logout = () => {
         let cookies = new Cookies();
         cookies.remove('AUTH-TOKEN');
         window.location.href = '/logout';
-    }
+    };
 
-    componentDidMount() {
-        let user = this.state.user;
-
-        Api.getUser().then(user => {
-            user.loaded = true;
-            user.loggedIn = user.id ? true : false;
-            this.setState({user: user});
-        });
+    componentWillMount() {
+        this.userStore.fetchUser();
     }
 
     render() {
-        const activeMatch = this.state.activeMatch;
-        return ([
-            <Nav
-                activeMatch={activeMatch}
-                user={this.state.user}
-                onExit={this.handleMatchSelect}
-                onLogin={this.handleLogin}
-                onLogout={this.handleLogout}
-                key='nav'
-            />,
-           activeMatch ? (
-                <Match
-                    matchStore={MatchStore}
-                    match={activeMatch}
-                    user={this.state.user}
-                    onExit={this.handleMatchSelect} />
-            ) : (
-                <div className="container-fluid" key='container'>
-                    <Home user={this.state.user} onMatchSelect={this.handleMatchSelect} />
+        return (
+        <Provider
+            userStore={this.userStore}
+            matchStore={this.matchStore}>
+                <div>
+                    <Nav
+                        onLogin={this.login}
+                        onLogout={this.logout}
+                        onExit={this.matchStore.clearMatch}
+                        key='nav' />
+                   {this.matchStore.match ? (
+                        <Match />
+                    ) : (
+                        <Home onMatchSelect={(match) => this.matchStore.setMatch(match)} />
+                    )}
                 </div>
-            )
-        ]);
+            </Provider>
+        );
     };
 }
 
-ReactDOM.render(
-    <App />,
-    document.getElementById('root')
-);
+ReactDOM.render(<App />, document.getElementById('root'));

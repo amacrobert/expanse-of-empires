@@ -117,8 +117,6 @@ class GraphicsUtil {
             this.mtlLoader.load(materialFile, materials => {
                 materials.preload();
 
-                console.log('materials:', materials);
-
                 if (materials.materials.SM_FortSG1) {
                     materials.materials.SM_FortSG1.color.r = .1;
                     materials.materials.SM_FortSG1.color.g = .1;
@@ -136,8 +134,8 @@ class GraphicsUtil {
                     object.position.set(position.x, position.y, position.z);
                     object.castShadow = true;
                     resolve(object);
-                }, (error) => console.log(error));
-            }, (error) => console.log(error));
+                });
+            });
         })
     };
 

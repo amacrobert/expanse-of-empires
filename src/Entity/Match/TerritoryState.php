@@ -7,9 +7,8 @@ use Doctrine\Common\Collections\Collection;
 use DateTime;
 use App\Entity\Map\Territory;
 use App\Entity\Match\{Building, Empire};
-use JsonSerializable;
 
-class TerritoryState implements JsonSerializable {
+class TerritoryState {
 
     private $id;
     private $match;
@@ -18,10 +17,6 @@ class TerritoryState implements JsonSerializable {
     private $building;
     private $fortification = 0;
     private $units;
-
-    public function jsonSerialize() {
-        return [];
-    }
 
     public function getId(): ?int {
         return $this->id;

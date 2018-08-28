@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import Modal from './Modal/Modal';
 import Api from '../services/api';
 
-class Login extends React.Component {
+class Login extends Component {
 
     constructor(props) {
         super(props);

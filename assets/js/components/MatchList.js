@@ -2,67 +2,60 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import MatchListSection from './MatchListSection';
 import Api from '../services/api';
+import { observer, inject } from 'mobx-react';
+import { computed } from 'mobx';
 
+@inject('matchStore')
+@observer
 class MatchList extends React.Component {
 
-    constructor(props) {
-        super(props);
-
-        this.loaded = false;
-        this.state = {
-            matches: []
+    @computed get matches() {
+        const matches = {
+            'joined': [],
+            'pre-registration': [],
+            'registration': [],
+            'non-player-combat': [],
+            'expanse-of-empires': [],
+            'complete': [],
         };
-    }
 
-    componentDidMount() {
-        Api.getMatches().then(result => {
-            console.log('Matches:', result);
-            this.setState({matches: result});
+        this.props.matchStore.matchList.forEach((match) => {
+            if (match.user_joined) {
+                matches['joined'].push(match);
+            }
+            else {
+                matches[match.phase].push(match);
+            }
         });
-    }
+
+        return matches;
+    };
 
     render() {
-        if (this.state.matches.length) {
-            const matches = {
-                'joined': [],
-                'pre-registration': [],
-                'registration': [],
-                'non-player-combat': [],
-                'expanse-of-empires': [],
-                'complete': [],
-            };
-
-            this.state.matches.forEach((match) => {
-                if (match.user_joined) {
-                    matches['joined'].push(match);
-                }
-                else {
-                    matches[match.phase].push(match);
-                }
-            });
+        if (this.props.matchStore.matchList.length) {
 
             return (
                 <div className="col-md-12">
                     <h4>MATCHES</h4>
                     <MatchListSection
                         title="Your matches"
-                        matches={matches['joined']}
+                        matches={this.matches['joined']}
                         onMatchSelect={this.props.onMatchSelect} />
                     <MatchListSection
                         title="Registration open"
-                        matches={matches['registration']}
+                        matches={this.matches['registration']}
                         onMatchSelect={this.props.onMatchSelect} />
                     <MatchListSection
                         title="Opening soon"
-                        matches={matches['pre-registration']}
+                        matches={this.matches['pre-registration']}
                         onMatchSelect={this.props.onMatchSelect} />
                     <MatchListSection
                         title="Play started"
-                        matches={matches['expanse-of-empires'].concat(matches['non-player-combat'])}
+                        matches={this.matches['expanse-of-empires'].concat(this.matches['non-player-combat'])}
                         onMatchSelect={this.props.onMatchSelect} />
                     <MatchListSection
                         title="Previous matches"
-                        matches={matches['complete']}
+                        matches={this.matches['complete']}
                         onMatchSelect={this.props.onMatchSelect} />
                 </div>
             );

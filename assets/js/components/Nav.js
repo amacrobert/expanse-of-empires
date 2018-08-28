@@ -1,16 +1,15 @@
 import React from 'react';
 import UserMenu from './UserMenu';
 import RegisterLoginButtons from './RegisterLoginButtons';
+import { observer, inject } from 'mobx-react';
 
+@inject('userStore', 'matchStore')
+@observer
 class Nav extends React.Component {
 
-    handleExit = () => {
-        this.props.onExit();
-    }
-
     render() {
-        const match = this.props.activeMatch;
-        const user = this.props.user;
+        const user = this.props.userStore.user;
+        const match = this.props.matchStore.match;
 
         return(
 
@@ -24,13 +23,13 @@ class Nav extends React.Component {
                 </button>
                 <div className="collapse navbar-collapse" id="navbarNav">
                     <div className="navbar-nav">
-                        {match && <a className="nav-item nav-link clickable" onClick={this.handleExit}>Exit</a>}
+                        {match && <a className="nav-item nav-link clickable" onClick={this.props.onExit}>Exit</a>}
                     </div>
                 </div>
 
                 {user.loaded && user.loggedIn &&
                     <UserMenu
-                        user={user}
+                        store={this.props.store}
                         onLogout={this.props.onLogout}
                     />
                 }

@@ -21,6 +21,7 @@ class Empire implements JsonSerializable {
     public function jsonSerialize() {
         return [
             'username'          => $this->getUser()->getUsername(),
+            'user_id'           => $this->getUser()->getId(),
             'result'            => $this->getResult(),
             'date_founded'      => $this->getDateFounded(),
             'active'            => $this->isActive(),

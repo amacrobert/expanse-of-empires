@@ -1,6 +1,9 @@
 import React from 'react';
 import MatchList from './MatchList';
+import { observer, inject } from 'mobx-react';
 
+@inject('userStore')
+@observer
 class UserMenu extends React.Component {
 
     constructor(props) {
@@ -12,9 +15,9 @@ class UserMenu extends React.Component {
     }
 
     render() {
-        const user = this.props.user;
+        const user = this.props.userStore.user;
 
-        return(
+        return (
             <div className="nav-item dropdown">
                 <a className="nav-link dropdown-toggle clickable" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     {user.username}

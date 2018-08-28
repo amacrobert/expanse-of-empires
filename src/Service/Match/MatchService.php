@@ -4,7 +4,7 @@ namespace App\Service\Match;
 
 use App\Controller\SocketController;
 use Doctrine\ORM\EntityManagerInterface;
-use Exception;
+use App\Exception\VisibleException;
 use App\Entity\User\User;
 use App\Entity\Match\{Match, Empire, TerritoryState, Building};
 use App\Entity\Map\Territory;
@@ -30,23 +30,23 @@ class MatchService {
 
         // Check that registration is open
         if ($match->getPhase() !== 'registration') {
-            throw new Exception('Registration is not open for this match');
+            throw new VisibleException('Registration is not open for this match.');
         }
 
         // Check the user doesn't already have an empire in this match
         if ($empire) {
-            throw new Exception('You already have an empire in this match');
+            throw new VisibleException('You already have an empire in this match.');
         }
 
         // Check that the territory is unoccupied
         $this->hydrateMapState($match);
-        if ($territory->empire_id) {
-            throw new Exception('That territory has already been claimed | ' . $territory->empire_id);
+        if ($territory->getState() && $territory->getState()->getEmpire()) {
+            throw new VisibleException('That territory has already been claimed.');
         }
 
         // Check that the territory is a valid starting position
         if (!$territory->isStartingPosition()) {
-            throw new Exception('That territory is not a valid starting position');
+            throw new VisibleException('That territory is not a valid starting position.');
         }
 
         $state = $this->em->getRepository(TerritoryState::class)->findOneBy([
@@ -87,6 +87,13 @@ class MatchService {
             'territory' => $territory,
         ]);
 
+        // Tell match service new empire exists
+        $empire->territory_count = 1;
+        $this->socket_controller->broadcastToMatch($match->getId(), [
+            'action' => 'new-empire',
+            'empire' => $empire,
+        ]);
+
         $this->em->clear();
     }
 
@@ -107,12 +114,14 @@ class MatchService {
         $territory_counts_by_empire_id = [];
 
         foreach ($territories as $territory) {
-            $empire_id = $territory->empire_id;
-            if (isset($territory_counts_by_empire_id[$empire_id])) {
-                $territory_counts_by_empire_id[$empire_id]++;
-            }
-            else {
-                $territory_counts_by_empire_id[$empire_id] = 1;
+            $empire = $territory->getState() ? $territory->getState()->getEmpire() : null;
+            if ($empire && $empire_id = $empire->getId()) {
+                if (isset($territory_counts_by_empire_id[$empire_id])) {
+                    $territory_counts_by_empire_id[$empire_id]++;
+                }
+                else {
+                    $territory_counts_by_empire_id[$empire_id] = 1;
+                }
             }
         }
 

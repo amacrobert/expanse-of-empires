@@ -11,9 +11,9 @@ class Chat extends React.Component {
         this.state = {
             lines: [],
             open: false,
+            chatInput: '',
         };
 
-        this.chatInput = React.createRef();
         this.chatEnd = React.createRef();
     }
 
@@ -55,16 +55,14 @@ class Chat extends React.Component {
     handleChatSubmit = (e) => {
         e.preventDefault();
 
-        const chatInput = this.chatInput.current.value;
-
-        if (chatInput.length) {
+        if (this.state.chatInput.length) {
             this.props.onChatSubmit({
                 'action': 'chat-send',
-                'message': chatInput
+                'message': this.state.chatInput,
             });
         }
 
-        this.chatInput.current.value = '';
+        this.state.chatInput = '';
     };
 
     toggleOpen = () => {
@@ -85,7 +83,8 @@ class Chat extends React.Component {
             <form onSubmit={this.handleChatSubmit}>
                 <input
                     type="text"
-                    ref={this.chatInput}
+                    value={this.state.chatInput}
+                    onChange={e => this.setState({chatInput: e.target.value})}
                     className="chat-input"
                     placeholder="Public chat"
                     onFocus={() => this.props.setFocus('chat')}

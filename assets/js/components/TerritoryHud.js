@@ -1,14 +1,13 @@
 import React from 'react';
 import MatchUtil from '../services/match-util';
+import { observer, inject } from 'mobx-react';
 
-export default class MatchHud extends React.Component {
-
-    constructor(props) {
-        super(props);
-    }
+@inject('matchStore', 'userStore')
+@observer
+export default class TerritoryHud extends React.Component {
 
     render() {
-        const t = this.props.territory;
+        const t = this.props.matchStore.selectedTerritory;
 
         if (!t) {
             return null;
@@ -22,10 +21,10 @@ export default class MatchHud extends React.Component {
             <div className="coordinates">({t.q}, {t.r})</div>
         );
 
-        if (t.starting_position && MatchUtil.showStartPosition(this.props.match, t)) {
+        if (t.starting_position && MatchUtil.showStartPosition(this.props.matchStore.match, t)) {
 
-            if (this.props.user.loggedIn) {
-                startPrompt = this.props.match.user_joined ? (
+            if (this.props.userStore.user.loggedIn) {
+                startPrompt = this.props.matchStore.userEmpire ? (
                     <p>You have already claimed another starting position in this match.</p>
                 ) : (
                     <button
@@ -43,9 +42,9 @@ export default class MatchHud extends React.Component {
 
         }
 
-        if (t.empire_id) {
-            let empire = this.props.empiresById[t.empire_id];
-            ownerInfo = empire.username + ' controls this territory';
+        if (t.empire) {
+            let userControls = t.empire == this.props.matchStore.userEmpire;
+            ownerInfo = userControls ? 'You control this territory' : t.empire.username + ' controls this territory';
         }
         else {
             ownerInfo = 'This territory has not been captured by any empire yet.';

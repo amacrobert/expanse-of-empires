@@ -1,17 +1,15 @@
 import React from 'react';
 import MatchUtil from '../services/match-util';
+import { observer, inject } from 'mobx-react';
 
+@inject('matchStore')
+@observer
 export default class MatchInfo extends React.Component {
 
-    constructor(props) {
-        super(props);
-    }
-
     render() {
-        const phase = MatchUtil.getPhase(this.props.match);
-
-        const empireList = Object.values(this.props.empires).map(empire => (
-            <p>{empire.username} ({empire.territory_count})</p>
+        const phase = MatchUtil.getPhase(this.props.matchStore.match);
+        const empireList = Object.values(this.props.matchStore.empires).map(empire => (
+            <p key={empire.id}>{empire.username} ({empire.territory_count})</p>
         ));
 
         return (

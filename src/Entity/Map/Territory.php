@@ -18,13 +18,11 @@ class Territory implements JsonSerializable {
     protected $initial_building;
     protected $initial_fortification = 0;
 
-    // unmapped -- derived from TerritoryState
-    public $empire_id;
-    public $building;
-    public $fortification;
-    public $units;
+    // unmapped -- hydrated by MatchService#hydrateMapState()
+    private $state;
 
     public function jsonSerialize() {
+        $state = $this->state;
         return [
             'id'                => $this->getId(),
             'q'                 => $this->getAxialQ(),
@@ -32,10 +30,10 @@ class Territory implements JsonSerializable {
             'coordinates'       => $this->getCoordinates(),
             'terrain'           => $this->getTerrain(),
             'starting_position' => $this->isStartingPosition(),
-            'empire_id'         => $this->empire_id ?: null,
-            'building'          => $this->building ?: null,
-            'fortification'     => $this->fortification ?: 0,
-            'units'             => $this->units ?: [],
+            'empire_id'         => $state && $state->getEmpire() ? $state->getEmpire()->getId() : null,
+            'building'          => $state ? $state->getBuilding() : null,
+            'fortification'     => $state ? $state->getFortification() : 0,
+            'units'             => $state ? $state->getUnits() : [],
         ];
     }
 
@@ -43,19 +41,12 @@ class Territory implements JsonSerializable {
         return $this->id;
     }
 
+    public function getState(): ?TerritoryState {
+        return $this->state;
+    }
+
     public function setState(?TerritoryState $state): Territory {
-        if (!$state) {
-            $this->empire_id = $this->building = null;
-            $this->fortification = 0;
-            $this->units = [];
-        }
-
-        $empire = $state->getEmpire();
-        $this->empire_id = $empire ? $empire->getId() : null;
-        $this->building = $state->getBuilding();
-        $this->fortification = $state->getFortification();
-        $this->units = $state->getUnits();
-
+        $this->state = $state;
         return $this;
     }
 

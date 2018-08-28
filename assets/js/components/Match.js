@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Component } from 'react';
 import _ from 'underscore';
 import update from 'immutability-helper';
 import Api from '../services/api';
@@ -6,12 +6,13 @@ import MatchUtil from '../services/match-util';
 import MapViewport from './MapViewport';
 import MatchHud from './MatchHud';
 import Chat from './Chat';
-import MatchStore from '../store/MatchStore';
-import { observer } from 'mobx-react';
+import ErrorModal from './ErrorModal';
+import { toJS } from 'mobx';
+import { observer, inject } from 'mobx-react';
 
-
+@inject('matchStore', 'userStore')
 @observer
-class Match extends React.Component {
+class Match extends Component {
 
     constructor(props) {
         super(props);
@@ -19,14 +20,8 @@ class Match extends React.Component {
 
         this.state = {
             focus: null,
-            map: {name: 'Loading', state: null},
-            empiresById: {},
             selectedTerritory: null,
         };
-    }
-
-    componentWillMount() {
-        MatchStore.fetchMatch(this.props.match);
     }
 
     startSocket = (close = false) => {
@@ -42,8 +37,15 @@ class Match extends React.Component {
 
             switch (message.action) {
                 case 'territory-update':
-                    console.log('territory update:', message.territory);
                     this.updateTerritory(message.territory);
+                    break;
+
+                case 'new-empire':
+                    this.props.matchStore.newEmpire(message.empire);
+                    break;
+
+                case 'error':
+                    this.props.matchStore.error = message.message;
                     break;
             }
         });
@@ -58,8 +60,8 @@ class Match extends React.Component {
     };
 
     updateTerritory = (newTerritory) => {
-        let empiresById = this.state.empiresById;
-        let map = this.state.map;
+        let empiresById = this.props.matchStore.empiresById;
+        let map = this.props.matchStore.map;
         const index = _.findIndex(map.state, (t) => (t.id == newTerritory.id));
         let oldTerritory = Object.assign(map.state[index]);
         map.state[index] = newTerritory;
@@ -70,9 +72,6 @@ class Match extends React.Component {
         if (empiresById[newTerritory.empire_id]) {
             empiresById[newTerritory.empire_id.territory_count]++;
         }
-
-        this.setState({map: map});
-        this.setState({empiresById: empiresById});
 
         // Update HUD if updated territory is selected
         if (this.state.selectedTerritory && this.state.selectedTerritory.id === newTerritory.id) {
@@ -90,8 +89,8 @@ class Match extends React.Component {
             }, 1000);
         }
         else {
-            message.token = this.props.user.token;
-            message.match_id = this.props.match.id;
+            message.token = this.props.userStore.user.token;
+            message.match_id = this.props.matchStore.match.id;
 
             this.socket.send(JSON.stringify(message));
         }
@@ -102,18 +101,14 @@ class Match extends React.Component {
         this.socket.close();
     }
 
-    handleExit = () => {
-        this.props.onExit();
-    };
-
     onTerritorySelect = (coordinates) => {
         if (coordinates) {
-            const territory = MatchUtil.getTerritory(MatchStore.map.state, coordinates.q, coordinates.r);
-            this.setState({ selectedTerritory: territory });
-            console.log(territory);
+            const territory = MatchUtil.getTerritory(this.props.matchStore.map.state, coordinates.q, coordinates.r);
+            this.props.matchStore.setSelectedTerritory(territory);
+            console.log(toJS(territory));
         }
         else {
-            this.setState({ selectedTerritory: null });
+            this.props.matchStore.setSelectedTerritory(null);
         }
     };
 
@@ -124,42 +119,32 @@ class Match extends React.Component {
     startEmpire = () => {
         this.socketSend({
             action: 'empire-start',
-            territory_id: this.state.selectedTerritory.id,
+            territory_id: this.props.matchStore.selectedTerritory.id,
         });
     };
 
     render() {
 
-        const match = MatchStore.match;
-
-        return MatchStore.map.state ? (
+        return this.props.matchStore.map.state ? (
             <div className="match-container">
                 <MapViewport
-                    user={this.props.user}
                     inFocus={this.state.focus !== 'chat'}
                     setFocus={this.setFocus}
-                    map={MatchStore.map}
-                    match={MatchStore.match}
-                    selectedTerritory={this.state.selectedTerritory}
                     onTerritorySelect={this.onTerritorySelect} />
                 <MatchHud
-                    user={this.props.user}
-                    match={MatchStore.match}
                     socket={this.socket}
-                    selectedTerritory={this.state.selectedTerritory}
-                    empires={MatchStore.empires}
-                    empiresById={MatchStore.empiresById}
                     startEmpire={this.startEmpire} />
                 <Chat
-                    user={this.props.user}
-                    match={this.props.match}
+                    user={this.props.userStore.user}
+                    match={this.props.matchStore.match}
                     onChatSubmit={this.socketSend}
                     socket={this.socket}
                     setFocus={this.setFocus} />
+                <ErrorModal />
             </div>
          ) : (
             <div className="row">
-                <div className="col-md-12">
+                <div className="col-md-12 text-center mt-5">
                     Loading...
                 </div>
             </div>

@@ -8,6 +8,7 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\EventDispatcher\GenericEvent;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\User\User;
+use App\Exception\VisibleException;
 use Exception;
 
 class SocketController implements MessageComponentInterface {
@@ -26,8 +27,8 @@ class SocketController implements MessageComponentInterface {
 
     public function broadcastToMatch($match_id, $message, $exclude_user_ids = []) {
 
-        print 'Sending: ' . json_encode($message) . PHP_EOL;
         $message = json_encode($message);
+        print 'Sending: ' . $message . PHP_EOL;
 
         foreach ($this->connections_by_match[$match_id] as $user_connections) {
             foreach ($user_connections as $user_id => $connection) {
@@ -38,8 +39,10 @@ class SocketController implements MessageComponentInterface {
         }
     }
 
-    public function broadcastToUser($match_id, $user_id, $message) {
-        //
+    public function broadcastToConnection($connection, $message) {
+        $message = json_encode($message);
+        print 'Sending: ' . $message . PHP_EOL;
+        $connection->send($message);
     }
 
     public function onOpen(ConnectionInterface $connection) {
@@ -95,10 +98,14 @@ class SocketController implements MessageComponentInterface {
             try {
                 $this->dispatcher->dispatch($event_name, $event);
             }
-            catch (Exception $e) {
-                // TODO: Broadcast error to user
-                print $e->getMessage() . PHP_EOL;
-                //print $e->getTraceAsString();
+            catch (VisibleException $e) {
+                $this->broadcastToConnection($from_connection, [
+                    'action' => 'error',
+                    'message' => $e->getMessage(),
+                ]);
+            }
+            catch(Exception $e) {
+                print (string)$e;
             }
         }
     }

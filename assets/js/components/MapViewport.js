@@ -2,13 +2,17 @@ import React from 'react';
 import MapUtil from '../services/map-util';
 import GraphicsUtil from '../services/graphics-util';
 import MatchUtil from '../services/match-util';
+import { reaction } from 'mobx';
 const THREE = require('three');
+const assets = new GraphicsUtil();
 
 require('../three/controls/OrbitControls.js');
 const Stats = require('../extra/stats.min.js');
 
-const assets = new GraphicsUtil();
+import { observer, inject } from 'mobx-react';
 
+@inject('matchStore')
+@observer
 class MapViewport extends React.Component {
 
     constructor(props) {
@@ -28,7 +32,7 @@ class MapViewport extends React.Component {
     }
 
     componentDidMount() {
-        const phase = MatchUtil.getPhase(this.props.match);
+        const phase = MatchUtil.getPhase(this.props.matchStore.match);
 
         this.renderer = new THREE.WebGLRenderer({
             antialias: true,
@@ -80,7 +84,7 @@ class MapViewport extends React.Component {
         this.scene.background = skyColor;
 
         // hex grid
-        this.props.map.state.forEach(territory => {
+        this.props.matchStore.map.state.forEach(territory => {
             let q = territory.q;
             let r = territory.r;
             let hexMesh = assets.getHexMesh(territory);
@@ -190,6 +194,7 @@ class MapViewport extends React.Component {
     start = () => {
         if (!this.frameId) {
             this.frameId = requestAnimationFrame(this.animate);
+            this.updateScene();
         }
     };
 
@@ -201,7 +206,7 @@ class MapViewport extends React.Component {
 
         this.stats.begin();
 
-        this.updateScene();
+        //this.updateScene();
         this.controls.enabled = this.props.inFocus;
         this.controls.update();
         this.renderScene()
@@ -216,7 +221,7 @@ class MapViewport extends React.Component {
 
     updateScene = () => {
         // iterate territories and determine if any graphics elements need to be updated
-        this.props.map.state.forEach(territory => {
+        this.props.matchStore.map.state.forEach(territory => {
             const q = territory.q;
             const r = territory.r;
             const hex = this.getHex(q, r);
@@ -232,7 +237,7 @@ class MapViewport extends React.Component {
                 }
 
                 // Delete starting position sprite
-                if (!MatchUtil.showStartPosition(this.props.match, territory)
+                if (!MatchUtil.showStartPosition(this.props.matchStore.match, territory)
                     && hex.userData.graphics.startingPositionSprite
                 ) {
                     console.log('REMOVING STARTING POSITION SPRITE');
@@ -243,7 +248,7 @@ class MapViewport extends React.Component {
                     hex.userData.graphics.simpleShadow = null;
                 }
                 // Add starting position sprite
-                else if (MatchUtil.showStartPosition(this.props.match, territory)
+                else if (MatchUtil.showStartPosition(this.props.matchStore.match, territory)
                     && !hex.userData.graphics.startingPositionSprite
                 ) {
                     console.log('ADDING STARTING POSITION SPRITE');
@@ -274,7 +279,7 @@ class MapViewport extends React.Component {
 
                         if (borderingHex) {
                             borderingTerritory = MatchUtil.getTerritory(
-                                this.props.map.state,
+                                this.props.matchStore.map.state,
                                 borderingHex.userData.coordinates.q,
                                 borderingHex.userData.coordinates.r
                             );
@@ -351,6 +356,12 @@ class MapViewport extends React.Component {
             }
         });
     };
+
+    // Update the scene when the map state changes
+    reactToSceneUpdate = reaction(
+        () => this.props.matchStore.map.state.slice(),
+        this.updateScene
+    );
 
     render() {
         return(
