@@ -4,6 +4,7 @@ import update from 'immutability-helper';
 import Api from '../services/api';
 import MatchUtil from '../services/match-util';
 import MapViewport from './MapViewport';
+import TerritoryHud from './TerritoryHud';
 import MatchHud from './MatchHud';
 import Chat from './Chat';
 import ErrorModal from './ErrorModal';
@@ -131,8 +132,8 @@ class Match extends Component {
                     inFocus={this.state.focus !== 'chat'}
                     setFocus={this.setFocus}
                     onTerritorySelect={this.onTerritorySelect} />
-                <MatchHud
-                    socket={this.socket}
+                <MatchHud />
+                <TerritoryHud
                     startEmpire={this.startEmpire} />
                 <Chat
                     user={this.props.userStore.user}

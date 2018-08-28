@@ -1,25 +1,26 @@
 import React from 'react';
-import TerritoryHud from './TerritoryHud';
-import MatchInfo from './MatchInfo';
+import MatchUtil from '../services/match-util';
 import { observer, inject } from 'mobx-react';
 
 @inject('matchStore')
 @observer
-export default class MatchHud extends React.Component {
-
-    constructor(props) {
-        super(props);
-    }
+class MatchHud extends React.Component {
 
     render() {
-        return [(
-            <TerritoryHud
-                socket={this.props.socket}
-                startEmpire={this.props.startEmpire}
-                key="mh1" />
-        ), (
-            <MatchInfo
-                key="mh2" />
-        )];
+        const phase = MatchUtil.getPhase(this.props.matchStore.match);
+        const empireList = Object.values(this.props.matchStore.empires).map(empire => (
+            <p key={empire.id}>{empire.username} ({empire.territory_count})</p>
+        ));
+
+        return (
+            <div className="match-hud match-hud-left">
+                <p>Phase: {phase}</p>
+                <p>{MatchUtil.getPhaseDescriptor(phase)}</p>
+                <hr />
+                {empireList}
+            </div>
+        );
     }
 }
+
+export default MatchHud;
