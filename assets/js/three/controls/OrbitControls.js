@@ -89,7 +89,8 @@ THREE.OrbitControls = function ( object, domElement ) {
         Q: 81,
         E: 69,
         PLUS: 187,
-        MINUS: 189
+        MINUS: 189,
+        ESC: 27,
     };
 
     // Mouse buttons

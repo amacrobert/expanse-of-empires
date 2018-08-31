@@ -65,7 +65,6 @@ class GraphicsUtil {
         };
 
         // Hex hover selection
-        let hoverLineMaterial = new THREE.LineBasicMaterial({ color: 0xffffff });
         let hoverLineGeometry = new THREE.Geometry();
         hoverLineGeometry.vertices.push(
             new THREE.Vector3(points.top.x, 0, points.top.z),
@@ -76,7 +75,16 @@ class GraphicsUtil {
             new THREE.Vector3(points.topRight.x, 0, points.topRight.z),
             new THREE.Vector3(points.top.x, 0, points.top.z),
         );
-        this.hoverOutline = new THREE.Line(hoverLineGeometry, hoverLineMaterial);
+        this.hoverOutline = new THREE.Line(
+            hoverLineGeometry,
+            new THREE.LineDashedMaterial({
+                color: 0xffffff,
+                scale: 1.0,
+                dashSize: 0.15,
+                gapSize: 0.05,
+            })
+        );
+        this.hoverOutline.computeLineDistances();
         this.hoverOutline.position.y = 0.02;
 
         // Border section mesh assets

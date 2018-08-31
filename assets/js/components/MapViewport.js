@@ -50,19 +50,29 @@ class MapViewport extends React.Component {
         this.controls.target.set(0, 0, 0);
         this.scene.add(this.camera);
 
+        // Deselect territory
+        // @TODO: move to controls
+        // @TODO: Make changes to selectionGlow as a mobx reaction to matchStore.selectedTerritory
+        window.addEventListener('keydown', e => {
+            if (e.keyCode == 27) {
+                this.props.matchStore.setSelectedTerritory(null);
+                this.selectionGlow.visible = false;
+            }
+        });
+
         // selection glow
         this.selectionGlow = new THREE.Mesh(
             new THREE.SphereGeometry(.98, 6, 10),
             new THREE.MeshBasicMaterial({
                 color: 0xFFFFFF,
                 transparent: true,
-                opacity: 0.4,
+                opacity: 0.3,
                 depthWrite: false,
             })
         );
         this.selectionGlow.castShadow = false;
         this.selectionGlow.rotation.y = Math.PI / 6;
-        this.selectionGlow.scale.y = 2;
+        this.selectionGlow.scale.y = 1;
         this.selectionGlow.visible = false;
         this.scene.add(this.selectionGlow);
 
@@ -359,8 +369,14 @@ class MapViewport extends React.Component {
 
     // Update the scene when the map state changes
     reactToSceneUpdate = reaction(
-        () => this.props.matchStore.map.state.slice(),
-        this.updateScene
+        () => {
+            return this.props.matchStore.map.state && this.props.matchStore.map.state.slice()
+        },
+        () => {
+            if (this.props.matchStore.map.state) {
+                this.updateScene();
+            }
+        }
     );
 
     render() {
