@@ -15,6 +15,7 @@ class MatchStore {
     @observable map = {state: null};
     @observable error;
     @observable selectedTerritoryId;
+    @observable loaded = false;
 
     @computed get empiresById() {
         let indexedEmpires = {};
@@ -30,20 +31,28 @@ class MatchStore {
         Api.getMatches().then(matches => this.matchList = matches);
     };
 
-    @action setMatch = (match) => {
-        this.match = match;
-        Api.getMatchDetails(match.id).then(matchFull => {
-            this.empires = matchFull.empires;
-            this.map = matchFull.map;
+    @action setMatch = (matchId) => {
+        return new Promise((resolve, reject) => {
+            Api.getMatchDetails(matchId).then(matchFull => {
+                this.empires = matchFull.empires;
+                this.map = matchFull.map;
 
-            // reference each territory to its empire
-            this.map.state.forEach(territory => {
-                territory.empire = territory.empire_id ? this.empiresById[territory.empire_id] : null;
-            });
-        })
+                // reference each territory to its empire
+                this.map.state.forEach(territory => {
+                    territory.empire = territory.empire_id ? this.empiresById[territory.empire_id] : null;
+                });
+
+                delete(matchFull.empires);
+                delete(matchFull.map);
+                this.match = matchFull;
+                this.loaded = true;
+                resolve();
+            })
+        });
     };
 
     @action clearMatch = () => {
+        this.loaded = false;
         this.match = null;
         this.empires.clear();
         this.map = {state: null};

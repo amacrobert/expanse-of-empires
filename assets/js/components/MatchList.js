@@ -33,30 +33,24 @@ class MatchList extends React.Component {
 
     render() {
         if (this.props.matchStore.matchList.length) {
-
             return (
                 <div className="col-md-12">
                     <h4>MATCHES</h4>
                     <MatchListSection
                         title="Your matches"
-                        matches={this.matches['joined']}
-                        onMatchSelect={this.props.onMatchSelect} />
+                        matches={this.matches['joined']} />
                     <MatchListSection
                         title="Registration open"
-                        matches={this.matches['registration']}
-                        onMatchSelect={this.props.onMatchSelect} />
+                        matches={this.matches['registration']} />
                     <MatchListSection
                         title="Opening soon"
-                        matches={this.matches['pre-registration']}
-                        onMatchSelect={this.props.onMatchSelect} />
+                        matches={this.matches['pre-registration']} />
                     <MatchListSection
                         title="Play started"
-                        matches={this.matches['expanse-of-empires'].concat(this.matches['non-player-combat'])}
-                        onMatchSelect={this.props.onMatchSelect} />
+                        matches={this.matches['expanse-of-empires'].concat(this.matches['non-player-combat'])} />
                     <MatchListSection
                         title="Previous matches"
-                        matches={this.matches['complete']}
-                        onMatchSelect={this.props.onMatchSelect} />
+                        matches={this.matches['complete']} />
                 </div>
             );
         }

@@ -6,6 +6,16 @@ import { observer, inject } from 'mobx-react';
 @observer
 export default class TerritoryHud extends React.Component {
 
+    constructor(props) {
+        super(props);
+        this.state = { pendingStartEmpireRequest: false };
+    }
+
+    startEmpire = () => {
+        this.setState({pendingStartEmpireRequest: true});
+        this.props.startEmpire();
+    };
+
     render() {
         const t = this.props.matchStore.selectedTerritory;
 
@@ -29,8 +39,9 @@ export default class TerritoryHud extends React.Component {
                 ) : (
                     <button
                         type="button"
+                        disabled={this.state.pendingStartEmpireRequest}
                         className="btn btn-primary btn-lg btn-block"
-                        onClick={this.props.startEmpire} >
+                        onClick={this.startEmpire} >
                             Start Empire Here
                     </button>
                 );

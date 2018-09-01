@@ -17,12 +17,19 @@ class Match extends Component {
 
     constructor(props) {
         super(props);
-        this.startSocket();
 
         this.state = {
             focus: null,
             selectedTerritory: null,
         };
+    }
+
+    componentDidMount() {
+        let matchId = this.props.match.params.matchId;
+        this.props.matchStore.setMatch(matchId).then(() => {
+            console.log(this.props.matchStore);
+            this.startSocket();
+        });
     }
 
     startSocket = (close = false) => {
@@ -56,7 +63,7 @@ class Match extends Component {
         };
 
         this.socket.onerror = (error) => {
-            this.startSocket(true);
+            this.attemptReconnect();
         };
     };
 
@@ -82,24 +89,30 @@ class Match extends Component {
 
     socketSend = (message) => {
         if (this.socket.readyState !== WebSocket.OPEN) {
-            console.log('Attempting to reconnect to socket server...');
-            this.startSocket(true);
-
-            window.setTimeout(() => {
-                this.socketSend(message)
-            }, 1000);
+            this.attemptReconnect(message);
         }
         else {
             message.token = this.props.userStore.user.token;
             message.match_id = this.props.matchStore.match.id;
 
+            console.log('sending:', message);
             this.socket.send(JSON.stringify(message));
         }
+    };
 
-    }
+    attemptReconnect = (message) => {
+        console.log('Attempting to reconnect to socket server...');
+        window.setTimeout(() => {
+            this.startSocket(true);
+            if (message) {
+                this.socketSend(message)
+            }
+        }, 1000);
+    };
 
     componentWillUnmount() {
         this.socket.close();
+        this.props.matchStore.clearMatch();
     }
 
     onTerritorySelect = (coordinates) => {
@@ -126,7 +139,17 @@ class Match extends Component {
 
     render() {
 
-        return this.props.matchStore.map.state ? (
+        if (!this.props.matchStore.loaded) {
+            return (
+                <div className="row">
+                    <div className="col-md-12 text-center mt-5">
+                        Loading...
+                    </div>
+                </div>
+            );
+        }
+
+        return (
             <div className="match-container">
                 <MapViewport
                     inFocus={this.state.focus !== 'chat'}
@@ -135,19 +158,13 @@ class Match extends Component {
                 <MatchHud />
                 <TerritoryHud
                     startEmpire={this.startEmpire} />
-                <Chat
+                {this.socket && <Chat
                     user={this.props.userStore.user}
                     match={this.props.matchStore.match}
                     onChatSubmit={this.socketSend}
                     socket={this.socket}
-                    setFocus={this.setFocus} />
+                    setFocus={this.setFocus} /> }
                 <ErrorModal />
-            </div>
-         ) : (
-            <div className="row">
-                <div className="col-md-12 text-center mt-5">
-                    Loading...
-                </div>
             </div>
         );
     }

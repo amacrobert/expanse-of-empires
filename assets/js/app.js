@@ -2,6 +2,11 @@ import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import Cookies from 'universal-cookie';
 import 'bootstrap';
+import {
+  BrowserRouter as Router,
+  Route,
+  Link
+} from 'react-router-dom'
 
 import Nav from './components/Nav';
 import Home from './components/Home';
@@ -35,7 +40,7 @@ class App extends Component {
         window.location.href = '/logout';
     };
 
-    componentWillMount() {
+    componentDidMount() {
         this.userStore.fetchUser();
     }
 
@@ -44,18 +49,16 @@ class App extends Component {
         <Provider
             userStore={this.userStore}
             matchStore={this.matchStore}>
-                <div>
-                    <Nav
-                        onLogin={this.login}
-                        onLogout={this.logout}
-                        onExit={this.matchStore.clearMatch}
-                        key='nav' />
-                   {this.matchStore.match ? (
-                        <Match />
-                    ) : (
-                        <Home onMatchSelect={(match) => this.matchStore.setMatch(match)} />
-                    )}
-                </div>
+                <Router>
+                    <div>
+                        <Nav
+                            onLogin={this.login}
+                            onLogout={this.logout}
+                            key='nav' />
+                        <Route exact path="/" component={Home} />
+                        <Route path="/match/:matchId" component={Match}/>
+                    </div>
+                </Router>
             </Provider>
         );
     };

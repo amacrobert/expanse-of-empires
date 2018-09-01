@@ -12,29 +12,30 @@ const getUser = () => {
 }
 
 const getMatches = () => {
-    return request('/api/matches').then(matches => {
-
-        // Replace date strings with Date objects
-        matches.forEach(match => {
-            match.date_registration = new Date(match.date_registration);
-            match.date_npc = new Date(match.date_npc);
-            match.date_p2p = new Date(match.date_p2p);
-
-            if (match.date_completed) {
-                match.date_completed = new Date(match.date_completed);
-            }
-        })
-
-        return matches;
-    });
+    return request('/api/matches')
+    .then(matches => matches.map(match => convertMatchDates(match)));
 }
+
+// Replace date strings with Date objects
+const convertMatchDates = (match) => {
+    match.date_registration = new Date(match.date_registration);
+    match.date_npc = new Date(match.date_npc);
+    match.date_p2p = new Date(match.date_p2p);
+
+    if (match.date_completed) {
+        match.date_completed = new Date(match.date_completed);
+    }
+
+    return match;
+};
 
 const getMatchChat = matchId => {
     return request('/api/match/' + matchId + '/chat');
 }
 
 const getMatchDetails = matchId => {
-    return request('/api/match/' + matchId);
+    return request('/api/match/' + matchId)
+    .then(match => convertMatchDates(match));
 };
 
 const register = (email, username, password) => {
@@ -86,4 +87,5 @@ export default {
     getMatches,
     getMatchChat,
     getMatchDetails,
+    convertMatchDates,
 };

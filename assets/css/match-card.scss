@@ -3,7 +3,13 @@
 .match-card {
     //background-color: #5cb85c !important;
     margin-bottom: 0.5rem;
+    color: white;
     @include clickable;
+}
+
+.match-card:hover {
+    color: white;
+    text-decoration: none;
 }
 
 .match-card .btn-open {

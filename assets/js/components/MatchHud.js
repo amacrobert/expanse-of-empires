@@ -6,9 +6,11 @@ import { observer, inject } from 'mobx-react';
 @observer
 class MatchHud extends React.Component {
 
+
     render() {
+
         const phase = MatchUtil.getPhase(this.props.matchStore.match);
-        const empireList = Object.values(this.props.matchStore.empires).map(empire => (
+        const empireList = this.props.matchStore.empires.map(empire => (
             <p key={empire.id}>{empire.username} ({empire.territory_count})</p>
         ));
 

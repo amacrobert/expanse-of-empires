@@ -1,7 +1,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import MatchCard from './MatchCard';
+import { observer } from 'mobx-react';
 
+@observer
 class MatchList extends React.Component {
 
     constructor(props) {
@@ -13,13 +15,11 @@ class MatchList extends React.Component {
             return [];
         }
 
-        var matchCards = this.props.matches.map((match, index) => {
+        var matchCards = this.props.matches.map(match => {
             return (
                 <MatchCard
-                    key={index}
-                    match={match}
-                    onMatchSelect={this.props.onMatchSelect}
-                />
+                    key={match.id}
+                    match={match} />
             );
         });
 

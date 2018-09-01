@@ -132,7 +132,9 @@ class MapViewport extends React.Component {
 
     componentWillUnmount() {
         this.stop();
-        this.mount.current.removeChild(this.renderer.domElement);
+        if (this.renderer) {
+            this.mount.current.removeChild(this.renderer.domElement);
+        }
     }
 
     onMouseDown = (event) => {

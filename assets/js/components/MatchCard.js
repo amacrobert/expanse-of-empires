@@ -1,5 +1,8 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
+import { observer } from 'mobx-react';
 
+@observer
 class MatchCard extends React.Component {
 
     constructor(props) {
@@ -32,7 +35,7 @@ class MatchCard extends React.Component {
 
         return(
             <div className="col-md-4">
-                <div className={matchCardClasses.join(' ')} onClick={this.handleMatchSelect}>
+                <Link to={'/match/' + match.id} className={matchCardClasses.join(' ')}>
                     <div className="card-header">
                         <span className="align-middle">{match.name}</span>
                         <span className={openButtonClasses.join(' ')}>Open</span>
@@ -41,7 +44,7 @@ class MatchCard extends React.Component {
                         <p className="card-text">{match.phase}</p>
                         <p className="card-text">Speed: {match.speed}%</p>
                     </div>
-                </div>
+                </Link>
             </div>
         );
     }

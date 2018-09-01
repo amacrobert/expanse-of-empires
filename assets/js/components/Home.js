@@ -10,7 +10,7 @@ class Home extends Component {
         super(props);
     }
 
-    componentWillMount() {
+    componentDidMount() {
         this.props.matchStore.fetchMatchList();
     }
 
@@ -18,7 +18,7 @@ class Home extends Component {
         return(
             <div className="container-fluid" key='container'>
                 <div className="row mt-2">
-                    <MatchList onMatchSelect={this.props.onMatchSelect} />
+                    <MatchList />
                 </div>
             </div>
         );

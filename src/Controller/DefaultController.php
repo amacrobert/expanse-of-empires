@@ -15,7 +15,7 @@ class DefaultController extends AbstractController {
     }
 
     /**
-     * @Route("/match/{match_id}", name="match")
+     * @Route("/match/{match_id}", name="match", requirements={"react_route"=".+"})
      */
     public function match($match_id) {
         return $this->renderApp();
