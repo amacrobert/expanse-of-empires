@@ -9,15 +9,13 @@ use Symfony\Component\Console\Input\InputArgument;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\Map\{Map, Territory, Terrain};
 
-
 class SpawnMapCommand extends ContainerAwareCommand {
 
     protected $em;
 
     public function __construct(EntityManagerInterface $em) {
-        parent::__construct();
-
         $this->em = $em;
+        parent::__construct();
     }
 
     protected function configure() {

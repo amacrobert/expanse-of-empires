@@ -13,6 +13,9 @@ class MatchService {
 
     private $em;
 
+    const STARTING_SUPPLY = 100;
+    const STARTING_TIDE = 100;
+
     public function __construct(
         SocketController $socket_controller,
         EntityManagerInterface $em
@@ -73,6 +76,8 @@ class MatchService {
             ->setUser($user)
             ->setMatch($match)
             ->setActive(true)
+            ->setSupply(self::STARTING_SUPPLY)
+            ->setTide(self::STARTING_TIDE)
         ;
         $this->em->persist($empire);
 

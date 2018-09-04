@@ -13,11 +13,17 @@ class MatchHud extends React.Component {
         const empireList = this.props.matchStore.empires.map(empire => (
             <p key={empire.id}>{empire.username} ({empire.territory_count})</p>
         ));
+        const userEmpire = this.props.matchStore.userEmpire;
+
+        const supply = <p>Supply: {this.props.matchStore.supply}</p>;
+        const tide = <p>Tide: {this.props.matchStore.tide}</p>;
 
         return (
             <div className="match-hud match-hud-left">
                 <p>Phase: {phase}</p>
-                <p>{MatchUtil.getPhaseDescriptor(phase)}</p>
+                <hr />
+                {userEmpire && supply}
+                {userEmpire && tide}
                 <hr />
                 {empireList}
             </div>

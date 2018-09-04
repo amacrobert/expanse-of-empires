@@ -13,6 +13,7 @@ App\Entity\Match\Match:
         date_npc:           { type: datetime }
         date_p2p:           { type: datetime }
         date_completed:     { type: datetime, nullable: true }
+        date_last_resource_distribution: { type: datetime, nullable: true }
 
     manyToOne:
         map: { targetEntity: App\Entity\Map\Map }

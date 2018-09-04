@@ -95,6 +95,29 @@ class ApiController extends Controller {
     }
 
     /**
+     * @Route("/match/{match_id}/empire", name="user_empire")
+     */
+    public function getUserEmpire(EntityManagerInterface $em, $match_id) {
+        $user = $this->getUser();
+
+        if (!$user) {
+            return new JsonResponse(['message' => 'unauthorized'], 400);
+        }
+
+        if ($empire = $em->getRepository(Empire::class)->findOneBy([
+            'user' => $user,
+            'match' => $match_id,
+        ])) {
+            return new JsonResponse([
+                'supply' => $empire->getSupply(),
+                'tide'  =>$empire->getTide(),
+            ]);
+        }
+
+        return new JsonResponse(['message' => 'user empire not found'], 400);
+    }
+
+    /**
      * @Route("/match/{match_id}/chat", name="match_chat")
      */
     public function getMatchChat($match_id, EntityManagerInterface $em) {

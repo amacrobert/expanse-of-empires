@@ -16,6 +16,10 @@ const getMatches = () => {
     .then(matches => matches.map(match => convertMatchDates(match)));
 }
 
+const getUserEmpire = matchId => {
+    return request('/api/match/' + matchId + '/empire');
+};
+
 // Replace date strings with Date objects
 const convertMatchDates = (match) => {
     match.date_registration = new Date(match.date_registration);
@@ -87,5 +91,5 @@ export default {
     getMatches,
     getMatchChat,
     getMatchDetails,
-    convertMatchDates,
+    getUserEmpire,
 };

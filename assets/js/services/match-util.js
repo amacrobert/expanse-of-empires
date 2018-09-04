@@ -3,6 +3,8 @@ import _ from 'underscore';
 const getPhase = (match) => {
     const now = new Date();
 
+    if (!match) return null;
+
     if (match.completed || match.date_completed) {
         return 'completed';
     }

@@ -21,6 +21,7 @@ class Match implements JsonSerializable {
     private $date_completed;
     private $empires;
     private $territory_states;
+    private $date_last_resource_distribution;
 
     // unmapped
     private $user_empire = null;
@@ -83,6 +84,14 @@ class Match implements JsonSerializable {
         return $this;
     }
 
+    public function getDateLastResourceDistribution(): ?DateTime {
+        return $this->date_last_resource_distribution;
+    }
+
+    public function setDateLastResourceDistribution(DateTime $date): Match {
+        $this->date_last_resource_distribution = $date;
+        return $this;
+    }
 
     public function getId() {
         return $this->id;
@@ -155,6 +164,10 @@ class Match implements JsonSerializable {
 
     public function setDateNPC(?DateTime $date_npc) {
         $this->date_npc = $date_npc;
+        // Set resources to start accumulating once registration phase ends
+        if (!$this->date_last_resource_distribution || $this->date_last_resource_distribution < $date_npc) {
+            $this->setDateLastResourceDistribution($date_npc);
+        }
         return $this;
     }
 

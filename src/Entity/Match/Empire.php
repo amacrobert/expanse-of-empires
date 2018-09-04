@@ -17,6 +17,8 @@ class Empire implements JsonSerializable {
     private $result;
     private $placement;
     private $color;
+    private $supply = 0;
+    private $tide = 0;
 
     public function jsonSerialize() {
         return [
@@ -35,6 +37,24 @@ class Empire implements JsonSerializable {
 
     public function getId(): int {
         return $this->id;
+    }
+
+    public function getSupply(): ?int {
+        return $this->supply ?: 0;
+    }
+
+    public function setSupply(int $supply): Empire {
+        $this->supply = $supply;
+        return $this;
+    }
+
+    public function getTide(): ?int {
+        return $this->tide ?: 0;
+    }
+
+    public function setTide(int $tide): Empire {
+        $this->tide = $tide;
+        return $this;
     }
 
     public function getColor(): ?string {

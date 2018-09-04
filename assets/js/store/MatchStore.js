@@ -15,6 +15,8 @@ class MatchStore {
     @observable map = {state: null};
     @observable error;
     @observable selectedTerritoryId;
+    @observable supply;
+    @observable tide;
     @observable loaded = false;
 
     @computed get empiresById() {
@@ -31,7 +33,7 @@ class MatchStore {
         Api.getMatches().then(matches => this.matchList = matches);
     };
 
-    @action setMatch = (matchId) => {
+    @action setMatch = matchId => {
         return new Promise((resolve, reject) => {
             Api.getMatchDetails(matchId).then(matchFull => {
                 this.empires = matchFull.empires;
@@ -46,8 +48,17 @@ class MatchStore {
                 delete(matchFull.map);
                 this.match = matchFull;
                 this.loaded = true;
+
+                this.fetchUserEmpire();
                 resolve();
             })
+        });
+    };
+
+    @action fetchUserEmpire = () => {
+        Api.getUserEmpire(this.match.id).then(data => {
+            this.supply = data.supply;
+            this.tide = data.tide;
         });
     };
 
@@ -56,6 +67,8 @@ class MatchStore {
         this.match = null;
         this.empires.clear();
         this.map = {state: null};
+        this.supply = null;
+        this.tide = null;
     };
 
     @action newEmpire = (empire) => {
