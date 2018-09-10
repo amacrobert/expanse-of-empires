@@ -44,7 +44,7 @@ class MapViewport extends React.Component {
         this.renderer.setSize(this.mount.current.offsetWidth, this.mount.current.offsetHeight);
         this.scene = new THREE.Scene();
 
-        this.camera = new THREE.PerspectiveCamera(45, this.mount.current.offsetWidth / this.mount.current.offsetHeight, .1, 200);
+        this.camera = new THREE.PerspectiveCamera(45, this.mount.current.offsetWidth / this.mount.current.offsetHeight, 1, 75);
         this.camera.position.set(0, 40, 20);
         this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
         this.controls.target.set(0, 0, 0);
@@ -349,13 +349,6 @@ class MapViewport extends React.Component {
                         console.log('ADDING BUILDING: ' + building.name.toUpperCase());
                         hex.userData.graphics.building = building;
                         this.scene.add(building);
-
-                        // simple shadow
-                        let buildingShadow = assets.getSimpleShadow(territory);
-                        buildingShadow.scale.setScalar(2);
-                        buildingShadow.opacity = 1;
-                        hex.userData.graphics.simpleShadow = buildingShadow;
-                        this.scene.add(buildingShadow);
                     })
                 }
                 // Remove destroyed building
@@ -363,8 +356,6 @@ class MapViewport extends React.Component {
                     console.log('REMOVING BUILDING: ' + building.name.toUpperCase());
                     this.scene.remove(hex.userData.graphics.building);
                     hex.userData.graphics.building = null;
-                    this.scene.remove(hex.userData.graphics.simpleShadow);
-                    hex.userData.graphics.simpleShadow = null;
                 }
             }
         });

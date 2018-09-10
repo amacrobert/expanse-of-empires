@@ -41,7 +41,7 @@ class GraphicsUtil {
             opacity: 0.5,
         }));
         this.shadowMesh.rotation.x = -Math.PI / 2;
-        this.shadowMesh.position.y = .001;
+        this.shadowMesh.position.y = .04;
 
         // Sprite assets
         this.sprites = {
@@ -55,6 +55,12 @@ class GraphicsUtil {
                 '/models/castle/SM_Fort.obj',
                 '/models/castle/SM_Fort.mtl',
                 {x: .008, y: .020, z: .008}
+            ),
+            bastion: this.loadObj(
+                '/models/bastion/model.obj',
+                '/models/bastion/materials.mtl',
+                {x: .25, y: .25, z: .25},
+                {x: 0, y: .67, z: 0}
             ),
             mill: this.loadObj(
                 '/models/mill/PUSHILIN_windmill.obj',
@@ -85,7 +91,7 @@ class GraphicsUtil {
             })
         );
         this.hoverOutline.computeLineDistances();
-        this.hoverOutline.position.y = 0.02;
+        this.hoverOutline.position.y = 0;//0.02;
 
         // Border section mesh assets
         let borderShape = new THREE.Shape();
@@ -211,7 +217,7 @@ class GraphicsUtil {
         var borderMesh = new THREE.Mesh(this.borderGeometry);
         borderMesh.rotation.z = MapUtil.borderRotation[rotation];
         borderMesh.rotation.x = -Math.PI / 2;
-        borderMesh.position.y = 0.01;
+        borderMesh.position.y = 0.05;
         let realCoords = MapUtil.axialToReal(territory.q, territory.r);
         borderMesh.position.x = realCoords.x;
         borderMesh.position.z = realCoords.z;
