@@ -15,8 +15,8 @@ class MatchHud extends React.Component {
         ));
         const userEmpire = this.props.matchStore.userEmpire;
 
-        const supply = <p>Supply: {this.props.matchStore.supply}</p>;
-        const tide = <p>Tide: {this.props.matchStore.tide}</p>;
+        const supply = <p>Supply: {Math.floor(this.props.matchStore.supply)}</p>;
+        const tide = <p>Tide: {Math.floor(this.props.matchStore.tide)}</p>;
 
         return (
             <div className="match-hud match-hud-left">

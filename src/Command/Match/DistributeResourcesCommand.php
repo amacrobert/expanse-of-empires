@@ -11,6 +11,8 @@ use App\Entity\Match\Match;
 use App\Entity\Map\{Map, Territory, Terrain};
 use DateTime;
 
+use App\Service\Socket\SocketClient;
+
 class DistributeResourcesCommand extends ContainerAwareCommand {
 
     protected $em;
@@ -39,6 +41,7 @@ class DistributeResourcesCommand extends ContainerAwareCommand {
     }
 
     protected function execute(InputInterface $input, OutputInterface $output) {
+
         $pdo = $this->em->getConnection()->getWrappedConnection();
 
         // Select every income-earning territory
@@ -46,9 +49,10 @@ class DistributeResourcesCommand extends ContainerAwareCommand {
             SELECT
                 match.id AS match_id,
                 empire.id AS empire_id,
+                empire.user_id,
                 match.date_last_resource_distribution AS last_supply,
-                empire.supply,
-                empire.tide,
+                empire.supply AS old_supply,
+                empire.tide AS old_tide,
                 territory_id,
                 building_id,
                 speed,
@@ -61,6 +65,7 @@ class DistributeResourcesCommand extends ContainerAwareCommand {
                 JOIN `match` ON empire.match_id = `match`.id
                 JOIN territory ON state.territory_id = territory.id
                 JOIN terrain ON territory.terrain_id = terrain.id
+                JOIN user ON empire.user_id = user.id
             WHERE
                 state.empire_id IS NOT NULL
                 AND `match`.date_completed IS NULL
@@ -77,21 +82,28 @@ class DistributeResourcesCommand extends ContainerAwareCommand {
         $supply_income = [];
 
         foreach ($rows as $row) {
-            extract($row); // match_id, empire_id, territory_id, building_id, speed, name, base_supply_output
+            extract($row); // match_id, empire_id, user_id, territory_id, building_id, speed, name, base_supply_output
 
             if (!isset($last_distribution[$match_id])) {
                 $last_distribution[$match_id] = new DateTime($last_supply);
             }
 
-            if (!isset($supply_income[$match_id])) {
-                $supply_income[$match_id] = [];
+            if (!isset($income[$match_id])) {
+                $income[$match_id] = [];
             }
 
             if (!isset($supply_income[$match_id][$empire_id])) {
-                $supply_income[$match_id][$empire_id] = 0;
+                $income[$match_id][$empire_id] = [
+                    'new_supply' => 0,
+                    'new_tide' => 0,
+                    'old_supply' => $old_supply,
+                    'old_tide' => $old_tide,
+                    'user_id' => $user_id,
+                ];
             }
 
-            $supply_income[$match_id][$empire_id] += $base_supply_output;
+            $income[$match_id][$empire_id]['new_supply'] += $base_supply_output;
+            $income[$match_id][$empire_id]['new_tide'] += 0;
         }
 
         $now = new DateTime;
@@ -99,20 +111,30 @@ class DistributeResourcesCommand extends ContainerAwareCommand {
         $add_supply_statement = $pdo->prepare(self::ADD_SUPPLY_TO_EMPIRE);
         $update_distribution_date_statement = $pdo->prepare(self::UPDATE_DISTRIBUTION_DATE);
 
-        foreach ($supply_income as $match_id => $empires) {
+        $update_messages = [];
+        foreach ($income as $match_id => $empires) {
             $last_match_distribution_timestamp = $last_distribution[$match_id]->getTimestamp();
             $seconds_since_last_supply = $now->getTimestamp() - $last_match_distribution_timestamp;
 
             $total_empires = 0;
             $total_distributed = 0;
-            foreach ($empires as $empire_id => $supply_rate) {
-                $new_supply = $supply_rate * $seconds_since_last_supply / 3600;
+            $update_messages = [];
+            foreach ($empires as $empire_id => $resources) {
+                $new_supply = $resources['new_supply'] * $seconds_since_last_supply / 3600;
                 $total_distributed += $new_supply;
                 $total_empires++;
                 $add_supply_statement->execute([
                     'new_supply' => $new_supply,
                     'empire_id' => $empire_id,
                 ]);
+
+                $update_messages[] = [
+                    'action'    => 'update-resources',
+                    'match_id'  => $match_id,
+                    'user_id'   => $resources['user_id'],
+                    'supply'    => $resources['new_supply'] + $resources['old_supply'],
+                    'tide'      => $resources['new_tide'] + $resources['old_tide'],
+                ];
             }
 
             $update_distribution_date_statement->execute([
@@ -122,5 +144,16 @@ class DistributeResourcesCommand extends ContainerAwareCommand {
 
             $output->writeln('[' . $now->format('Y-m-d H:i:s') . '] - Match ' . $match_id . ': ' . $total_distributed . ' supply to ' . $total_empires . ' empires (' . $seconds_since_last_supply . 's)');
         }
+
+        \Ratchet\Client\connect('ws://127.0.0.1:8080')->then(function($conn) use ($match_id, $update_messages) {
+            $conn->send(json_encode([
+                'action' => 'client-messages',
+                'messages' => $update_messages,
+            ]));
+            $conn->close();
+        }, function ($e) {
+            echo "Could not connect: {$e->getMessage()}\n";
+        });
+
     }
 }

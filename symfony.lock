@@ -98,6 +98,9 @@
     "psr/simple-cache": {
         "version": "1.0.1"
     },
+    "ratchet/pawl": {
+        "version": "v0.3.2"
+    },
     "ratchet/rfc6455": {
         "version": "0.2.4"
     },

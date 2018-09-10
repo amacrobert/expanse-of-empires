@@ -13,7 +13,17 @@ class ChatService {
         $this->socket_controller = $socket_controller;
         $this->em = $em;
     }
-    
+
+    public function chatJoin($match_id, $user) {
+        $this->socket_controller->broadcastToMatch($match_id, [
+            'action' => 'chat-join',
+            'user' => [
+                'id' => $user->getId(),
+                'username' => $user->getUsername(),
+            ],
+        ]);
+    }
+
     public function chatSent($message, $user) {
         // Persist the message in db
         $chat_message = new Message();

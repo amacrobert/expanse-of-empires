@@ -52,6 +52,11 @@ class Match extends Component {
                     this.props.matchStore.newEmpire(message.empire);
                     break;
 
+                case 'update-resources':
+                    this.props.matchStore.supply = message.supply;
+                    this.props.matchStore.tide = message.tide;
+                    break;
+
                 case 'error':
                     this.props.matchStore.error = message.message;
                     break;

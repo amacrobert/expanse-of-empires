@@ -2,7 +2,10 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import ChatLine from './ChatLine';
 import Api from '../services/api';
+import { observer, inject } from 'mobx-react';
 
+@inject('matchStore')
+@observer
 class Chat extends React.Component {
 
     constructor(props) {

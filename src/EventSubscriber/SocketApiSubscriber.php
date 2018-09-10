@@ -31,12 +31,17 @@ class SocketApiSubscriber implements EventSubscriberInterface {
 
         return [
             'socket.chat.send' =>       [['userSentChat']],
+            'socket.iam' =>             [['userJoinedChat']],
             'socket.empire.start' =>    [['startEmpire']],
         ];
     }
 
     public function userSentChat($event) {
         $this->chat_service->chatSent($event->getSubject(), $event->getArgument('user'));
+    }
+
+    public function userJoinedChat($event) {
+        $this->chat_service->chatJoin($event->getSubject()->match_id, $event->getArgument('user'));
     }
 
     public function startEmpire($event) {
