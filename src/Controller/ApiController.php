@@ -166,7 +166,12 @@ class ApiController extends Controller {
      */
     public function getAppUser() {
         $user = $this->getUser();
-        return new JsonResponse($user);
+        if ($user) {
+            $user_array = $user->jsonSerialize();
+            return new JsonResponse(array_merge($user_array, ['token' => $user->getApiKey()]));
+        }
+
+        return new JsonResponse(null, 401);
     }
 
 }
