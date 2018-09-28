@@ -1,0 +1,2 @@
+# Template for cron jobs needed
+* * * * * path/to/eoe/bin/match-updates.sh
