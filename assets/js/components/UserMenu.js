@@ -6,14 +6,6 @@ import { observer, inject } from 'mobx-react';
 @observer
 class UserMenu extends React.Component {
 
-    constructor(props) {
-        super(props);
-    }
-
-    handleLogout = () => {
-        this.props.onLogout();
-    }
-
     render() {
         const user = this.props.userStore.user;
 
@@ -28,7 +20,7 @@ class UserMenu extends React.Component {
                     <div className="dropdown-divider"></div>
                     <a
                         className="dropdown-item clickable"
-                        onClick={this.handleLogout}>
+                        onClick={this.props.onLogout}>
                         Log out
                     </a>
                 </div>

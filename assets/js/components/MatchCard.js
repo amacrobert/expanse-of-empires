@@ -5,21 +5,6 @@ import { observer } from 'mobx-react';
 @observer
 class MatchCard extends React.Component {
 
-    constructor(props) {
-        super(props);
-
-        const match = this.props.match;
-        const now = new Date();
-        const dateRegistration = new Date(match.date_registration);
-        const dateNPC = new Date(match.date_npc);
-        const dateP2P = new Date(match.date_p2p);
-        const dateCompleted = match.date_completed ? new Date(match.date_completed) : null;
-    }
-
-    handleMatchSelect = (e) => {
-        this.props.onMatchSelect(this.props.match);
-    }
-
     render() {
         const match = this.props.match;
         const matchCardClasses = ['card', 'match-card'];
@@ -33,7 +18,7 @@ class MatchCard extends React.Component {
             openButtonClasses.push('btn-light');
         }
 
-        return(
+        return (
             <div className="col-md-4">
                 <Link to={'/match/' + match.id} className={matchCardClasses.join(' ')}>
                     <div className="card-header">

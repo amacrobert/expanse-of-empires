@@ -12,8 +12,7 @@ class Nav extends React.Component {
         const user = this.props.userStore.user;
         const match = this.props.matchStore.match;
 
-        return(
-
+        return (
             <nav className="navbar navbar-expand-sm navbar-dark bg-primary main-nav">
                 <Link to="/" className="navbar-brand mb-0 h1">
                     <span className="text-uppercase">Expanse</span> of <span className="text-uppercase">Empires</span>

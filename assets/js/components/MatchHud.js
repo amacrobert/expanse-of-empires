@@ -6,7 +6,6 @@ import { observer, inject } from 'mobx-react';
 @observer
 class MatchHud extends React.Component {
 
-
     render() {
 
         const phase = MatchUtil.getPhase(this.props.matchStore.match);
