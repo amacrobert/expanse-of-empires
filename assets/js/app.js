@@ -3,15 +3,14 @@ import ReactDOM from 'react-dom';
 import Cookies from 'universal-cookie';
 import 'bootstrap';
 import {
-  BrowserRouter as Router,
-  Route,
-  Link
+    BrowserRouter as Router,
+    Route,
+    Link
 } from 'react-router-dom'
 
 import Nav from './components/Nav';
 import Home from './components/Home';
 import Match from './components/Match';
-import Api from './services/api';
 
 import { Provider, observer } from 'mobx-react';
 import UserStore from './store/UserStore';
@@ -31,13 +30,20 @@ class App extends Component {
         const cookies = new Cookies();
         cookies.set('AUTH-TOKEN', result.api_key, {path: '/'});
         cookies.set('PHPSESSID', result.session, {path: '/'});
-        window.location.href = '/';
+        window.location.reload(true);
     };
 
     logout = () => {
         let cookies = new Cookies();
         cookies.remove('AUTH-TOKEN');
-        window.location.href = '/logout';
+
+        // Cookies.remove doesn't return a promise, so wait a bit before redirecting user.
+        // This prevents a bug where it takes multiple logouts to actually log out.
+        // @TODO: Contribute a fix to universal-cookies
+        // @see https://github.com/reactivestack/cookies/issues/189
+        window.setTimeout(function() {
+            window.location.href = '/logout';
+        }, 100);
     };
 
     componentDidMount() {
@@ -46,15 +52,12 @@ class App extends Component {
 
     render() {
         return (
-        <Provider
-            userStore={this.userStore}
-            matchStore={this.matchStore}>
+            <Provider userStore={this.userStore} matchStore={this.matchStore}>
                 <Router>
                     <div>
                         <Nav
                             onLogin={this.login}
-                            onLogout={this.logout}
-                            key='nav' />
+                            onLogout={this.logout} />
                         <Route exact path="/" component={Home} />
                         <Route path="/match/:matchId" component={Match}/>
                     </div>
