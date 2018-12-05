@@ -236,9 +236,6 @@
     "symfony/intl": {
         "version": "v4.0.8"
     },
-    "symfony/lts": {
-        "version": "4-dev"
-    },
     "symfony/options-resolver": {
         "version": "v4.0.8"
     },
