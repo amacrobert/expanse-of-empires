@@ -33,26 +33,33 @@ class MatchList extends React.Component {
 
     render() {
         if (this.props.matchStore.matchList.length) {
-            return (
-                <div className="col-md-12">
-                    <h4>MATCHES</h4>
-                    <MatchListSection
-                        title="Your matches"
-                        matches={this.matches['joined']} />
-                    <MatchListSection
-                        title="Registration open"
-                        matches={this.matches['registration']} />
-                    <MatchListSection
-                        title="Opening soon"
-                        matches={this.matches['pre-registration']} />
-                    <MatchListSection
-                        title="Play started"
-                        matches={this.matches['expanse-of-empires'].concat(this.matches['non-player-combat'])} />
-                    <MatchListSection
-                        title="Previous matches"
-                        matches={this.matches['complete']} />
-                </div>
-            );
+            return ([
+                <MatchListSection
+                    {...this.props}
+                    key="msl-your-matches"
+                    title="Your matches"
+                    matches={this.matches['joined']} />,
+                <MatchListSection
+                    {...this.props}
+                    key="msl-registration"
+                    title="Registration open"
+                    matches={this.matches['registration']} />,
+                <MatchListSection
+                    {...this.props}
+                    key="msl-opening-soon"
+                    title="Opening soon"
+                    matches={this.matches['pre-registration']} />,
+                <MatchListSection
+                    {...this.props}
+                    key="msl-play-started"
+                    title="Play started"
+                    matches={this.matches['expanse-of-empires'].concat(this.matches['non-player-combat'])} />,
+                <MatchListSection
+                    {...this.props}
+                    key="msl-completed"
+                    title="Previous matches"
+                    matches={this.matches['complete']} />,
+            ]);
         }
         else {
             return (<p>Loading matches...</p>)

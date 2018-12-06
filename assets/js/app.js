@@ -59,7 +59,7 @@ class App extends Component {
                             onLogin={this.login}
                             onLogout={this.logout} />
                         <Route exact path="/" component={Home} />
-                        <Route path="/match/:matchId" component={Match}/>
+                        <Route path="/match/:matchId" component={Match} />
                     </div>
                 </Router>
             </Provider>

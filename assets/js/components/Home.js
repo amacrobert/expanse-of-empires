@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import MatchList from './MatchList';
 import { observer, inject } from 'mobx-react';
+import Grid from '@material-ui/core/Grid';
 
 @inject('matchStore')
 @observer
@@ -15,12 +16,14 @@ class Home extends Component {
     }
 
     render() {
-        return(
-            <div className="container-fluid" key='container'>
-                <div className="row mt-2">
-                    <MatchList />
-                </div>
-            </div>
+
+        return (
+            <Grid container spacing={12} style={{padding: '12px'}}>
+                <Grid item xs={12}>
+                    <h4>MATCHES</h4>
+                    <MatchList {...this.props} />
+                </Grid>
+            </Grid>
         );
     }
 }
