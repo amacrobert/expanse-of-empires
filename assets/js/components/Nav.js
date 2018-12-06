@@ -29,37 +29,22 @@ class Nav extends React.Component {
                             {match && <span className="nav-match-name">{match.name}</span>}
                         </Link>
                     </Typography>
+
+                    {user.loaded && user.loggedIn &&
+                        <UserMenu
+                            store={this.props.store}
+                            onLogout={this.props.onLogout}
+                        />
+                    }
+
+                    {user.loaded && !user.loggedIn &&
+                        <RegisterLoginButtons
+                            onLogin={this.props.onLogin}
+                        />
+                    }
+
                 </Toolbar>
             </AppBar>
-        );
-
-        return (
-            <nav className="navbar navbar-expand-sm navbar-dark bg-primary main-nav">
-                <Link to="/" className="navbar-brand mb-0 h1">
-                    <span className="text-uppercase">Expanse</span> of <span className="text-uppercase">Empires</span>
-                </Link>
-                <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                    <span className="navbar-toggler-icon"></span>
-                </button>
-                <div className="collapse navbar-collapse" id="navbarNav">
-                    <div className="navbar-nav">
-                    </div>
-                </div>
-
-                {user.loaded && user.loggedIn &&
-                    <UserMenu
-                        store={this.props.store}
-                        onLogout={this.props.onLogout}
-                    />
-                }
-
-                {user.loaded && !user.loggedIn &&
-                    <RegisterLoginButtons
-                        onLogin={this.props.onLogin}
-                    />
-                }
-
-            </nav>
         );
     }
 }

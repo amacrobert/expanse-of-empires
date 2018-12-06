@@ -4,6 +4,8 @@ import Modal from './Modal/Modal';
 import Alert from './Alert';
 import Api from '../services/api';
 
+import Button from '@material-ui/core/Button';
+
 class Register extends React.Component {
 
     constructor(props) {
@@ -76,6 +78,15 @@ class Register extends React.Component {
     }
 
     render() {
+
+        return (
+            <Button
+                variant="contained"
+                color="secondary">
+                Register
+            </Button>
+        );
+
         return([
             <button key={2} className="btn btn-warning" data-toggle="modal" data-target="#registerModal">
                 Register
