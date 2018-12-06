@@ -44,8 +44,8 @@ class MapViewport extends React.Component {
         this.renderer.setSize(this.mount.current.offsetWidth, this.mount.current.offsetHeight);
         this.scene = new THREE.Scene();
 
-        this.camera = new THREE.PerspectiveCamera(45, this.mount.current.offsetWidth / this.mount.current.offsetHeight, 1, 75);
-        this.camera.position.set(0, 40, 20);
+        this.camera = new THREE.PerspectiveCamera(20, this.mount.current.offsetWidth / this.mount.current.offsetHeight, 1, 200);
+        this.camera.position.set(0, 90, 90);
         this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
         this.controls.target.set(0, 0, 0);
         this.scene.add(this.camera);
