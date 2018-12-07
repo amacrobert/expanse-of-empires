@@ -16,6 +16,7 @@ import { Provider, observer } from 'mobx-react';
 import UserStore from './store/UserStore';
 import MatchStore from './store/MatchStore';
 
+import { SnackbarProvider } from 'notistack';
 import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 
 @observer
@@ -49,6 +50,7 @@ class App extends Component {
     };
 
     componentDidMount() {
+        console.log('App mounted');
         this.userStore.fetchUser();
     }
 
@@ -56,13 +58,17 @@ class App extends Component {
         return (
             <Provider userStore={this.userStore} matchStore={this.matchStore}>
                 <Router>
-                    <MuiThemeProvider theme={theme}>
-                        <Nav
-                            onLogin={this.login}
-                            onLogout={this.logout} />
-                        <Route exact path="/" component={Home} />
-                        <Route path="/match/:matchId" component={Match} />
-                    </MuiThemeProvider>
+                    <SnackbarProvider maxSnack={12}>
+                        <MuiThemeProvider theme={theme}>
+                            <Nav
+                                onLogin={this.login}
+                                onLogout={this.logout} />
+                            {this.userStore.user.loaded && [
+                                <Route exact path="/" component={Home} key="route-home" />,
+                                <Route path="/match/:matchId" component={Match} key="route-match" />,
+                            ]}
+                        </MuiThemeProvider>
+                    </SnackbarProvider>
                 </Router>
             </Provider>
         );

@@ -110,10 +110,7 @@ class Register extends React.Component {
     renderForm = () => {
         var errorAlerts = this.state.errors.map((error, index) => {
             return (
-                <Alert
-                    key={index}
-                    message={error}
-                />
+                <p key={index}>{error}</p>
             );
         });
 
