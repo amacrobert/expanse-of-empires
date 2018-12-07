@@ -11,7 +11,11 @@ import ErrorModal from './ErrorModal';
 import { toJS } from 'mobx';
 import { observer, inject } from 'mobx-react';
 
-@inject('matchStore', 'userStore')
+import Grid from '@material-ui/core/Grid';
+import CircularProgress from '@material-ui/core/CircularProgress';
+import { withSnackbar } from 'notistack';
+
+@inject('userStore', 'matchStore')
 @observer
 class Match extends Component {
 
@@ -50,11 +54,13 @@ class Match extends Component {
 
                 case 'new-empire':
                     this.props.matchStore.newEmpire(message.empire);
+                    this.props.enqueueSnackbar(message.empire.username + ' joined the match');
                     break;
 
                 case 'update-resources':
                     this.props.matchStore.supply = message.supply;
                     this.props.matchStore.tide = message.tide;
+                    this.props.enqueueSnackbar('Resources distributed. ');
                     break;
 
                 case 'error':
@@ -93,6 +99,8 @@ class Match extends Component {
     };
 
     socketSend = (message) => {
+        let user = this.props.userStore.user;
+        console.log('userstore user:', user);
         if (this.socket.readyState !== WebSocket.OPEN) {
             this.attemptReconnect(message);
         }
@@ -144,35 +152,40 @@ class Match extends Component {
 
     render() {
 
-        if (!this.props.matchStore.loaded) {
-            return (
-                <div className="row">
-                    <div className="col-md-12 text-center mt-5">
-                        Loading...
-                    </div>
-                </div>
-            );
-        }
+        const loaded = this.props.matchStore.loaded;
 
         return (
-            <div className="match-container">
-                <MapViewport
-                    inFocus={this.state.focus !== 'chat'}
-                    setFocus={this.setFocus}
-                    onTerritorySelect={this.onTerritorySelect} />
-                <MatchHud />
-                <TerritoryHud
-                    startEmpire={this.startEmpire} />
-                {this.socket && <Chat
-                    user={this.props.userStore.user}
-                    match={this.props.matchStore.match}
-                    onChatSubmit={this.socketSend}
-                    socket={this.socket}
-                    setFocus={this.setFocus} /> }
-                <ErrorModal />
-            </div>
+            <Grid container spacing={0}>
+
+                {!loaded &&
+                    <Grid item xs={12} style={{textAlign: 'center', marginTop: 120}}>
+                        <CircularProgress
+                            size={80} />
+                    </Grid>
+                }
+
+                {loaded &&
+                    <Grid item xs={12}>
+                        <MapViewport
+                            inFocus={this.state.focus !== 'chat'}
+                            setFocus={this.setFocus}
+                            onTerritorySelect={this.onTerritorySelect} />
+                        <MatchHud />
+                        <TerritoryHud
+                            startEmpire={this.startEmpire} />
+                        {this.socket && <Chat
+                            user={this.props.userStore.user}
+                            match={this.props.matchStore.match}
+                            onChatSubmit={this.socketSend}
+                            socket={this.socket}
+                            setFocus={this.setFocus} />
+                        }
+                        <ErrorModal />
+                    </Grid>
+                }
+            </Grid>
         );
     }
 }
 
-export default Match;
+export default withSnackbar(Match);

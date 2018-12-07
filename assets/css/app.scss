@@ -1,9 +1,16 @@
-@import './bootstrap-superhero.css';
+//@import './bootstrap-superhero.css';
 @import './chat';
-@import './nav';
 @import './match-card';
 @import './match-hud';
 @import url('https://fonts.googleapis.com/css?family=Cinzel+Decorative');
+
+body {
+    padding: 0;
+    margin: 0;
+    background-color: #687582;
+    color: white;
+    font-family: 'Roboto';
+}
 
 .clickable {
     @include clickable;
@@ -15,11 +22,12 @@
     // left: 0;
     // right: 0;
     // bottom: 0;
+    z-index: 0;
 }
 
 .three-canvas {
     position: fixed;
-    top: 48px;
+    top: 64px;
     right: 0;
     bottom: 0;
     left: 0;
@@ -27,5 +35,5 @@
     // left: -8px;
     // bottom: -16px;
     // right: -16px;
-    height: calc(100vh - 48px);
+    height: calc(100vh - 64px);
 }

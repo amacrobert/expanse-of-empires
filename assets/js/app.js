@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import Cookies from 'universal-cookie';
-import 'bootstrap';
+
 import {
     BrowserRouter as Router,
     Route,
@@ -15,6 +15,9 @@ import Match from './components/Match';
 import { Provider, observer } from 'mobx-react';
 import UserStore from './store/UserStore';
 import MatchStore from './store/MatchStore';
+
+import { SnackbarProvider } from 'notistack';
+import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 
 @observer
 class App extends Component {
@@ -47,6 +50,7 @@ class App extends Component {
     };
 
     componentDidMount() {
+        console.log('App mounted');
         this.userStore.fetchUser();
     }
 
@@ -54,17 +58,29 @@ class App extends Component {
         return (
             <Provider userStore={this.userStore} matchStore={this.matchStore}>
                 <Router>
-                    <div>
-                        <Nav
-                            onLogin={this.login}
-                            onLogout={this.logout} />
-                        <Route exact path="/" component={Home} />
-                        <Route path="/match/:matchId" component={Match}/>
-                    </div>
+                    <SnackbarProvider maxSnack={12}>
+                        <MuiThemeProvider theme={theme}>
+                            <Nav
+                                onLogin={this.login}
+                                onLogout={this.logout} />
+                            {this.userStore.user.loaded && [
+                                <Route exact path="/" component={Home} key="route-home" />,
+                                <Route path="/match/:matchId" component={Match} key="route-match" />,
+                            ]}
+                        </MuiThemeProvider>
+                    </SnackbarProvider>
                 </Router>
             </Provider>
         );
     };
 }
+
+const theme = createMuiTheme({
+    palette: {
+        type: 'dark',
+        primary: { main: '#DF691A' },
+        secondary: { main: '#4E5D6C' },
+    },
+});
 
 ReactDOM.render(<App />, document.getElementById('root'));

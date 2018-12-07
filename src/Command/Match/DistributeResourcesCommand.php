@@ -81,6 +81,11 @@ class DistributeResourcesCommand extends ContainerAwareCommand {
         // supply_income[match_id][empire_id] => float
         $supply_income = [];
 
+        if (empty($rows)) {
+            $output->writeln('No qualifying distributions');
+            return;
+        }
+
         foreach ($rows as $row) {
             extract($row); // match_id, empire_id, user_id, territory_id, building_id, speed, name, base_supply_output
 

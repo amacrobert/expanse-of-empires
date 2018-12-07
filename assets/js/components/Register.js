@@ -1,8 +1,13 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import Modal from './Modal/Modal';
-import Alert from './Alert';
 import Api from '../services/api';
+
+import Button from '@material-ui/core/Button';
+import TextField from '@material-ui/core/TextField';
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogTitle from '@material-ui/core/DialogTitle';
 
 class Register extends React.Component {
 
@@ -13,28 +18,25 @@ class Register extends React.Component {
             errors: [],
             registrationComplete: false,
             email: '',
+            username: '',
+            password: '',
+            password2: '',
             submitting: false,
+            open: false,
         };
-
-        this.email = React.createRef();
-        this.username = React.createRef();
-        this.password1 = React.createRef();
-        this.password2 = React.createRef();
     }
 
-    handleRegisterSubmit = (e) => {
-        e.preventDefault();
+    handleRegisterSubmit = event => {
+        event.preventDefault();
+
+        console.log('submitting');
+
+        const { email, username, password, password2 } = this.state;
 
         this.setState({
             errors: [],
             submitting: true,
         });
-
-        const email = this.email.current.value,
-            username = this.username.current.value,
-            password = this.password1.current.value,
-            password2 = this.password2.current.value
-        ;
 
         var frontendErrors = [];
 
@@ -76,87 +78,80 @@ class Register extends React.Component {
     }
 
     render() {
-        return([
-            <button key={2} className="btn btn-warning" data-toggle="modal" data-target="#registerModal">
+
+        return ([
+            <Button
+                key="register-button"
+                variant="contained"
+                color="secondary"
+                onClick={() => this.setState({open: true})}>
                 Register
-            </button>,
-            <Modal id="registerModal" key="registerModal">
-                <Modal.Header>Register</Modal.Header>
-                {!this.state.registrationComplete &&
-                    this.renderForm()
-                }
-                {this.state.registrationComplete &&
-                    this.renderCompleteMessage()
-                }
-            </Modal>
+            </Button>,
+            <Dialog
+                key="register-dialog"
+                open={this.state.open}
+                onClose={() => this.setState({open: false})}>
+                <DialogTitle>Register</DialogTitle>
+                {!this.state.registrationComplete && this.renderForm() }
+                {this.state.registrationComplete && this.renderCompleteMessage() }
+            </Dialog>
         ]);
     }
 
     renderCompleteMessage = () => {
-        return(
-            <Modal.Body>
+        return (
+            <DialogContent>
                 <p>We sent an email to <strong>{this.state.email}</strong> with a link to complete your registration.</p>
-                <p>Check your email and click the link to activate your account.</p>
-            </Modal.Body>
+                <p>Check your email and open the link to activate your account.</p>
+            </DialogContent>
         );
     }
 
     renderForm = () => {
         var errorAlerts = this.state.errors.map((error, index) => {
             return (
-                <Alert
-                    key={index}
-                    message={error}
-                />
+                <p key={index}>{error}</p>
             );
         });
 
-        return(
+        return( 
             <form onSubmit={this.handleRegisterSubmit}>
-                <Modal.Body>
+                <DialogContent>
                     {errorAlerts}
-                    <div className="form-group">
-                        <label htmlFor="emailInput">Email address</label>
-                        <input
-                            className="form-control"
-                            type="email"
-                            aria-label="email"
-                            id="emailInput"
-                            ref={this.email} />
-                        <small className="form-text text-muted">We'll never share your email with anyone else.</small>
-                    </div>
-                    <div className="form-group">
-                        <label htmlFor="usernameInput">Username</label>
-                        <input
-                            className="form-control"
-                            type="text"
-                            aria-label="username"
-                            id="usernameInput"
-                            ref={this.username} />
-                    </div>
-                    <div className="form-group">
-                        <label htmlFor="password1Input">Password</label>
-                        <input
-                            className="form-control"
-                            type="password"
-                            aria-label="password"
-                            id="password1Input"
-                            ref={this.password1} />
-                    </div>
-                    <div className="form-group">
-                        <input
-                            className="form-control"
-                            type="password"
-                            placeholder="Repeat password"
-                            aria-label="repeat-password"
-                            id="password2Input"
-                            ref={this.password2} />
-                    </div>
-                </Modal.Body>
-                <Modal.Footer>
-                    <button disabled={this.state.submitting} className="btn bg-primary text-white" type="submit">Register</button>
-                </Modal.Footer>
-
+                    <TextField
+                        autoFocus
+                        label="Email address"
+                        type="email"
+                        margin="dense"
+                        onChange={event => this.setState({email: event.target.value})}
+                        value={this.state.email}
+                        helperText="We will keep your email private"
+                        fullWidth />
+                    <TextField
+                        label="Username"
+                        type="text"
+                        margin="dense"
+                        onChange={event => this.setState({username: event.target.value})}
+                        value={this.state.username}
+                        fullWidth />
+                    <TextField
+                        label="Password"
+                        type="password"
+                        margin="dense"
+                        onChange={event => this.setState({password: event.target.value})}
+                        value={this.state.password}
+                        fullWidth />
+                    <TextField
+                        label="Repeat password"
+                        type="password"
+                        margin="dense"
+                        onChange={event => this.setState({password2: event.target.value})}
+                        value={this.state.password2}
+                        fullWidth />
+                </DialogContent>
+                <DialogActions>
+                    <Button type="submit" disabled={this.submitting}>Register</Button>
+                </DialogActions>
             </form>
         );
     }

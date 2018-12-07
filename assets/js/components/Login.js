@@ -1,21 +1,31 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
-import Modal from './Modal/Modal';
 import Api from '../services/api';
+
+import Button from '@material-ui/core/Button';
+import TextField from '@material-ui/core/TextField';
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import FormControl from '@material-ui/core/FormControl';
 
 class Login extends Component {
 
     constructor(props) {
         super(props);
 
-        this.email = React.createRef();
-        this.password = React.createRef();
+        this.state = {
+            open: false,
+            email: '',
+            password: '',
+        };
     }
 
     handleLogin = (e) => {
         e.preventDefault();
 
-        Api.login(this.email.current.value, this.password.current.value).then(result => {
+        Api.login(this.state.email, this.state.password).then(result => {
             if (result.status == 200) {
                 result.json().then((data) => {
                     this.props.onLogin(data);
@@ -29,49 +39,43 @@ class Login extends Component {
         });
     };
 
-    componentDidMount() {
-        this.email.current.focus();
-    }
-
     render() {
-        return([
-            <button
-                key={2}
-                className="btn btn-login"
-                data-toggle="modal"
-                data-target="#loginModal"
-                >
-                Login
-            </button>,
-            <Modal id="loginModal" size="small" key="loginModal">
-                <Modal.Header>Login</Modal.Header>
-                <form onSubmit={this.handleLogin}>
-                    <Modal.Body>
-                        <div className="form-group">
-                            <label htmlFor="loginEmailInput">Email</label>
-                            <input
-                                className="form-control"
-                                type="text"
-                                aria-label="email"
-                                id="loginEmailInput"
-                                ref={this.email} />
-                        </div>
-                        <div className="form-group">
-                            <label htmlFor="loginPasswordInput">Password</label>
-                            <input
-                                className="form-control"
-                                type="password"
-                                aria-label="password"
-                                id="loginPasswordInput"
-                                ref={this.password} />
-                        </div>
-                    </Modal.Body>
-                    <Modal.Footer>
-                        <button className="btn bg-primary text-white" type="submit">Login</button>
-                    </Modal.Footer>
-                </form>
 
-            </Modal>
+        return ([
+            <Button
+                key="login-button"
+                color="inherit"
+                onClick={() => this.setState({open: true})}>
+                Log in
+            </Button>,
+            <Dialog
+                key="login-dialog"
+                open={this.state.open}
+                onClose={() => this.setState({open: false})}>
+                <DialogTitle>Log In</DialogTitle>
+                <form onSubmit={this.handleLogin}>
+                    <DialogContent>
+                        <TextField
+                            autoFocus
+                            label="Email address"
+                            type="email"
+                            margin="normal"
+                            onChange={event => this.setState({email: event.target.value})}
+                            value={this.state.email}
+                            fullWidth />
+                        <TextField
+                            label="Password"
+                            type="password"
+                            margin="normal"
+                            onChange={event => this.setState({password: event.target.value})}
+                            value={this.state.password}
+                            fullWidth />
+                    </DialogContent>
+                    <DialogActions>
+                        <Button type="submit">Log in</Button>
+                    </DialogActions>
+                </form>
+            </Dialog>
         ]);
     }
 }
