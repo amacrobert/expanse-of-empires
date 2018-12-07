@@ -61,19 +61,19 @@ export default class TerritoryHud extends React.Component {
             ownerInfo = userControls ? 'You control this territory' : t.empire.username + ' controls this territory';
         }
         else {
-            ownerInfo = 'This territory has not been captured by any empire yet.';
+            ownerInfo = 'Neutral territory';
         }
 
         return (
             <div className="match-hud match-hud-right">
                 {hexInfo}
+                <p>{ownerInfo}</p>
                 {startPrompt &&
                     <div className="start-prompt">
                         <p>This territory is an unclaimed starting position.</p>
                         {startPrompt}
                     </div>
                 }
-                <p>{ownerInfo}</p>
             </div>
         );
     }
