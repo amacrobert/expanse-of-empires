@@ -16,6 +16,8 @@ import { Provider, observer } from 'mobx-react';
 import UserStore from './store/UserStore';
 import MatchStore from './store/MatchStore';
 
+import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
+
 @observer
 class App extends Component {
 
@@ -54,17 +56,25 @@ class App extends Component {
         return (
             <Provider userStore={this.userStore} matchStore={this.matchStore}>
                 <Router>
-                    <div>
+                    <MuiThemeProvider theme={theme}>
                         <Nav
                             onLogin={this.login}
                             onLogout={this.logout} />
                         <Route exact path="/" component={Home} />
                         <Route path="/match/:matchId" component={Match} />
-                    </div>
+                    </MuiThemeProvider>
                 </Router>
             </Provider>
         );
     };
 }
+
+const theme = createMuiTheme({
+    palette: {
+        type: 'dark',
+        primary: { main: '#DF691A' },
+        secondary: { main: '#4E5D6C' },
+    },
+});
 
 ReactDOM.render(<App />, document.getElementById('root'));

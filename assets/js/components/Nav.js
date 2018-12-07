@@ -26,7 +26,7 @@ class Nav extends React.Component {
                     <Typography variant="h6" color="inherit" style={{flexGrow: 1}}>
                         <Link to="/" style={styles.navBarBrand}>
                             EXPANSE of EMPIRES
-                            {match && <span className="nav-match-name">{match.name}</span>}
+                            {match && <span style={{fontWeight: 'bold'}}> | {match.name}</span>}
                         </Link>
                     </Typography>
 

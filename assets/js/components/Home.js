@@ -18,7 +18,7 @@ class Home extends Component {
     render() {
 
         return (
-            <Grid container spacing={12} style={{padding: '12px'}}>
+            <Grid container spacing={0} style={{padding: '12px'}}>
                 <Grid item xs={12}>
                     <h4>MATCHES</h4>
                     <MatchList {...this.props} />

@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
-import Modal from './Modal/Modal';
 import Api from '../services/api';
 
 import Button from '@material-ui/core/Button';
@@ -24,7 +23,6 @@ class Login extends Component {
     }
 
     handleLogin = (e) => {
-        console.log('handleLogin', this.state.email, this.state.password);
         e.preventDefault();
 
         Api.login(this.state.email, this.state.password).then(result => {
@@ -45,7 +43,7 @@ class Login extends Component {
 
         return ([
             <Button
-                key="login-btn"
+                key="login-button"
                 color="inherit"
                 onClick={() => this.setState({open: true})}>
                 Log in
@@ -59,22 +57,18 @@ class Login extends Component {
                     <DialogContent>
                         <TextField
                             autoFocus
-                            id="email"
-                            label="Email Address"
+                            label="Email address"
                             type="email"
                             margin="normal"
                             onChange={event => this.setState({email: event.target.value})}
                             value={this.state.email}
-                            style={styles.textInput}
                             fullWidth />
                         <TextField
-                            id="password"
                             label="Password"
                             type="password"
                             margin="normal"
                             onChange={event => this.setState({password: event.target.value})}
                             value={this.state.password}
-                            style={styles.textInput}
                             fullWidth />
                     </DialogContent>
                     <DialogActions>
@@ -87,8 +81,3 @@ class Login extends Component {
 }
 
 export default Login;
-
-const styles = {
-    textInput: {
-    }
-};

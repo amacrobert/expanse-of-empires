@@ -1,9 +1,16 @@
-@import './bootstrap-superhero.css';
+//@import './bootstrap-superhero.css';
 @import './chat';
-@import './nav';
 @import './match-card';
 @import './match-hud';
 @import url('https://fonts.googleapis.com/css?family=Cinzel+Decorative');
+
+body {
+    padding: 0;
+    margin: 0;
+    background-color: #687582;
+    color: white;
+    font-family: 'Roboto';
+}
 
 .clickable {
     @include clickable;
