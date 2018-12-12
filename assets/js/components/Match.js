@@ -58,9 +58,15 @@ class Match extends Component {
                     break;
 
                 case 'update-resources':
+                    let newSupply = message.supply - this.props.matchStore.supply;
+                    let newTide = message.tide - this.props.matchStore.tide;
                     this.props.matchStore.supply = message.supply;
                     this.props.matchStore.tide = message.tide;
-                    this.props.enqueueSnackbar('Resources distributed. ');
+                    this.props.enqueueSnackbar(
+                        'Resources distributed. +' +
+                        Math.floor(newSupply*100)/100 + 'S +' +
+                        Math.floor(newTide*100)/100 + 'T'
+                    );
                     break;
 
                 case 'error':
