@@ -1,5 +1,4 @@
 import React from 'react';
-import MatchList from './MatchList';
 import { observer, inject } from 'mobx-react';
 
 import AccountCircle from '@material-ui/icons/AccountCircle';

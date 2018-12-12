@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import MatchList from './MatchList';
+import MatchList from './MatchList/MatchList';
 import { observer, inject } from 'mobx-react';
 import Grid from '@material-ui/core/Grid';
 

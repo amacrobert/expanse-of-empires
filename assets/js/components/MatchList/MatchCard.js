@@ -11,6 +11,10 @@ import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
 
+import TableBody from '@material-ui/core/TableBody';
+import TableCell from '@material-ui/core/TableCell';
+import TableRow from '@material-ui/core/TableRow';
+
 @observer
 class MatchCard extends React.Component {
 
@@ -30,19 +34,17 @@ class MatchCard extends React.Component {
         }
 
         return (
-            <Grid item xs={3}>
-                <Card>
-                    <CardActionArea onClick={() => this.props.history.push(matchUrl)}>
-                        <CardContent>
-                            <Typography gutterBottom variant="h5" component="h2">
-                                {match.name}
-                            </Typography>
-                            <Typography component="p">Phase: {match.phase}</Typography>
-                            <Typography component="p">Speed: {match.speed}</Typography>
-                        </CardContent>
-                    </CardActionArea>
-                </Card>
-            </Grid>
+            <TableRow
+                hover
+                style={{cursor: 'pointer'}}
+                onClick={() => this.props.history.push(matchUrl)}
+                tabIndex={-1}
+                padding='dense'>
+                <TableCell>{match.name}</TableCell>
+                <TableCell>{match.phase}</TableCell>
+                <TableCell numeric>{match.speed}</TableCell>
+                <TableCell>{match.map_name}</TableCell>
+            </TableRow>
         );
     }
 }
