@@ -6,7 +6,8 @@ import { observer } from 'mobx-react';
 import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
-import TableBody from '@material-ui/core/TableRow';
+import TableBody from '@material-ui/core/TableBody';
+import Grid from '@material-ui/core/Grid';
 
 @observer
 class MatchList extends React.Component {
@@ -29,26 +30,39 @@ class MatchList extends React.Component {
             );
         });
 
+        return this.props.display == 'card' ? this.renderCards(matchCards) : this.renderTable(matchCards);
 
+    }
+
+    renderCards = matchCards => {
+        if (!matchCards) {
+            return null;
+        }
+
+        return (
+            <Grid container spacing={24} style={{marginBottom: 16}}>
+                <Grid item xs={12}>
+                    <h4>{this.props.title.toUpperCase()}</h4>
+                </Grid>
+                {matchCards}
+            </Grid>
+        )
+    };
+
+    renderTable = matchCards => {
         return ([
             <TableHead key={this.props.key + '-th1'}>
                 <TableRow>
-                    <TableCell colSpan={4} style={styles.sectionHeader}>
+                    <TableCell colSpan={5} style={styles.sectionHeader}>
                         {this.props.title}
                     </TableCell>
                 </TableRow>
             </TableHead>,
-            <TableHead key={this.props.key + '-th2'}>
-                <TableRow>
-                    <TableCell>Name</TableCell>
-                    <TableCell>Phase</TableCell>
-                    <TableCell numeric>Speed</TableCell>
-                    <TableCell>Map</TableCell>
-                </TableRow>
-            </TableHead>,
-            matchCards
+            <TableBody>
+                {matchCards}
+            </TableBody>,
         ]);
-    }
+    };
 }
 
 export default MatchList;

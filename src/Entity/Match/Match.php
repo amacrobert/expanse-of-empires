@@ -27,6 +27,9 @@ class Match implements JsonSerializable {
     private $user_empire = null;
 
     public function jsonSerialize() {
+        $empire_count = $this->getEmpires()->count();
+        $slots = $this->getMap()->getStartingTerritories()->count();
+
         return [
             'id'                => $this->getId(),
             'name'              => $this->getName(),
@@ -39,6 +42,9 @@ class Match implements JsonSerializable {
             'phase'             => $this->getPhase(),
             'map_name'          => $this->getMap() ? $this->getMap()->getName() : 'Map not chosen yet',
             'user_joined'       => (bool)$this->getUserEmpire(),
+            'empire_count'      => $empire_count,
+            'slots'             => $slots,
+            'full'              => !($empire_count < $slots)
         ];
     }
 

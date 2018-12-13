@@ -35,15 +35,20 @@ class MatchList extends React.Component {
     };
 
     render() {
+
+        const otherMatchesText = this.matches['joined'].length ? 'OTHER MATCHES' : 'MATCHES';
+
         if (this.props.matchStore.matchList.length) {
-            return (
-                <Paper>
+            return ([
+                <MatchListSection
+                    {...this.props}
+                    key="msl-your-matches"
+                    title="Your active matches"
+                    matches={this.matches['joined']}
+                    display="card" />,
+                <h4>{otherMatchesText}</h4>,
+                <Paper key="ml-table-container">
                     <Table padding='dense'>
-                        <MatchListSection
-                            {...this.props}
-                            key="msl-your-matches"
-                            title="Your matches"
-                            matches={this.matches['joined']} />
                         <MatchListSection
                             {...this.props}
                             key="msl-registration"
@@ -65,8 +70,8 @@ class MatchList extends React.Component {
                             title="Previous matches"
                             matches={this.matches['complete']} />
                     </Table>
-                </Paper>
-            );
+                </Paper>,
+            ]);
         }
         else {
             return (<p>Loading matches...</p>)

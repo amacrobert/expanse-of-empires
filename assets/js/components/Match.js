@@ -54,6 +54,8 @@ class Match extends Component {
 
                 case 'new-empire':
                     this.props.matchStore.newEmpire(message.empire);
+                    this.props.matchStore.supply = message.supply;
+                    this.props.matchStore.tide = message.tide;
                     this.props.enqueueSnackbar(message.empire.username + ' joined the match');
                     break;
 
@@ -106,7 +108,6 @@ class Match extends Component {
 
     socketSend = (message) => {
         let user = this.props.userStore.user;
-        console.log('userstore user:', user);
         if (this.socket.readyState !== WebSocket.OPEN) {
             this.attemptReconnect(message);
         }

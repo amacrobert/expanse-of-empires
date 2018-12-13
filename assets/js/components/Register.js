@@ -29,8 +29,6 @@ class Register extends React.Component {
     handleRegisterSubmit = event => {
         event.preventDefault();
 
-        console.log('submitting');
-
         const { email, username, password, password2 } = this.state;
 
         this.setState({
@@ -59,7 +57,6 @@ class Register extends React.Component {
         Api.register(email, username, password).then((result) => {
             if (result.status == 200) {
                 result.json().then((data) => {
-                    console.log(data);
                     this.setState({
                         registrationComplete: true,
                         email: email,
