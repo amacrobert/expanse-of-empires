@@ -46,7 +46,7 @@ class MatchList extends React.Component {
                     title="Your active matches"
                     matches={this.matches['joined']}
                     display="card" />,
-                <h4>{otherMatchesText}</h4>,
+                <h4 key="ml-header-other">{otherMatchesText}</h4>,
                 <Paper key="ml-table-container">
                     <Table padding='dense'>
                         <MatchListSection

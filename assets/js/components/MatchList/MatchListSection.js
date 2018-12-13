@@ -51,14 +51,14 @@ class MatchList extends React.Component {
 
     renderTable = matchCards => {
         return ([
-            <TableHead key={this.props.key + '-th1'}>
+            <TableHead key={'th'}>
                 <TableRow>
                     <TableCell colSpan={5} style={styles.sectionHeader}>
                         {this.props.title}
                     </TableCell>
                 </TableRow>
             </TableHead>,
-            <TableBody>
+            <TableBody key={'tb'}>
                 {matchCards}
             </TableBody>,
         ]);

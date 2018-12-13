@@ -80,6 +80,9 @@ const theme = createMuiTheme({
         primary: { main: '#DF691A' },
         secondary: { main: '#4E5D6C' },
     },
+    typography: {
+        useNextVariants: true,
+    },
 });
 
 ReactDOM.render(<App />, document.getElementById('root'));
