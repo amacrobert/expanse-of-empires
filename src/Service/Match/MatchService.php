@@ -96,6 +96,8 @@ class MatchService {
         $empire->territory_count = 1;
         $this->socket_controller->broadcastToMatch($match->getId(), [
             'action' => 'new-empire',
+            'supply' => $empire->getSupply(),
+            'tide' => $empire->getTide(),
             'empire' => $empire,
         ]);
 

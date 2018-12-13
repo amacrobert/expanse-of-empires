@@ -4,6 +4,7 @@ namespace App\Entity\Map;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\Criteria;
 use JsonSerializable;
 
 class Map implements JsonSerializable {
@@ -18,6 +19,7 @@ class Map implements JsonSerializable {
             'name'              => $this->getName(),
             'description'       => $this->getDescription(),
             'state'             => $this->getTerritories()->toArray(),
+            'slots'             => $this->getStartingTerritories()->count(),
         ];
     }
 
@@ -27,6 +29,11 @@ class Map implements JsonSerializable {
 
     public function __toString() {
         return $this->getName() ?: 'New Map';
+    }
+
+    public function getStartingTerritories() {
+        $criteria = Criteria::create()->where(Criteria::expr()->eq('starting_position', 1));
+        return $this->getTerritories()->matching($criteria);
     }
 
     public function getId() {
