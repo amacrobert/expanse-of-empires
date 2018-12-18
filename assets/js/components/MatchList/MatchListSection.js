@@ -8,6 +8,7 @@ import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import TableBody from '@material-ui/core/TableBody';
 import Grid from '@material-ui/core/Grid';
+import Typography from '@material-ui/core/Typography';
 
 @observer
 class MatchList extends React.Component {
@@ -39,14 +40,14 @@ class MatchList extends React.Component {
             return null;
         }
 
-        return (
-            <Grid container spacing={24} style={{marginBottom: 16}}>
-                <Grid item xs={12}>
-                    <h4>{this.props.title.toUpperCase()}</h4>
-                </Grid>
+        return ([
+            <Typography variant="h6" gutterBottom={true} key="mls-title">
+                {this.props.title.toUpperCase()}
+            </Typography>,
+            <Grid container spacing={24} style={{marginBottom: 16}} key="mls-container">
                 {matchCards}
             </Grid>
-        )
+        ]);
     };
 
     renderTable = matchCards => {

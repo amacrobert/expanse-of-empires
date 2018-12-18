@@ -7,6 +7,7 @@ import { computed } from 'mobx';
 
 import Paper from '@material-ui/core/Paper';
 import Table from '@material-ui/core/Table';
+import Typography from '@material-ui/core/Typography';
 
 @inject('matchStore')
 @observer
@@ -46,7 +47,9 @@ class MatchList extends React.Component {
                     title="Your active matches"
                     matches={this.matches['joined']}
                     display="card" />,
-                <h4 key="ml-header-other">{otherMatchesText}</h4>,
+                <Typography variant="h6" gutterBottom={true} key="ml-header-other">
+                    {otherMatchesText}
+                </Typography>,
                 <Paper key="ml-table-container">
                     <Table padding='dense'>
                         <MatchListSection

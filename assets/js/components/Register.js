@@ -8,6 +8,7 @@ import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogTitle from '@material-ui/core/DialogTitle';
+import Typography from '@material-ui/core/Typography';
 
 class Register extends React.Component {
 
@@ -107,11 +108,13 @@ class Register extends React.Component {
     renderForm = () => {
         var errorAlerts = this.state.errors.map((error, index) => {
             return (
-                <p key={index}>{error}</p>
+                <Typography key={index} color="error" gutterBottom={true}>
+                    {error}
+                </Typography>
             );
         });
 
-        return( 
+        return(
             <form onSubmit={this.handleRegisterSubmit}>
                 <DialogContent>
                     {errorAlerts}
