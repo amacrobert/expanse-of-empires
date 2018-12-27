@@ -16,3 +16,9 @@ App\Entity\Match\TerritoryState:
         empire: { targetEntity: App\Entity\Match\Empire }
         territory: { targetEntity: App\Entity\Map\Territory }
         building: { targetEntity: App\Entity\Match\Building }
+
+    oneToMany:
+        armies:
+            targetEntity: App\Entity\Match\Army
+            mappedBy: territory_state
+            orphanRemoval: true

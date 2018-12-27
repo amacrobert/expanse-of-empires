@@ -6,7 +6,6 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use DateTime;
 use App\Entity\Map\Territory;
-use App\Entity\Match\{Building, Empire};
 
 class TerritoryState {
 
@@ -17,6 +16,27 @@ class TerritoryState {
     private $building;
     private $fortification = 0;
     private $units;
+    private $armies;
+
+    public function __construct() {
+        $this->armies = new ArrayCollection;
+    }
+
+    public function getArmies(): Collection {
+        return $this->armies;
+    }
+
+    public function addArmy(Army $army): TerritoryState {
+        $army->setTerritoryState($this);
+        $this->armies[] = $army;
+        return $this;
+    }
+
+    public function removeArmy(Army $army): TerritoryState {
+        $army->setTerritoryState(null); // to trigger orphan removal
+        $this->armies->removeElement($army);
+        return $this;
+    }
 
     public function getId(): ?int {
         return $this->id;

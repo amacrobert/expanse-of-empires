@@ -1,0 +1,15 @@
+App\Entity\Match\Army:
+
+    type: entity
+    table: army
+
+    id:
+        empire: { associationKey: true }
+        territory_state: { associationKey: true }
+
+    fields:
+        size: { type: integer }
+
+    manyToOne:
+        empire: { targetEntity: App\Entity\Match\Empire }
+        territory_state: { targetEntity: App\Entity\Match\TerritoryState, inversedBy: armies }
