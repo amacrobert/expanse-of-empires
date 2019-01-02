@@ -157,6 +157,13 @@ class Match extends Component {
         });
     };
 
+    trainSoldier = () => {
+        this.socketSend({
+            action: 'train-army',
+            territory_id: this.props.matchStore.selectedTerritory.id,
+        });
+    };
+
     render() {
 
         const loaded = this.props.matchStore.loaded;
@@ -177,9 +184,13 @@ class Match extends Component {
                             inFocus={this.state.focus !== 'chat'}
                             setFocus={this.setFocus}
                             onTerritorySelect={this.onTerritorySelect} />
+
                         <MatchHud />
+
                         <TerritoryHud
-                            startEmpire={this.startEmpire} />
+                            startEmpire={this.startEmpire}
+                            trainSoldier={this.trainSoldier} />
+
                         {this.socket && <Chat
                             user={this.props.userStore.user}
                             match={this.props.matchStore.match}
