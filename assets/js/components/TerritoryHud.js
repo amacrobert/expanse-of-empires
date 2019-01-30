@@ -66,9 +66,10 @@ export default class TerritoryHud extends React.Component {
 
         }
 
-        if (t.empire) {
-            let userControls = t.empire == this.props.matchStore.userEmpire;
-            ownerInfo = userControls ? 'You control this territory' : t.empire.username + ' controls this territory';
+        if (t.empire_id) {
+            let empire = this.props.matchStore.empiresById[t.empire_id];
+            let userControls = empire == this.props.matchStore.userEmpire;
+            ownerInfo = userControls ? 'You control this territory' : empire.username + ' controls this territory';
 
             if (phase == 'non-player-combat' || phase == 'expanse-of-empires') {
                 if (userControls) {

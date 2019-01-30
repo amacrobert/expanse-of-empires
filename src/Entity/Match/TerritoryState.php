@@ -60,10 +60,6 @@ class TerritoryState {
         return $this;
     }
 
-    public function getUnits() {
-        return [];
-    }
-
     public function getTerritory(): ?Territory {
         return $this->territory;
     }

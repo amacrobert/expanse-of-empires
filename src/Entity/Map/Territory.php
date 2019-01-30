@@ -33,7 +33,7 @@ class Territory implements JsonSerializable {
             'empire_id'         => $state && $state->getEmpire() ? $state->getEmpire()->getId() : null,
             'building'          => $state ? $state->getBuilding() : null,
             'fortification'     => $state ? $state->getFortification() : 0,
-            'units'             => $state ? $state->getUnits() : [],
+            'armies'            => $state ? $state->getArmies()->toArray() : [],
         ];
     }
 

@@ -33,6 +33,7 @@ class SocketApiSubscriber implements EventSubscriberInterface {
             'socket.chat.send' =>       [['userSentChat']],
             'socket.iam' =>             [['userJoinedChat']],
             'socket.empire.start' =>    [['startEmpire']],
+            'socket.train.army' =>      [['trainArmy']],
         ];
     }
 
@@ -45,14 +46,22 @@ class SocketApiSubscriber implements EventSubscriberInterface {
     }
 
     public function startEmpire($event) {
-        $message = $event->getSubject();
-        $match_id = $message->match_id;
-        $territory_id = $message->territory_id;
-
-        $match = $this->em->find(Match::class, $match_id);
-        $territory = $this->em->find(Territory::class, $territory_id);
-        $user = $event->getArgument('user');
-
+        $this->deriveMessageData($event, $user, $match, $territory);
         $this->match_service->createEmpire($user, $match, $territory);
+    }
+
+    public function trainArmy($event) {
+        $this->deriveMessageData($event, $user, $match, $territory);
+        $this->match_service->trainArmy($user, $match, $territory);
+    }
+
+    private function deriveMessageData($event, &$user, &$match, &$territory = null) {
+        $message = $event->getSubject();
+        $match_id = $message->match_id ?? null;
+        $territory_id = $message->territory_id ?? null;
+
+        $user = $event->getArgument('user') ?? null;
+        $match = $match_id ? $this->em->find(Match::class, $match_id) : null;
+        $territory = $territory_id ? $this->em->find(Territory::class, $territory_id) : null;
     }
 }

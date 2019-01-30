@@ -2,11 +2,20 @@
 
 namespace App\Entity\Match;
 
-class Army {
+use \JsonSerializable;
+
+class Army implements JsonSerializable {
 
     private $territory_state;
     private $empire;
     private $size = 0;
+
+    public function jsonSerialize() {
+        return [
+            'empire_id' => $this->getEmpire()->getId(),
+            'size' => $this->getSize(),
+        ];
+    }
 
     public function getTerritoryState(): ?TerritoryState {
         return $this->territory_state;

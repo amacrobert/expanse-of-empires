@@ -6,7 +6,7 @@ use App\Controller\SocketController;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Exception\VisibleException;
 use App\Entity\User\User;
-use App\Entity\Match\{Match, Empire, TerritoryState, Building};
+use App\Entity\Match\{Match, Empire, TerritoryState, Building, Army};
 use App\Entity\Map\Territory;
 
 class MatchService {
@@ -15,6 +15,8 @@ class MatchService {
 
     const STARTING_SUPPLY = 100;
     const STARTING_TIDE = 100;
+    const TRAIN_ARMY_SUPPLY = -10;
+    const TRAIN_ARMY_TIDE = -10;
 
     public function __construct(
         SocketController $socket_controller,
@@ -99,6 +101,76 @@ class MatchService {
             'supply' => $empire->getSupply(),
             'tide' => $empire->getTide(),
             'empire' => $empire,
+        ]);
+
+        $this->em->clear();
+    }
+
+    public function trainArmy($user, $match, $territory) {
+
+        // Get the user's empire
+        $empire = $this->em->getRepository(Empire::class)->findOneBy([
+            'user' => $user,
+            'match' => $match,
+        ]);
+
+        // Check that we're in a phase where training armies is allowed
+        $phase = $match->getPhase();
+        if (!in_array($phase, ['registration', 'non-player-combat', 'expanse-of-empires'])) {
+            throw new VisibleException('Training armies is not allowed in current phase: ' . $phase);
+        }
+
+        // Check that the user occupies the territory
+        $this->hydrateMapState($match);
+        $state = $territory->getState();
+        if (!$state || $state->getEmpire() != $empire) {
+            throw new VisibleException('You do not control that territory.');
+        }
+
+        // Check that the territory has a building capable of training armies
+        if (!$state || !$state->getBuilding() || !in_array($state->getBuilding()->getMachineName(), ['castle', 'barracks'])) {
+            throw new VisibleException('You need a Castle or Barracks to train an army.');
+        }
+
+        // Check that the user has enough supply and tide
+        if ($empire->getSupply() + self::TRAIN_ARMY_SUPPLY < 0) {
+            throw new VisibleException('You do not have enough Supply to train an army');
+        }
+        if ($empire->getTide() + self::TRAIN_ARMY_TIDE < 0) {
+            throw new VisibleException('You do not have enough Tide to train an army');
+        }
+
+        // Get existing army or create new if none exists. Update army size.
+        $army = $this->em->getRepository(Army::class)->findOneBy([
+            'territory_state' => $state,
+            'empire' => $empire,
+        ]);
+
+        if (!$army) {
+            $army = (new Army)
+                ->setTerritoryState($state)
+                ->setEmpire($empire)
+            ;
+            $this->em->persist($army);
+        }
+
+        $empire->setSupply($empire->getSupply() + self::TRAIN_ARMY_SUPPLY);
+        $empire->setTide($empire->getTide() + self::TRAIN_ARMY_TIDE);
+        $army->setSize($army->getSize() + 1);
+        $this->em->flush([$empire, $army]);
+
+        // Broadcast new army to user
+        $this->socket_controller->broadcastToUser($match->getId(), $user->getId(), [
+            'action' => 'army-trained',
+            'supply' => $empire->getSupply(),
+            'tide' => $empire->getTide(),
+        ]);
+
+        // Broadcast territory update to user (@TODO: broadcast to alliance)
+        print json_encode($territory);
+        $this->socket_controller->broadcastToUser($match->getId(), $user->getId(), [
+            'action' => 'territory-update',
+            'territory' => $territory,
         ]);
 
         $this->em->clear();

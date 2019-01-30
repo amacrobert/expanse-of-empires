@@ -12,7 +12,7 @@ class Building implements JsonSerializable {
     public function jsonSerialize() {
         return [
             'name'          => $this->getName(),
-            'machine_name'  => str_replace(' ', '-', strtolower($this->getName())),
+            'machine_name'  => $this->getMachineName(),
         ];
     }
 
@@ -31,5 +31,9 @@ class Building implements JsonSerializable {
     public function setName(?string $name): Building {
         $this->name = $name;
         return $this;
+    }
+
+    public function getMachineName(): ?string {
+        return str_replace(' ', '-', strtolower($this->getName()));
     }
 }
