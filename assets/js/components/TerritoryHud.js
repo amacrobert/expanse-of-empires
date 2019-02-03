@@ -4,7 +4,7 @@ import { observer, inject } from 'mobx-react';
 
 import Button from '@material-ui/core/Button';
 
-@inject('matchStore', 'userStore')
+@inject('matchStore', 'userStore', 'uiStore')
 @observer
 export default class TerritoryHud extends React.Component {
 
@@ -17,12 +17,12 @@ export default class TerritoryHud extends React.Component {
     }
 
     startEmpire = () => {
-        this.setState({pendingStartEmpireRequest: true});
+        this.props.uiStore.disableButton('start-empire');
         this.props.startEmpire();
     };
 
     trainSoldier = () => {
-        this.setState({pendingTrainSoldierRequest: true});
+        this.props.uiStore.disableButton('train-army');
         this.props.trainSoldier();
     }
 
@@ -53,7 +53,7 @@ export default class TerritoryHud extends React.Component {
                         variant="contained"
                         size="large"
                         color="primary"
-                        disabled={this.state.pendingStartEmpireRequest}
+                        disabled={this.props.uiStore.buttons['start-empire'].disabled}
                         onClick={this.startEmpire} >
                             Start Empire Here
                     </Button>
@@ -79,7 +79,7 @@ export default class TerritoryHud extends React.Component {
                                 variant="contained"
                                 size="large"
                                 color="primary"
-                                disabled={this.state.pendingTrainSoldierRequest}
+                                disabled={this.props.uiStore.buttons['train-army'].disabled}
                                 onClick={this.trainSoldier}>
                                     Train Soldier (-10S -10T)
                             </Button>

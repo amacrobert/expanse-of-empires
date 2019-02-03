@@ -15,6 +15,7 @@ import Match from './components/Match';
 import { Provider, observer } from 'mobx-react';
 import UserStore from './store/UserStore';
 import MatchStore from './store/MatchStore';
+import UIStore from './store/UIStore';
 
 import { SnackbarProvider } from 'notistack';
 import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
@@ -27,6 +28,7 @@ class App extends Component {
 
         this.userStore = new UserStore;
         this.matchStore = new MatchStore(this.userStore);
+        this.uiStore = new UIStore;
     };
 
     login = (result) => {
@@ -55,7 +57,10 @@ class App extends Component {
 
     render() {
         return (
-            <Provider userStore={this.userStore} matchStore={this.matchStore}>
+            <Provider
+                userStore={this.userStore}
+                matchStore={this.matchStore}
+                uiStore={this.uiStore}>
                 <Router>
                     <SnackbarProvider maxSnack={12}>
                         <MuiThemeProvider theme={theme}>

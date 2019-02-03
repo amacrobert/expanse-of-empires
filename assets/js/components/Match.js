@@ -15,7 +15,7 @@ import Grid from '@material-ui/core/Grid';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { withSnackbar } from 'notistack';
 
-@inject('userStore', 'matchStore')
+@inject('userStore', 'matchStore', 'uiStore')
 @observer
 class Match extends Component {
 
@@ -71,8 +71,15 @@ class Match extends Component {
                     );
                     break;
 
+                case 'army-trained':
+                    this.props.matchStore.supply = message.supply;
+                    this.props.matchStore.tide = message.tide;
+                    this.props.uiStore.enableButton('train-army');
+                    break;
+
                 case 'error':
                     this.props.matchStore.error = message.message;
+                    this.props.uiStore.clearUI();
                     break;
             }
         });
