@@ -78,8 +78,7 @@ class Match extends Component {
                     break;
 
                 case 'error':
-                    this.props.matchStore.error = message.message;
-                    this.props.uiStore.clearUI();
+                    this.props.uiStore.error = message.message;
                     break;
             }
         });
