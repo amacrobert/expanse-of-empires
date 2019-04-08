@@ -31,7 +31,7 @@ class Chat extends React.Component {
             this.scrollToBottom(true);
         })
 
-        this.props.socket.addEventListener('message', (payload) => {
+        this.props.matchStore.socket.addEventListener('message', (payload) => {
             const message = JSON.parse(payload.data);
 
             switch (message.action) {

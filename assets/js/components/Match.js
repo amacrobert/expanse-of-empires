@@ -7,7 +7,8 @@ import MapViewport from './MapViewport';
 import TerritoryHud from './TerritoryHud';
 import MatchHud from './MatchHud';
 import Chat from './Chat';
-import ErrorModal from './ErrorModal';
+import ErrorModal from './Match/ErrorModal';
+import ConnectingOverlay from './Match/ConnectingOverlay';
 import { toJS } from 'mobx';
 import { observer, inject } from 'mobx-react';
 
@@ -29,21 +30,23 @@ class Match extends Component {
     }
 
     componentDidMount() {
+        let ui = this.props.uiStore;
         let matchId = this.props.match.params.matchId;
+        ui.connectingMessage = 'Connecting to server';
+        ui.showConnectingOverlay = true;
+
         this.props.matchStore.setMatch(matchId).then(() => {
             console.log(this.props.matchStore);
             this.startSocket();
         });
     }
 
-    startSocket = (close = false) => {
-        if (close) {
-            this.socket.close();
-        }
+    startSocket = () => {
 
-        this.socket = new WebSocket('ws://127.0.0.1:8080');
+        this.props.matchStore.socket = new WebSocket('ws://127.0.0.1:8080');
+        let socket = this.props.matchStore.socket;
 
-        this.socket.addEventListener('message', (payload) => {
+        socket.addEventListener('message', (payload) => {
             const message = JSON.parse(payload.data);
             console.log('Received socket message:', message);
 
@@ -83,13 +86,26 @@ class Match extends Component {
             }
         });
 
-        this.socket.onopen = () => {
+        socket.onopen = () => {
+            let ui = this.props.uiStore;
+
+            ui.connectingMessage = 'Refreshing game state';
+            this.props.matchStore.refreshMatch().then(() => {
+                ui.showConnectingOverlay = false;
+                ui.connectingMessage = null;
+            });
             this.socketSend({action: 'iam'});
         };
 
-        this.socket.onerror = (error) => {
+        socket.onclose = () => {
+            let ui = this.props.uiStore;
+            ui.connectingMessage = 'Re-establishing connection to the server';
+            ui.showConnectingOverlay = true;
             this.attemptReconnect();
-        };
+        }
+
+        socket.onerror = () => {
+        }
     };
 
     updateTerritory = (newTerritory) => {
@@ -114,7 +130,8 @@ class Match extends Component {
 
     socketSend = (message) => {
         let user = this.props.userStore.user;
-        if (this.socket.readyState !== WebSocket.OPEN) {
+        let socket = this.props.matchStore.socket;
+        if (socket.readyState !== WebSocket.OPEN) {
             this.attemptReconnect(message);
         }
         else {
@@ -122,14 +139,15 @@ class Match extends Component {
             message.match_id = this.props.matchStore.match.id;
 
             console.log('sending:', message);
-            this.socket.send(JSON.stringify(message));
+            socket.send(JSON.stringify(message));
         }
     };
 
     attemptReconnect = (message) => {
         console.log('Attempting to reconnect to socket server...');
+
         window.setTimeout(() => {
-            this.startSocket(true);
+            this.startSocket();
             if (message) {
                 this.socketSend(message)
             }
@@ -137,7 +155,7 @@ class Match extends Component {
     };
 
     componentWillUnmount() {
-        this.socket.close();
+        this.props.matchStore.socket.close();
         this.props.matchStore.clearMatch();
     }
 
@@ -173,6 +191,7 @@ class Match extends Component {
     render() {
 
         const loaded = this.props.matchStore.loaded;
+        const socket = this.props.matchStore.socket;
 
         return (
             <Grid container spacing={0}>
@@ -197,7 +216,7 @@ class Match extends Component {
                             startEmpire={this.startEmpire}
                             trainSoldier={this.trainSoldier} />
 
-                        {this.socket && <Chat
+                        {socket && <Chat
                             user={this.props.userStore.user}
                             match={this.props.matchStore.match}
                             onChatSubmit={this.socketSend}
@@ -207,6 +226,7 @@ class Match extends Component {
                         <ErrorModal />
                     </Grid>
                 }
+                <ConnectingOverlay />
             </Grid>
         );
     }

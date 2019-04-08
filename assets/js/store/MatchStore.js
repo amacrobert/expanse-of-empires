@@ -55,6 +55,10 @@ class MatchStore {
         });
     };
 
+    @action refreshMatch = () => {
+        return this.setMatch(this.match.id);
+    }
+
     @action fetchUserEmpire = () => {
         Api.getUserEmpire(this.match.id).then(data => {
             this.supply = data.supply;

@@ -6,8 +6,10 @@ class UIStore {
         this.clearUI();
     }
 
-    @observable buttons;
     @observable error;
+    @observable buttons;
+    @observable showConnectingOverlay = false;
+    @observable connectingMessage;
 
     @action enableButton = (button) => {
         this.buttons[button].disabled = false;
@@ -23,6 +25,8 @@ class UIStore {
             'train-army': {disabled: false},
         };
 
+        this.showConnectingOverlay = false;
+        this.connectingMessage = null;
         this.error = null;
     };
 }
