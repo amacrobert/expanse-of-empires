@@ -22,7 +22,7 @@ class WebsocketServerCommand extends ContainerAwareCommand {
 
     protected function configure() {
         $this
-            ->setName('eoe:websocket:start')
+            ->setName('eoe:socket-server:start')
             ->setDescription('Start the websocket api server.')
         ;
     }
