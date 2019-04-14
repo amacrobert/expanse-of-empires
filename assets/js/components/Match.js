@@ -89,7 +89,7 @@ class Match extends Component {
         socket.onopen = () => {
             let ui = this.props.uiStore;
 
-            ui.connectingMessage = 'Refreshing game state';
+            ui.connectingMessage = 'Loading game state';
             this.props.matchStore.refreshMatch().then(() => {
                 ui.showConnectingOverlay = false;
                 ui.connectingMessage = null;
