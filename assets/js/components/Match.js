@@ -196,12 +196,7 @@ class Match extends Component {
         return (
             <Grid container spacing={0}>
 
-                {!loaded &&
-                    <Grid item xs={12} style={{textAlign: 'center', marginTop: 120}}>
-                        <CircularProgress
-                            size={80} />
-                    </Grid>
-                }
+                <ConnectingOverlay />
 
                 {loaded &&
                     <Grid item xs={12}>
@@ -220,13 +215,12 @@ class Match extends Component {
                             user={this.props.userStore.user}
                             match={this.props.matchStore.match}
                             onChatSubmit={this.socketSend}
-                            socket={this.socket}
                             setFocus={this.setFocus} />
                         }
+
                         <ErrorModal />
                     </Grid>
                 }
-                <ConnectingOverlay />
             </Grid>
         );
     }

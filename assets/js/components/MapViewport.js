@@ -255,7 +255,7 @@ class MapViewport extends React.Component {
                 if (!MatchUtil.showStartPosition(this.props.matchStore.match, territory)
                     && graphics.startingPositionSprite
                 ) {
-                    console.log('REMOVING STARTING POSITION SPRITE');
+                    console.debug('Removing starting position sprite from territory ' + territory.id);
                     this.scene.remove(graphics.startingPositionSprite);
                     delete graphics.startingPositionSprite;
 
@@ -266,7 +266,7 @@ class MapViewport extends React.Component {
                 else if (MatchUtil.showStartPosition(this.props.matchStore.match, territory)
                     && !graphics.startingPositionSprite
                 ) {
-                    console.log('ADDING STARTING POSITION SPRITE');
+                    console.debug('Adding starting position sprite to territory ' + territory.id);
                     assets.getSprite('startingPosition', territory.q, territory.r).then(sprite => {
                         graphics.startingPositionSprite = sprite;
                         this.scene.add(sprite);
@@ -304,7 +304,7 @@ class MapViewport extends React.Component {
                     // Add missing border sections
                     if (territory.empire_id && (!borderingHex || !bordersMatch)) {
                         if (!graphics.borders[rotation]) {
-                            console.log('BORDER: Adding ' + rotation + ' border to territory ' + territory.id);
+                            console.debug('Adding ' + rotation + ' border to territory ' + territory.id);
                             let newBorderSection = assets.getBorderSectionMesh(territory, rotation);
                             graphics.borders[rotation] = newBorderSection;
                             borderMeshUpdated = true;
@@ -314,7 +314,7 @@ class MapViewport extends React.Component {
                     // Remove border sections that shouldn't exist anymore
                     if (!territory.empire_id || (territory.empire_id && bordersMatch)) {
                         if (graphics.borders[rotation]) {
-                            console.log('BORDER: Removing ' + rotation + ' border from territory ' + territory.id)
+                            console.debug('Removing ' + rotation + ' border from territory ' + territory.id)
                             delete graphics.borders[rotation];
                             borderMeshUpdated = true;
                         }
@@ -324,6 +324,7 @@ class MapViewport extends React.Component {
                 // Remove old border mesh if it was updated
                 if (borderMeshUpdated) {
                     if (graphics.borderMerged) {
+                        console.debug('Removing border mesh from territory ' + territory.id);
                         this.scene.remove(graphics.borderMerged);
                         delete graphics.borderMerged;
                     }
@@ -331,7 +332,6 @@ class MapViewport extends React.Component {
 
                 // merge border meshes and add to scene
                 if (Object.keys(graphics.borders).length && !graphics.borderMerged) {
-                    console.log('graphics.borders: ', graphics.borders);
                     var borderMergedGeo = new THREE.Geometry();
 
                     Object.keys(graphics.borders).forEach(key => {
@@ -341,7 +341,7 @@ class MapViewport extends React.Component {
 
                     var borderMerged = new THREE.Mesh(borderMergedGeo, assets.borderMaterial);
                     borderMerged.castShadow = true;
-                    console.log('ADDING MERGED BORDER MESH');
+                    console.debug('Adding border mesh to territory ' + territory.id);
                     graphics.borderMerged = borderMerged;
                     this.scene.add(borderMerged);
                 }
@@ -355,21 +355,21 @@ class MapViewport extends React.Component {
                 ) {
                     // Remove building to be replaced
                     if (graphics.building) {
-                        console.log('Replacing building ' + graphics.building.name.toUpperCase() + ' from territory ' + territody.id);
+                        console.debug('Replacing building ' + graphics.building.name.toUpperCase() + ' from territory ' + territody.id);
                         this.scene.remove(graphics.building);
                         delete graphics.building;
                     }
 
                     // Place a building
                     assets.getBuilding(buildingName, q, r).then(building => {
-                        console.log('Adding building ' + building.name.toUpperCase() + ' to territory ' + territory.id);
+                        console.debug('Adding building ' + building.name.toUpperCase() + ' to territory ' + territory.id);
                         graphics.building = building;
                         this.scene.add(building);
                     })
                 }
                 // Remove destroyed building
                 else if (!territory.building && graphics.building) {
-                    console.log('Removing building ' + graphics.building.name.toUpperCase() + ' from territory ' + territory.id);
+                    console.debug('Removing building ' + graphics.building.name.toUpperCase() + ' from territory ' + territory.id);
                     this.scene.remove(graphics.building);
                     delete graphics.building;
                 }

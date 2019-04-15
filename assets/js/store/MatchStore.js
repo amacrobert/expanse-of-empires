@@ -6,7 +6,6 @@ class MatchStore {
 
     constructor(userStore) {
         this.userStore = userStore;
-        this.socket = null;
     }
 
     @observable match;
@@ -18,6 +17,7 @@ class MatchStore {
     @observable supply;
     @observable tide;
     @observable loaded = false;
+    @observable socket;
 
     @computed get empiresById() {
         let indexedEmpires = {};
