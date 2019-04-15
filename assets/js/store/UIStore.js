@@ -10,6 +10,7 @@ class UIStore {
     @observable buttons;
     @observable showConnectingOverlay = false;
     @observable connectingMessage;
+    @observable selectedUnits;
 
     @action enableButton = (button) => {
         this.buttons[button].disabled = false;
