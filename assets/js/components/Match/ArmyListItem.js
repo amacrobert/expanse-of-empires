@@ -108,7 +108,7 @@ export default class ArmyListItem extends React.Component {
 
         return (
                 <ListItemText
-                    primary={empire.username}
+                    primary={isUserEmpire ? 'Your army' : empire.username}
                     secondary={armyIcons}
                 />
         );
