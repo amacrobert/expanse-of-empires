@@ -15,8 +15,8 @@ import { observer, inject } from 'mobx-react';
 const maxDrawnIcons = 5;
 const buttonStyles = {
     default: 'rgba(127, 127, 127, .2)',
-    hover: 'rgba(173, 216, 230, .2)',
-    selected: 'rgba(173, 216, 230, .4)',
+    hover: 'rgba(173, 216, 230, .25)',
+    selected: 'rgba(173, 216, 230, .7)',
 };
 
 @inject('matchStore', 'uiStore')
@@ -28,13 +28,12 @@ export default class ArmyListItem extends React.Component {
         this.state = {unitHover: 0};
     }
 
-    select = key => {
-        console.log('select');
+    select = size => {
         let ui = this.props.uiStore;
         let previousSelectedUnits = ui.selectedUnits;
 
-        if (Number.isInteger(key)) {
-            ui.selectedUnits = key + 1;
+        if (Number.isInteger(size)) {
+            ui.selectedUnits = size;
         }
         else {
             ui.selectedUnits = this.props.army.size;
@@ -44,8 +43,6 @@ export default class ArmyListItem extends React.Component {
         if (ui.selectedUnits == previousSelectedUnits) {
             ui.selectedUnits = 0;
         }
-
-        console.log("UNITS SELECTED:", ui.selectedUnits);
     };
 
     render() {
@@ -53,7 +50,6 @@ export default class ArmyListItem extends React.Component {
         let army = this.props.army;
         let empire =  this.props.empire;
         let isUserEmpire = this.props.matchStore.userEmpire == empire;
-        console.log('isUserEmpire:', isUserEmpire);
         let armyIcons = [];
 
         for (let i = 0; i < army.size && i < maxDrawnIcons; i++) {
@@ -73,7 +69,7 @@ export default class ArmyListItem extends React.Component {
                <IconButton
                     key={i}
                     disabled={!isUserEmpire}
-                    onClick={() => this.select(i)}
+                    onClick={() => this.select(i + 1)}
                     onMouseEnter={() => this.setState({unitHover: i + 1})}
                     onMouseLeave={() => this.setState({unitHover: 0})}
                     style={{background: buttonStyle}}>
@@ -84,12 +80,27 @@ export default class ArmyListItem extends React.Component {
             );
         }
         if (army.size > maxDrawnIcons) {
+
+            let buttonStyle = buttonStyles.default;
+            if (ui.selectedUnits == army.size) {
+                buttonStyle = buttonStyles.selected;
+            }
+            else if (army.size == this.state.unitHover) {
+                buttonStyle = buttonStyles.hover;
+            }
+            if (this.state.unitHover > 0 && ui.selectedUnits == army.size && this.state.unitHover < army.size) {
+                buttonStyle = buttonStyles.hover;
+            }
+
+
             armyIcons.push(
                 <IconButton
                     key='extra-units'
                     disabled={!isUserEmpire}
-                    onClick={() => this.select('all')}
-                    >
+                    onClick={() => this.select(army.size)}
+                    onMouseEnter={() => this.setState({unitHover: army.size})}
+                    onMouseLeave={() => this.setState({unitHover: 0})}
+                    style={{background: buttonStyle}}>
                     {'+' + (army.size - maxDrawnIcons)}
                 </IconButton>
             );
