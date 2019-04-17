@@ -19,6 +19,7 @@ class MatchStore {
     @observable tide;
     @observable loaded = false;
     @observable socket;
+    @observable selectedUnits;
 
     @computed get empiresById() {
         let indexedEmpires = {};
@@ -74,6 +75,7 @@ class MatchStore {
         this.map = {state: null};
         this.supply = null;
         this.tide = null;
+        this.selectedUnits = 0;
     };
 
     @action newEmpire = (empire) => {
@@ -89,6 +91,11 @@ class MatchStore {
     };
 
     @action setSelectedTerritory = (territory) => {
+        // Clear selected units selection if the selection has changed
+        if (territory != this.selectedTerritory) {
+            this.selectedUnits = 0;
+        }
+
         this.selectedTerritoryId = territory ? territory.id : null;
     };
 

@@ -11,7 +11,7 @@ const Stats = require('../extra/stats.min.js');
 
 import { observer, inject } from 'mobx-react';
 
-@inject('matchStore', 'uiStore')
+@inject('matchStore')
 @observer
 class MapViewport extends React.Component {
 
@@ -51,11 +51,11 @@ class MapViewport extends React.Component {
         this.scene.add(this.camera);
 
         // Deselect territory
-        // @TODO: move to controls
+        // @TODO: move actions to prop function handled in Math.js
         window.addEventListener('keydown', e => {
             if (e.keyCode == 27) {
-                if (this.props.uiStore.selectedUnits > 0) {
-                    this.props.uiStore.selectedUnits = 0;
+                if (this.props.matchStore.selectedUnits > 0) {
+                    this.props.matchStore.selectedUnits = 0;
                 }
                 else {
                     this.props.matchStore.setSelectedTerritory(null);

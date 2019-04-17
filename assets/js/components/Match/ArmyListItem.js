@@ -19,7 +19,7 @@ const buttonStyles = {
     selected: 'rgba(173, 216, 230, .7)',
 };
 
-@inject('matchStore', 'uiStore')
+@inject('matchStore')
 @observer
 export default class ArmyListItem extends React.Component {
 
@@ -29,24 +29,24 @@ export default class ArmyListItem extends React.Component {
     }
 
     select = size => {
-        let ui = this.props.uiStore;
-        let previousSelectedUnits = ui.selectedUnits;
+        let matchStore = this.props.matchStore;
+        let previousSelectedUnits = matchStore.selectedUnits;
 
         if (Number.isInteger(size)) {
-            ui.selectedUnits = size;
+            matchStore.selectedUnits = size;
         }
         else {
-            ui.selectedUnits = this.props.army.size;
+            matchStore.selectedUnits = this.props.army.size;
         }
 
         // If the user clicked on their existing selected, toggle it off
-        if (ui.selectedUnits == previousSelectedUnits) {
-            ui.selectedUnits = 0;
+        if (matchStore.selectedUnits == previousSelectedUnits) {
+            matchStore.selectedUnits = 0;
         }
     };
 
     render() {
-        let ui = this.props.uiStore;
+        let matchStore = this.props.matchStore;
         let army = this.props.army;
         let empire =  this.props.empire;
         let isUserEmpire = this.props.matchStore.userEmpire == empire;
@@ -56,15 +56,15 @@ export default class ArmyListItem extends React.Component {
 
             let buttonStyle = buttonStyles.default;
             if (isUserEmpire) {
-                if (i < ui.selectedUnits) {
+                if (i < matchStore.selectedUnits) {
                     buttonStyle = buttonStyles.selected;
                 }
                 else if (i < this.state.unitHover) {
                     buttonStyle = buttonStyles.hover;
                 }
-                if (this.state.unitHover > 0 && i < ui.selectedUnits && i >= this.state.unitHover) {
+                if (this.state.unitHover > 0 && i < matchStore.selectedUnits && i >= this.state.unitHover) {
                     buttonStyle = buttonStyles.hover;
-                }                
+                }
             }
 
             armyIcons.push(
@@ -86,15 +86,15 @@ export default class ArmyListItem extends React.Component {
             let buttonStyle = buttonStyles.default;
 
             if (isUserEmpire) {
-                if (ui.selectedUnits == army.size) {
+                if (matchStore.selectedUnits == army.size) {
                     buttonStyle = buttonStyles.selected;
                 }
                 else if (army.size == this.state.unitHover) {
                     buttonStyle = buttonStyles.hover;
                 }
-                if (this.state.unitHover > 0 && ui.selectedUnits == army.size && this.state.unitHover < army.size) {
+                if (this.state.unitHover > 0 && matchStore.selectedUnits == army.size && this.state.unitHover < army.size) {
                     buttonStyle = buttonStyles.hover;
-                }                
+                }
             }
 
             armyIcons.push(

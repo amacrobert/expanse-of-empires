@@ -55,9 +55,24 @@ const getTerritory = (mapState, q, r) => {
     return _.findWhere(mapState, {q: q, r: r});
 };
 
+const getBorderingTerritories = (mapState, territory) => {
+    let q = territory.coordinates.q;
+    let r = territory.coordinates.r;
+
+    return [
+        getTerritory(mapState, q - 1, r),
+        getTerritory(mapState, q, r - 1),
+        getTerritory(mapState, q + 1, r - 1),
+        getTerritory(mapState, q + 1, r),
+        getTerritory(mapState, q, r + 1),
+        getTerritory(mapState, q - 1, r + 1),
+    ];
+};
+
 export default {
     getPhase,
     showStartPosition,
     getTerritory,
     getPhaseDescriptor,
+    getBorderingTerritories,
 };

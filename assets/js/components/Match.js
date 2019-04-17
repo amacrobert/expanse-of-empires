@@ -9,6 +9,7 @@ import MatchHud from './MatchHud';
 import Chat from './Chat';
 import ErrorModal from './Match/ErrorModal';
 import ConnectingOverlay from './Match/ConnectingOverlay';
+import Pathing from '../services/pathing';
 import { toJS } from 'mobx';
 import { observer, inject } from 'mobx-react';
 
@@ -176,14 +177,21 @@ class Match extends Component {
     };
 
     onTerritoryHover = (coordinates) => {
+        let matchStore = this.props.matchStore;
+
         if (coordinates) {
-            const territory = MatchUtil.getTerritory(this.props.matchStore.map.state, coordinates.q, coordinates.r);
-            this.props.matchStore.setHoverTerritory(territory);
-            console.log(toJS(territory));
+            const territory = MatchUtil.getTerritory(matchStore.map.state, coordinates.q, coordinates.r);
+            matchStore.setHoverTerritory(territory);
         }
         else {
-            this.props.matchStore.setHoverTerritory(null);
+            matchStore.setHoverTerritory(null);
         }
+
+        // If units are selected and the hovering territory is different from the selected territory, calculate a route
+        if (matchStore.selectedUnits > 0 && matchStore.hoverTerritory != matchStore.selectedTerritory) {
+            Pathing.calculate(matchStore);
+        }
+
     }
 
     setFocus = (focus = null) => {

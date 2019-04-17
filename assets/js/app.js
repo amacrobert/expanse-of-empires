@@ -26,9 +26,9 @@ class App extends Component {
     constructor(props) {
         super(props);
 
+        this.uiStore = new UIStore;
         this.userStore = new UserStore;
         this.matchStore = new MatchStore(this.userStore);
-        this.uiStore = new UIStore;
     };
 
     login = (result) => {
