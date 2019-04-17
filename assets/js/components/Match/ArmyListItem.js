@@ -55,14 +55,16 @@ export default class ArmyListItem extends React.Component {
         for (let i = 0; i < army.size && i < maxDrawnIcons; i++) {
 
             let buttonStyle = buttonStyles.default;
-            if (i < ui.selectedUnits) {
-                buttonStyle = buttonStyles.selected;
-            }
-            else if (i < this.state.unitHover) {
-                buttonStyle = buttonStyles.hover;
-            }
-            if (this.state.unitHover > 0 && i < ui.selectedUnits && i >= this.state.unitHover) {
-                buttonStyle = buttonStyles.hover;
+            if (isUserEmpire) {
+                if (i < ui.selectedUnits) {
+                    buttonStyle = buttonStyles.selected;
+                }
+                else if (i < this.state.unitHover) {
+                    buttonStyle = buttonStyles.hover;
+                }
+                if (this.state.unitHover > 0 && i < ui.selectedUnits && i >= this.state.unitHover) {
+                    buttonStyle = buttonStyles.hover;
+                }                
             }
 
             armyIcons.push(
@@ -82,16 +84,18 @@ export default class ArmyListItem extends React.Component {
         if (army.size > maxDrawnIcons) {
 
             let buttonStyle = buttonStyles.default;
-            if (ui.selectedUnits == army.size) {
-                buttonStyle = buttonStyles.selected;
-            }
-            else if (army.size == this.state.unitHover) {
-                buttonStyle = buttonStyles.hover;
-            }
-            if (this.state.unitHover > 0 && ui.selectedUnits == army.size && this.state.unitHover < army.size) {
-                buttonStyle = buttonStyles.hover;
-            }
 
+            if (isUserEmpire) {
+                if (ui.selectedUnits == army.size) {
+                    buttonStyle = buttonStyles.selected;
+                }
+                else if (army.size == this.state.unitHover) {
+                    buttonStyle = buttonStyles.hover;
+                }
+                if (this.state.unitHover > 0 && ui.selectedUnits == army.size && this.state.unitHover < army.size) {
+                    buttonStyle = buttonStyles.hover;
+                }                
+            }
 
             armyIcons.push(
                 <IconButton

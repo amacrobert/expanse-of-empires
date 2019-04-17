@@ -14,6 +14,7 @@ class MatchStore {
     @observable map = {state: null};
     @observable error;
     @observable selectedTerritoryId;
+    @observable hoverTerritoryId;
     @observable supply;
     @observable tide;
     @observable loaded = false;
@@ -89,10 +90,18 @@ class MatchStore {
 
     @action setSelectedTerritory = (territory) => {
         this.selectedTerritoryId = territory ? territory.id : null;
-    }
+    };
+
+    @action setHoverTerritory = (territory) => {
+        this.hoverTerritoryId = territory ? territory.id : null;
+    };
 
     @computed get selectedTerritory() {
         return _.find(this.map.state, t => t.id === this.selectedTerritoryId);
+    };
+
+    @computed get hoverTerritory() {
+        return _.find(this.map.state, t => t.id === this.hoverTerritoryId);
     };
 }
 

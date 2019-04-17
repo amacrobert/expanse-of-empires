@@ -11,7 +11,7 @@ const Stats = require('../extra/stats.min.js');
 
 import { observer, inject } from 'mobx-react';
 
-@inject('matchStore')
+@inject('matchStore', 'uiStore')
 @observer
 class MapViewport extends React.Component {
 
@@ -55,8 +55,13 @@ class MapViewport extends React.Component {
         // @TODO: Make changes to selectionGlow as a mobx reaction to matchStore.selectedTerritory
         window.addEventListener('keydown', e => {
             if (e.keyCode == 27) {
-                this.props.matchStore.setSelectedTerritory(null);
-                this.selectionGlow.visible = false;
+                if (this.props.uiStore.selectedUnits > 0) {
+                    this.props.uiStore.selectedUnits = 0;
+                }
+                else {
+                    this.props.matchStore.setSelectedTerritory(null);
+                    this.selectionGlow.visible = false;                    
+                }
             }
         });
 
@@ -167,10 +172,9 @@ class MapViewport extends React.Component {
             this.selectedHex.getWorldPosition(hexPosition);
             this.selectionGlow.position.x = hexPosition.x;
             this.selectionGlow.position.z = hexPosition.z;
-            var data = this.selectedHex.userData;
 
             // Send selected territory coordinates up
-            this.props.onTerritorySelect(data.coordinates);
+            this.props.onTerritorySelect(this.selectedHex.userData.coordinates);
         }
         else {
             this.selectionGlow.visible = false;
@@ -190,8 +194,14 @@ class MapViewport extends React.Component {
         let intersects = this.raycaster.intersectObjects(this.targetList);
 
         if (intersects.length) {
-            this.hoveredHex = intersects[0].object;
-            assets.setHoverOutline(this.hoveredHex.userData.coordinates);
+            // only update if hovering over a new hex
+            if (intersects[0].object != this.hoveredHex) {
+                this.hoveredHex = intersects[0].object;
+                assets.setHoverOutline(this.hoveredHex.userData.coordinates);
+
+                // Send up the hovering territory coordinates
+                this.props.onTerritoryHover(this.hoveredHex.userData.coordinates);
+            }
         }
         else {
             assets.setHoverOutline(null);

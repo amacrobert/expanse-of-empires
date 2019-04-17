@@ -170,6 +170,17 @@ class Match extends Component {
         }
     };
 
+    onTerritoryHover = (coordinates) => {
+        if (coordinates) {
+            const territory = MatchUtil.getTerritory(this.props.matchStore.map.state, coordinates.q, coordinates.r);
+            this.props.matchStore.setHoverTerritory(territory);
+            console.log(toJS(territory));
+        }
+        else {
+            this.props.matchStore.setHoverTerritory(null);
+        }
+    }
+
     setFocus = (focus = null) => {
         this.setState({focus: focus});
     };
@@ -203,7 +214,8 @@ class Match extends Component {
                         <MapViewport
                             inFocus={this.state.focus !== 'chat'}
                             setFocus={this.setFocus}
-                            onTerritorySelect={this.onTerritorySelect} />
+                            onTerritorySelect={this.onTerritorySelect}
+                            onTerritoryHover={this.onTerritoryHover} />
 
                         <MatchHud />
 
