@@ -162,8 +162,13 @@ class Match extends Component {
     onTerritorySelect = (coordinates) => {
         if (coordinates) {
             const territory = MatchUtil.getTerritory(this.props.matchStore.map.state, coordinates.q, coordinates.r);
-            this.props.matchStore.setSelectedTerritory(territory);
-            console.log(toJS(territory));
+            if (territory == this.props.matchStore.selectedTerritory) {
+                this.props.matchStore.setSelectedTerritory(null);
+            }
+            else {
+                this.props.matchStore.setSelectedTerritory(territory);
+                console.log(toJS(territory));
+            }
         }
         else {
             this.props.matchStore.setSelectedTerritory(null);

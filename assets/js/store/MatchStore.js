@@ -82,11 +82,11 @@ class MatchStore {
         this.map.state.forEach(territory => {
             territory.empire = territory.empire_id ? this.empiresById[territory.empire_id] : null;
         })
-    }
+    };
 
     @action setError = (error) => {
         this.error = error;
-    }
+    };
 
     @action setSelectedTerritory = (territory) => {
         this.selectedTerritoryId = territory ? territory.id : null;

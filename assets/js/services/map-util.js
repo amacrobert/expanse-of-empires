@@ -1,7 +1,7 @@
 const radius = 1;
 const width = Math.sqrt(3) * radius;
 const height = 2 * radius;
-const borderWidth = .25;
+const borderWidth = .1;
 const borderA = borderWidth / Math.tan(Math.PI / 3);
 const points = {
     top:            { x: 0,         z: -height/2 },

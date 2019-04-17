@@ -52,7 +52,6 @@ class MapViewport extends React.Component {
 
         // Deselect territory
         // @TODO: move to controls
-        // @TODO: Make changes to selectionGlow as a mobx reaction to matchStore.selectedTerritory
         window.addEventListener('keydown', e => {
             if (e.keyCode == 27) {
                 if (this.props.uiStore.selectedUnits > 0) {
@@ -60,7 +59,6 @@ class MapViewport extends React.Component {
                 }
                 else {
                     this.props.matchStore.setSelectedTerritory(null);
-                    this.selectionGlow.visible = false;                    
                 }
             }
         });
@@ -165,21 +163,10 @@ class MapViewport extends React.Component {
         // if there is one (or more) intersections
         if (intersects.length) {
             this.selectedHex = intersects[0].object;
-
-            // Move selection glow
-            this.selectionGlow.visible = true;
-            var hexPosition = new THREE.Vector3();
-            this.selectedHex.getWorldPosition(hexPosition);
-            this.selectionGlow.position.x = hexPosition.x;
-            this.selectionGlow.position.z = hexPosition.z;
-
             // Send selected territory coordinates up
             this.props.onTerritorySelect(this.selectedHex.userData.coordinates);
         }
         else {
-            this.selectionGlow.visible = false;
-            this.selectedHex = null;
-
             // unset selected territory
             this.props.onTerritorySelect(null);
         }
@@ -390,12 +377,33 @@ class MapViewport extends React.Component {
     // Update the scene when the map state changes
     reactToSceneUpdate = reaction(
         () => {
-            let match = this.props.matchStore;
-            return match.map.state && match.map.state.slice()
+            let matchStore = this.props.matchStore;
+            return matchStore.map.state && matchStore.map.state.slice()
         },
         () => {
             if (this.props.matchStore.map.state) {
                 this.updateScene();
+            }
+        }
+    );
+
+    // Update selection glow when selection changes
+    reactToSelectionChange = reaction(
+        () => {
+            let matchStore = this.props.matchStore;
+            return matchStore.selectedTerritory;
+        },
+        () => {
+            let territory = this.props.matchStore.selectedTerritory;
+
+            if (territory) {
+                let realCoordinates = MapUtil.axialToReal(territory.coordinates.q, territory.coordinates.r);
+                this.selectionGlow.position.x = realCoordinates.x;
+                this.selectionGlow.position.z = realCoordinates.z;
+                this.selectionGlow.visible = true;
+            }
+            else {
+                this.selectionGlow.visible = false;
             }
         }
     );
