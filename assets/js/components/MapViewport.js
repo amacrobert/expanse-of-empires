@@ -408,6 +408,20 @@ class MapViewport extends React.Component {
         }
     );
 
+    // Update the movement path when it changes
+    reactToPathChange = reaction(
+        () => {
+            let matchStore = this.props.matchStore;
+            return matchStore.path.nodes.slice();
+        },
+        () => {
+            let path = this.props.matchStore.path;
+
+            // @TODO: Render path
+            console.log('REACTING TO CHANGED PATH');
+        }
+    );
+
     render() {
         return(
             <div

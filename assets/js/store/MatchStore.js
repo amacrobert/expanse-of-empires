@@ -6,6 +6,7 @@ class MatchStore {
 
     constructor(userStore) {
         this.userStore = userStore;
+        this.path = {};
     }
 
     @observable match;
@@ -20,6 +21,7 @@ class MatchStore {
     @observable loaded = false;
     @observable socket;
     @observable selectedUnits;
+    @observable path;
 
     @computed get empiresById() {
         let indexedEmpires = {};
@@ -77,6 +79,12 @@ class MatchStore {
         this.tide = null;
         this.selectedUnits = 0;
     };
+
+    @action clearPath = () => {
+        this.path.type = null;
+        this.path.cost = 0,
+        this.path.nodes = [];
+    }
 
     @action newEmpire = (empire) => {
         this.empires.push(empire);

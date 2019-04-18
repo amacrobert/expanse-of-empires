@@ -24,17 +24,20 @@ export default class Pathing {
             return;
         }
 
-        let result = Pathing.findPath(matchStore, start, end);
+        let path = Pathing.findPath(matchStore, start, end);
 
-        console.log('type:', result.move);
-        console.log('cost:', result.cost);
+        console.log('type:', path.type);
+        console.log('cost:', path.cost);
 
-        if (result.path) {
+        if (path.nodes) {
             console.log('Calculated path:');
-            result.path.forEach(territory => {
+            path.nodes.forEach(territory => {
                 console.log('(' + territory.q + ',' + territory.r + ')');
             });
         }
+
+        // Update matchStore
+        path ? matchStore.path = path : matchStore.clearPath();
     };
 
     // A* search using terrain tide cost as movement cost
@@ -60,18 +63,21 @@ export default class Pathing {
                 let path = [];
                 let trace = end;
 
+                console.log('cameFrom:', cameFrom);
+
                 while (trace) {
                     path.push(trace);
                     trace = cameFrom[trace.id];
-                }
 
-                // reset priorities
-                Object.keys(cameFrom).forEach(id => {delete cameFrom[id].priority});
+                    if (trace) {
+                        delete trace.priority;
+                    }
+                }
 
                 return {
                     type: 'move',
                     cost: costSoFar[end.id],
-                    path,
+                    nodes: path.reverse(),
                 };
             }
 
@@ -95,13 +101,13 @@ export default class Pathing {
         }
 
         // reset priorities
-        Object.keys(cameFrom).forEach(id => {delete cameFrom[id].priority});
+        Object.keys(cameFrom).forEach(id => {
+            if (cameFrom[id]) {
+                delete cameFrom[id].priority;
+            }
+        });
 
         // No path found
-        return {
-            type: null,
-            cost: 0,
-            path: [],
-        };
+        return false;
     }
 }
