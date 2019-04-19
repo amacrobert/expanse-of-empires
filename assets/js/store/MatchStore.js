@@ -6,7 +6,7 @@ class MatchStore {
 
     constructor(userStore) {
         this.userStore = userStore;
-        this.path = {};
+        this.clearPath;
     }
 
     @observable match;
@@ -78,9 +78,14 @@ class MatchStore {
         this.supply = null;
         this.tide = null;
         this.selectedUnits = 0;
+        this.clearPath;
     };
 
     @action clearPath = () => {
+        if (!this.path) {
+            this.path = {};
+        }
+
         this.path.type = null;
         this.path.cost = 0,
         this.path.nodes = [];
@@ -104,6 +109,7 @@ class MatchStore {
             this.selectedUnits = 0;
         }
 
+        this.clearPath();
         this.selectedTerritoryId = territory ? territory.id : null;
     };
 

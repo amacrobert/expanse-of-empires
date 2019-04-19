@@ -85,7 +85,8 @@ export default class Pathing {
 
             neighbors.forEach(next => {
                 if (next) {
-                    let newCost = costSoFar[current.id] + next.terrain.tide;
+                    let tideCost =  next.terrain.tide;
+                    let newCost = costSoFar[current.id] + tideCost;
                     let hasVisited = (next.id in cameFrom);
                     let costsLess = newCost < costSoFar[next.id];
                     let isTraversable = (next.empire == matchStore.userEmpire);

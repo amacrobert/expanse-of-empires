@@ -75,13 +75,13 @@ class GraphicsUtil {
         // Hex hover selection
         let hoverLineGeometry = new THREE.Geometry();
         hoverLineGeometry.vertices.push(
-            new THREE.Vector3(points.top.x, 0, points.top.z),
-            new THREE.Vector3(points.topLeft.x, 0, points.topLeft.z),
-            new THREE.Vector3(points.bottomLeft.x, 0, points.bottomLeft.z),
-            new THREE.Vector3(points.bottom.x, 0, points.bottom.z),
-            new THREE.Vector3(points.bottomRight.x, 0, points.bottomRight.z),
-            new THREE.Vector3(points.topRight.x, 0, points.topRight.z),
-            new THREE.Vector3(points.top.x, 0, points.top.z),
+            new THREE.Vector3(points.top.x, 0.02, points.top.z),
+            new THREE.Vector3(points.topLeft.x, 0.02, points.topLeft.z),
+            new THREE.Vector3(points.bottomLeft.x, 0.02, points.bottomLeft.z),
+            new THREE.Vector3(points.bottom.x, 0.02, points.bottom.z),
+            new THREE.Vector3(points.bottomRight.x, 0.02, points.bottomRight.z),
+            new THREE.Vector3(points.topRight.x, 0.02, points.topRight.z),
+            new THREE.Vector3(points.top.x, 0.02, points.top.z),
         );
         this.hoverOutline = new THREE.Line(
             hoverLineGeometry,

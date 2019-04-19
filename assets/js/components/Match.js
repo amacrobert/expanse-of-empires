@@ -191,7 +191,7 @@ class Match extends Component {
         if (matchStore.selectedUnits > 0 && matchStore.hoverTerritory != matchStore.selectedTerritory) {
             Pathing.calculate(matchStore);
         }
-        else if (matchStore.path.type) {
+        else if (matchStore.path && matchStore.path.type) {
             matchStore.clearPath();
         }
 

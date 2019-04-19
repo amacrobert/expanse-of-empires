@@ -412,12 +412,30 @@ class MapViewport extends React.Component {
     reactToPathChange = reaction(
         () => {
             let matchStore = this.props.matchStore;
-            return matchStore.path.nodes.slice();
+            return matchStore.path && matchStore.path.nodes.slice();
         },
         () => {
             let path = this.props.matchStore.path;
 
-            // @TODO: Render path
+            // remove old path
+            if (this.scenePath) {
+                this.scene.remove(this.scenePath);
+                delete this.scenePath;
+            }
+
+            if (path.nodes.length) {
+                let pathMaterial = new THREE.LineBasicMaterial({ color: 0x5555FF});
+                let pathGeometry = new THREE.Geometry();
+
+                path.nodes.forEach(node => {
+                    let real = MapUtil.axialToReal(node.q, node.r);
+                    pathGeometry.vertices.push(new THREE.Vector3(real.x, 0.03, real.z));
+                });
+
+                this.scenePath = new THREE.Line(pathGeometry, pathMaterial);
+                this.scene.add(this.scenePath);
+            }
+
             console.log('REACTING TO CHANGED PATH');
         }
     );
