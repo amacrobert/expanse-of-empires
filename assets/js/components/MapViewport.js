@@ -29,6 +29,7 @@ class MapViewport extends React.Component {
         this.stats = new Stats();
         this.stats.showPanel(0);
         document.body.appendChild(this.stats.dom);
+
     }
 
     componentDidMount() {
@@ -50,18 +51,8 @@ class MapViewport extends React.Component {
         this.controls.target.set(0, 0, 0);
         this.scene.add(this.camera);
 
-        // Deselect territory
-        // @TODO: move actions to prop function handled in Math.js
-        window.addEventListener('keydown', e => {
-            if (e.keyCode == 27) {
-                if (this.props.matchStore.selectedUnits > 0) {
-                    this.props.matchStore.selectedUnits = 0;
-                }
-                else {
-                    this.props.matchStore.setSelectedTerritory(null);
-                }
-            }
-        });
+        // @TODO: move actions to prop function handled in Match.js
+        window.addEventListener('keydown', this.onKeyDown, false);
 
         // selection glow
         this.selectionGlow = new THREE.Mesh(
@@ -139,6 +130,9 @@ class MapViewport extends React.Component {
             this.mount.current.removeChild(this.renderer.domElement);
         }
         document.body.removeChild(this.stats.dom);
+
+        window.removeEventListener('keydown', this.onKeyDown, false);
+        window.removeEventListener('resize', this.onWindowResize, false);
     }
 
     onMouseDown = (event) => {
@@ -199,6 +193,30 @@ class MapViewport extends React.Component {
         this.camera.aspect = this.mount.current.offsetWidth / this.mount.current.offsetHeight;
         this.camera.updateProjectionMatrix();
         this.renderer.setSize(this.mount.current.offsetWidth, this.mount.current.offsetHeight);
+    };
+
+    onKeyDown = (e) => {
+
+        // Deselect territory
+        if (e.keyCode == 27) {
+            if (this.props.matchStore.selectedUnits > 0) {
+                this.props.matchStore.selectedUnits = 0;
+            }
+            else {
+                this.props.matchStore.setSelectedTerritory(null);
+            }
+        }
+
+        // Select units with 1-5 keys
+        if (49 <= e.keyCode && e.keyCode <= 53) {
+            let selection = e.keyCode - 48;
+            this.props.matchStore.setSelectedUnits(selection);
+        }
+
+        // ` selects all units
+        if (e.keyCode === 192) {
+            this.props.matchStore.selectAllUnits();
+        }
     };
 
     start = () => {

@@ -60,7 +60,9 @@ class MatchStore {
     };
 
     @action refreshMatch = () => {
-        return this.setMatch(this.match.id);
+        if (this.match) {
+            return this.setMatch(this.match.id);
+        }
     }
 
     @action fetchUserEmpire = () => {
@@ -78,6 +80,7 @@ class MatchStore {
         this.supply = null;
         this.tide = null;
         this.selectedUnits = 0;
+        this.selectedTerritoryId = null;
         this.clearPath;
     };
 
@@ -115,6 +118,38 @@ class MatchStore {
 
     @action setHoverTerritory = (territory) => {
         this.hoverTerritoryId = territory ? territory.id : null;
+    };
+
+    @action setSelectedUnits = (selection) => {
+        let army = this.userArmyInSelectedTerritory;
+
+        if (!army) {
+            return;
+        }
+
+        // de-select if the existing selection is chosen
+        if (selection == this.selectedUnits) {
+            selection = 0;
+        }
+        // limit selection to army size
+        else if (selection > army.size) {
+            selection = army.size;
+        }
+
+        this.selectedUnits = selection;
+    };
+
+    @action selectAllUnits = () => {
+        if (this.userArmyInSelectedTerritory) {
+            this.setSelectedUnits(this.userArmyInSelectedTerritory.size);
+        }
+    }
+
+    @computed get userArmyInSelectedTerritory() {
+        if (this.selectedTerritory) {
+            return _.find(this.selectedTerritory.armies, a => a.empire_id === this.userEmpire.id);
+        }
+        return null;
     };
 
     @computed get selectedTerritory() {
