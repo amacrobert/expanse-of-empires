@@ -10,6 +10,7 @@ import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import ListItemText from '@material-ui/core/ListItemText';
 import IconButton from '@material-ui/core/IconButton';
 import SvgIcon from '@material-ui/core/SvgIcon';
+import Typography from '@material-ui/core/Typography';
 import { observer, inject } from 'mobx-react';
 
 const maxDrawnIcons = 5;
@@ -81,6 +82,8 @@ export default class ArmyListItem extends React.Component {
                 </IconButton>
             );
         }
+
+        // +X units
         if (army.size > maxDrawnIcons) {
 
             let buttonStyle = buttonStyles.default;
@@ -107,6 +110,15 @@ export default class ArmyListItem extends React.Component {
                     style={{background: buttonStyle}}>
                     {'+' + (army.size - maxDrawnIcons)}
                 </IconButton>
+            );
+        }
+
+        // "X units selected" text
+        if (isUserEmpire && matchStore.selectedUnits) {
+            armyIcons.push(
+                <Typography variant='caption' key='units-selected-text'>
+                    {matchStore.selectedUnits} unit{matchStore.selectedUnits != 1 ? 's' : ''} selected
+                </Typography>
             );
         }
 

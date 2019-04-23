@@ -1,6 +1,7 @@
 import { observable, computed, action } from 'mobx';
 import Api from '../services/api';
 import _ from 'underscore';
+import Pathing from '../services/pathing';
 
 class MatchStore {
 
@@ -124,11 +125,13 @@ class MatchStore {
         let army = this.userArmyInSelectedTerritory;
 
         if (!army) {
+            this.clearPath();
             return;
         }
 
         // de-select if the existing selection is chosen
         if (selection == this.selectedUnits) {
+            this.clearPath();
             selection = 0;
         }
         // limit selection to army size
@@ -137,6 +140,13 @@ class MatchStore {
         }
 
         this.selectedUnits = selection;
+
+        if (this.selectedUnits == 0) {
+            this.clearPath();
+        }
+        else {
+            Pathing.calculate(this);
+        }
     };
 
     @action selectAllUnits = () => {

@@ -14,6 +14,7 @@ export default class Pathing {
         // If user does not have an army in start territory, take no action
         // This should never happen since we don't get here unless there are units selected, but including it for safety
         if (!userArmy) {
+            matchStore.clearPath();
             return;
         }
 
@@ -21,6 +22,7 @@ export default class Pathing {
         // @TODO: Allow user to traverse through allies' territories
         let territoriesBorderingStart = MatchUtil.getBorderingTerritories(matchStore.map.state, start);
         if (!_.contains(territoriesBorderingStart, end) && end.empire != userEmpire) {
+            matchStore.clearPath();
             return;
         }
 

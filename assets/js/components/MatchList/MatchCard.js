@@ -34,11 +34,17 @@ class MatchCard extends React.Component {
                         <Typography gutterBottom variant="h5" component="h2">
                             {match.name}
                         </Typography>
+                        <Typography variant="body2" inline={true}>
+                            Speed: {match.speed}
+                        </Typography>
+                        <Typography variant="body2" inline={true}>
+                            Map: {match.map_name}
+                        </Typography>
+                        <Typography variant="body2" inline={true}>
+                            Phase: {this.phaseText}
+                        </Typography>
                     </CardContent>
                 </CardActionArea>
-                <CardActions>
-                    <Button onClick={this.matchSelected}>OPEN</Button>
-                </CardActions>
             </Card>
         </Grid>
     );
@@ -87,7 +93,7 @@ class MatchCard extends React.Component {
             phaseText = match.phase;
         }
         return (
-            <Typography color={color}>
+            <Typography color={color} inline={true}>
                 {phaseText}
             </Typography>
         );

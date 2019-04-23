@@ -200,7 +200,7 @@ class MapViewport extends React.Component {
         // Deselect territory
         if (e.keyCode == 27) {
             if (this.props.matchStore.selectedUnits > 0) {
-                this.props.matchStore.selectedUnits = 0;
+                this.props.matchStore.setSelectedUnits(0);
             }
             else {
                 this.props.matchStore.setSelectedTerritory(null);
