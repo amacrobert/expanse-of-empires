@@ -28,16 +28,6 @@ export default class Pathing {
 
         let path = Pathing.findPath(matchStore, start, end);
 
-        console.log('type:', path.type);
-        console.log('cost:', path.cost);
-
-        if (path.nodes) {
-            console.log('Calculated path:');
-            path.nodes.forEach(territory => {
-                console.log('(' + territory.q + ',' + territory.r + ')');
-            });
-        }
-
         // Update matchStore
         path ? matchStore.path = path : matchStore.clearPath();
     };
@@ -64,8 +54,6 @@ export default class Pathing {
             if (current == end) {
                 let path = [];
                 let trace = end;
-
-                console.log('cameFrom:', cameFrom);
 
                 while (trace) {
                     path.push(trace);

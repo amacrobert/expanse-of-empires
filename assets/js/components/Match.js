@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import _ from 'underscore';
 import update from 'immutability-helper';
-import Api from '../services/api';
 import MatchUtil from '../services/match-util';
 import MapViewport from './MapViewport';
 import TerritoryHud from './TerritoryHud';
@@ -161,18 +160,36 @@ class Match extends Component {
     }
 
     onTerritorySelect = (coordinates) => {
+
+        let matchStore = this.props.matchStore;
+        let selectedTerritory = matchStore.selectedTerritory;
+        let path = matchStore.path;
+
         if (coordinates) {
-            const territory = MatchUtil.getTerritory(this.props.matchStore.map.state, coordinates.q, coordinates.r);
-            if (territory == this.props.matchStore.selectedTerritory) {
-                this.props.matchStore.setSelectedTerritory(null);
+
+            let territory = MatchUtil.getTerritory(matchStore.map.state, coordinates.q, coordinates.r);
+
+            // De-select if user clicks the existing selection
+            if (territory == selectedTerritory) {
+                matchStore.setSelectedTerritory(null);
             }
+            // Move units
+            else if (path && path.type == 'move') {
+                this.socketSend({
+                    action: 'move-units',
+                    start: selectedTerritory.id,
+                    end: territory.id,
+                    path: matchStore.path.nodes.map(territory => territory.id),
+                })
+            }
+            // Normal selection
             else {
-                this.props.matchStore.setSelectedTerritory(territory);
+                matchStore.setSelectedTerritory(territory);
                 console.log(toJS(territory));
             }
         }
         else {
-            this.props.matchStore.setSelectedTerritory(null);
+            matchStore.setSelectedTerritory(null);
         }
     };
 

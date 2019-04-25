@@ -453,8 +453,6 @@ class MapViewport extends React.Component {
                 this.scenePath = new THREE.Line(pathGeometry, pathMaterial);
                 this.scene.add(this.scenePath);
             }
-
-            console.log('REACTING TO CHANGED PATH');
         }
     );
 

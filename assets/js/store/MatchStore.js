@@ -64,7 +64,7 @@ class MatchStore {
         if (this.match) {
             return this.setMatch(this.match.id);
         }
-    }
+    };
 
     @action fetchUserEmpire = () => {
         Api.getUserEmpire(this.match.id).then(data => {
