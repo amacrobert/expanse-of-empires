@@ -80,6 +80,9 @@ class Match extends Component {
                     this.props.uiStore.enableButton('train-army');
                     break;
 
+                case 'units-moved':
+                    break;
+
                 case 'error':
                     this.props.uiStore.error = message.message;
                     break;
@@ -179,8 +182,9 @@ class Match extends Component {
                     action: 'move-units',
                     start: selectedTerritory.id,
                     end: territory.id,
+                    units: matchStore.selectedUnits,
                     path: matchStore.path.nodes.map(territory => territory.id),
-                })
+                });
             }
             // Normal selection
             else {

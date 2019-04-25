@@ -117,6 +117,7 @@ class SocketController implements MessageComponentInterface {
                 'action' => 'error',
                 'message' => $e->getMessage(),
             ]);
+            $this->em->clear();
         }
         catch(Exception $e) {
             print (string)$e;

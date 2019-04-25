@@ -30,10 +30,11 @@ class SocketApiSubscriber implements EventSubscriberInterface {
     public static function getSubscribedEvents() {
 
         return [
-            'socket.chat.send' =>       [['userSentChat']],
-            'socket.iam' =>             [['userJoinedChat']],
-            'socket.empire.start' =>    [['startEmpire']],
-            'socket.train.army' =>      [['trainArmy']],
+            'socket.chat.send' =>       'userSentChat',
+            'socket.iam' =>             'userJoinedChat',
+            'socket.empire.start' =>    'startEmpire',
+            'socket.train.army' =>      'trainArmy',
+            'socket.move.units' =>      'moveUnits',
         ];
     }
 
@@ -53,6 +54,24 @@ class SocketApiSubscriber implements EventSubscriberInterface {
     public function trainArmy($event) {
         $this->deriveMessageData($event, $user, $match, $territory);
         $this->match_service->trainArmy($user, $match, $territory);
+    }
+
+    public function moveUnits($event) {
+        // Get some message data
+        $this->deriveMessageData($event, $user, $match);
+        $units = $event->getSubject()->units;
+
+        // Get all territories in path
+        $territory_path_ids = $event->getSubject()->path;
+        $territory_path = $this->em->getRepository(Territory::class)->findBy(['id' => $territory_path_ids]);
+
+        // Sort the territory paths by the order of the path
+        $territory_path_order = array_flip($territory_path_ids);
+        usort($territory_path, function($t1, $t2) use ($territory_path_order) {
+            return $territory_path_order[$t1->getId()] > $territory_path_order[$t2->getId()];
+        });
+
+        $this->match_service->moveUnits($user, $match, $territory_path, $units);
     }
 
     private function deriveMessageData($event, &$user, &$match, &$territory = null) {

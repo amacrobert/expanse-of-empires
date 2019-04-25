@@ -176,8 +176,133 @@ class MatchService {
         $this->em->clear();
     }
 
-    public function hydrateMapState($match) {
-        $territory_states = $this->em->getRepository(TerritoryState::class)->findByMatch($match);
+    public function moveUnits(User $user, Match $match, array $territory_path, int $units) {
+
+        $empire = $this->em->getRepository(Empire::class)->findOneBy([
+            'user' => $user,
+            'match' => $match,
+        ]);
+
+        // Check that we're in a phase where moving armies is allowed
+        $phase = $match->getPhase();
+        if (!in_array($phase, ['non-player-combat', 'expanse-of-empires'])) {
+            throw new VisibleException('Moving armies is not allowed in current phase: ' . $phase);
+        }
+
+        $this->hydrateMapState($match, $territory_path);
+
+        // Check that the user has at the requested units in the starting territory
+        $territory_start = current($territory_path);
+        $user_army_start = $this->getEmpireArmyInTerritory($empire, $territory_start);
+
+        if (!$user_army_start || $user_army_start->getSize() < $units) {
+            throw new VisibleException('You do not have ' . $units . ' units in the starting territory to move');
+        }
+
+        $tide_cost = 0;
+        foreach ($territory_path as $order => $territory) {
+
+            $state = $territory->getState();
+
+            // Make sure there is a direct path from the previous territory to the current one
+            if (!empty($territory_path[$order - 1])) {
+                $previous_territory = $territory_path[$order - 1];
+                if (!$this->territoriesAreNeighbors($territory, $previous_territory)) {
+                    throw new VisibleException('Invalid path. ' . $territory->getId() . 'isnot neighbor of ' . $previous_territory->getId());
+                }
+            }
+
+            // Check that the user controls the territory
+            // @TODO: allow traversal through an allies' territories
+            if ($state->getEmpire() != $empire) {
+                throw new VisibleException('That path is no longer valid. You have lost one of the territories in the path.');
+            }
+
+            // Add the tide cost to the total
+            $tide_cost += $territory->getTerrain()->getBaseTideCost();
+
+            print 'path ' . $order . ': t.id ' . $territory->getId() . ', terrain cost: ' . $territory->getTerrain()->getBaseTideCost() . PHP_EOL;
+        }
+
+        // Check that the user has enough tide to complete the move
+        if ($tide_cost > $empire->getTide()) {
+            throw new VisibleException('You do not have enough Tideto make that move. Needed: ' . $tide_cost . ', current: ' . $empire->getTide());
+        }
+
+        // Move units
+        $territory_end = end($territory_path);
+        $user_army_end = $this->getEmpireArmyInTerritory($empire, $territory_end, true);
+        $user_army_start->setSize($user_army_start->getSize() - $units);
+        $user_army_end->setSize($user_army_end->getSize() + $units);
+        $this->em->flush([$user_army_start, $user_army_end]);
+
+        $this->socket_controller->broadcastToMatch($match->getId(), [
+            'action' => 'territory-update',
+            'territory' => $territory_start,
+        ]);
+        $this->socket_controller->broadcastToMatch($match->getId(), [
+            'action' => 'territory-update',
+            'territory' => $territory_end,
+        ]);
+
+        $this->em->clear();
+    }
+
+    private function territoriesAreNeighbors(Territory $t1, Territory $t2): bool {
+        $t1_q = $t1->getAxialQ();
+        $t1_r = $t1->getAxialR();
+        $t2_q = $t2->getAxialQ();
+        $t2_r = $t2->getAxialR();
+
+        return (
+            ($t1_q == $t2_q + 0 && $t1_r == $t2_r - 1) || // top left neighbor
+            ($t1_q == $t2_q + 1 && $t1_r == $t2_r - 1) || // top right neighbor
+            ($t1_q == $t2_q + 1 && $t1_r == $t2_r + 0) || // right neighbor
+            ($t1_q == $t2_q + 0 && $t1_r == $t2_r + 1) || // bottom right neighbor
+            ($t1_q == $t2_q - 1 && $t1_r == $t2_r + 1) || // bottom left neighbor
+            ($t1_q == $t2_q - 1 && $t1_r == $t2_r + 0)    // left neighbor
+        );
+    }
+
+    private function getEmpireArmyInTerritory(
+        Empire $empire,
+        Territory $territory,
+        bool $create_if_missing = false
+    ): ?Army {
+
+        $territory_armies = $territory->getState()->getArmies()->toArray();
+        $empire_armies = array_filter($territory_armies, function($army) use ($empire) {
+            return $army->getEmpire() == $empire;
+        });
+
+        if (!empty($empire_armies)) {
+            return current($empire_armies);
+        }
+
+        if ($create_if_missing) {
+            $army = (new Army)
+                ->setEmpire($empire)
+                ->setTerritoryState($territory->getState())
+                ->setSize(0)
+            ;
+
+            $this->em->persist($army);
+            $this->em->flush($army);
+
+            return $army;
+        }
+
+        return null;
+    }
+
+    public function hydrateMapState(Match $match, array $territories = null) {
+
+        $search_params = ['match' => $match];
+        if (!empty($territories)) {
+            $search_params['territory'] = $territories;
+        }
+
+        $territory_states = $this->em->getRepository(TerritoryState::class)->findBy($search_params);
 
         foreach ($territory_states as $territory_state) {
             $territory = $territory_state->getTerritory();
