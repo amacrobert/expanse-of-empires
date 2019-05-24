@@ -58,11 +58,9 @@ export default class Pathing {
                 while (trace) {
                     path.push(trace);
                     trace = cameFrom[trace.id];
-
-                    if (trace) {
-                        delete trace.priority;
-                    }
                 }
+
+                console.log('path:', path.reverse());
 
                 return {
                     type: 'move',

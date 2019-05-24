@@ -112,10 +112,13 @@ class Match extends Component {
     };
 
     updateTerritory = (newTerritory) => {
-        let empiresById = this.props.matchStore.empiresById;
-        let map = this.props.matchStore.map;
+        let matchStore = this.props.matchStore;
+        let empiresById = matchStore.empiresById;
+        let map = matchStore.map;
         const index = _.findIndex(map.state, (t) => (t.id == newTerritory.id));
         let oldTerritory = Object.assign(map.state[index]);
+        // Update teritory empire from empire_id
+        newTerritory.empire = newTerritory.empire_id ? matchStore.empiresById[newTerritory.empire_id] : null;
         map.state[index] = newTerritory;
 
         if (empiresById[oldTerritory.empire_id]) {
@@ -124,6 +127,7 @@ class Match extends Component {
         if (empiresById[newTerritory.empire_id]) {
             empiresById[newTerritory.empire_id.territory_count]++;
         }
+
 
         // Update HUD if updated territory is selected
         if (this.state.selectedTerritory && this.state.selectedTerritory.id === newTerritory.id) {
@@ -185,6 +189,9 @@ class Match extends Component {
                     units: matchStore.selectedUnits,
                     path: matchStore.path.nodes.map(territory => territory.id),
                 });
+
+                matchStore.setSelectedTerritory(territory);
+                matchStore.setSelectedUnits(0);
             }
             // Normal selection
             else {

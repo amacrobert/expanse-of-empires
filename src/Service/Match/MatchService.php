@@ -193,6 +193,9 @@ class MatchService {
 
         // Check that the user has at the requested units in the starting territory
         $territory_start = current($territory_path);
+        if (!$territory_start instanceof Territory) {
+            throw new VisibleException('There was an error trying to execute the move command. Please refresh and try again.');
+        }
         $user_army_start = $this->getEmpireArmyInTerritory($empire, $territory_start);
 
         if (!$user_army_start || $user_army_start->getSize() < $units) {
