@@ -60,8 +60,6 @@ export default class Pathing {
                     trace = cameFrom[trace.id];
                 }
 
-                console.log('path:', path.reverse());
-
                 return {
                     type: 'move',
                     cost: costSoFar[end.id],

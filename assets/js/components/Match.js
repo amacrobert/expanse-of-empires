@@ -128,7 +128,6 @@ class Match extends Component {
             empiresById[newTerritory.empire_id.territory_count]++;
         }
 
-
         // Update HUD if updated territory is selected
         if (this.state.selectedTerritory && this.state.selectedTerritory.id === newTerritory.id) {
             this.setState({ selectedTerritory: newTerritory });
@@ -182,16 +181,18 @@ class Match extends Component {
             }
             // Move units
             else if (path && path.type == 'move') {
-                this.socketSend({
-                    action: 'move-units',
-                    start: selectedTerritory.id,
-                    end: territory.id,
-                    units: matchStore.selectedUnits,
-                    path: matchStore.path.nodes.map(territory => territory.id),
-                });
+
+                let units = matchStore.selectedUnits;
+                let path = matchStore.path.nodes.map(territory => territory.id);
 
                 matchStore.setSelectedTerritory(territory);
                 matchStore.setSelectedUnits(0);
+
+                this.socketSend({
+                    action: 'move-units',
+                    units,
+                    path,
+                });
             }
             // Normal selection
             else {
