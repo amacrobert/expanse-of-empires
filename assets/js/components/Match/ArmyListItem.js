@@ -20,7 +20,7 @@ const buttonStyles = {
     selected: 'rgba(173, 216, 230, .7)',
 };
 
-@inject('matchStore')
+@inject('matchStore', 'uiStore')
 @observer
 export default class ArmyListItem extends React.Component {
 
@@ -52,6 +52,7 @@ export default class ArmyListItem extends React.Component {
         let empire =  this.props.empire;
         let isUserEmpire = this.props.matchStore.userEmpire == empire;
         let armyIcons = [];
+        let userIsMovingUnits = this.props.uiStore.movingUnits && isUserEmpire;
 
         for (let i = 0; i < army.size && i < maxDrawnIcons; i++) {
 
@@ -122,11 +123,20 @@ export default class ArmyListItem extends React.Component {
             );
         }
 
+        // "moving units" text
+        if (userIsMovingUnits) {
+            armyIcons.push(
+                <Typography variant='caption' key='moving-units-text'>
+                    Moving units into territory...
+                </Typography>
+            );
+        }
+
         return (
-                <ListItemText
-                    primary={isUserEmpire ? 'Your army' : empire.username}
-                    secondary={armyIcons}
-                />
+            <ListItemText
+                primary={isUserEmpire ? 'Your army' : empire.username + "'s army"}
+                secondary={armyIcons}
+            />
         );
 
     }

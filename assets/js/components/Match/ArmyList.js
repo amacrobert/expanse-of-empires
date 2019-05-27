@@ -13,18 +13,20 @@ import SvgIcon from '@material-ui/core/SvgIcon';
 import { observer, inject } from 'mobx-react';
 
 @observer
-@inject('matchStore')
+@inject('matchStore', 'uiStore')
 export default class ArmyList extends React.Component {
 
     render() {
 
         const armyList = this.props.armies.map(army => {
 
-            if (!army.size) {
+            const empire = this.props.matchStore.empiresById[army.empire_id];
+            const isUserEmpire = this.props.matchStore.userEmpire == empire;
+            const userIsMovingUnits = this.props.uiStore.movingUnits && isUserEmpire;
+
+            if (!army.size && !userIsMovingUnits) {
                 return null;
             }
-
-            const empire = this.props.matchStore.empiresById[army.empire_id];
 
             return (
                 <ListItem key={empire.id}>
