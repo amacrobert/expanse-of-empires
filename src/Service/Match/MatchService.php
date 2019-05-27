@@ -89,18 +89,19 @@ class MatchService {
 
         // Update map
         $territory->setState($state);
-        $this->socket_controller->broadcastToMatch($match->getId(), [
-            'action' => 'territory-update',
-            'territory' => $territory,
-        ]);
 
         // Tell match service new empire exists
         $empire->territory_count = 1;
         $this->socket_controller->broadcastToMatch($match->getId(), [
             'action' => 'new-empire',
-            'supply' => $empire->getSupply(),
-            'tide' => $empire->getTide(),
-            'empire' => $empire,
+            'updates' => [
+                'empires' => [$empire],
+                'territories' => [$territory],
+                'resources' => [
+                    'supply' => $empire->getSupply(),
+                    'tide' => $empire->getTide(),
+                ],
+            ],
         ]);
 
         $this->em->clear();
@@ -159,18 +160,16 @@ class MatchService {
         $army->setSize($army->getSize() + 1);
         $this->em->flush([$empire, $army]);
 
-        // Broadcast new army to user
+        // Broadcast new army to user (@TODO: broadcast to alliance)
         $this->socket_controller->broadcastToUser($match->getId(), $user->getId(), [
             'action' => 'army-trained',
-            'supply' => $empire->getSupply(),
-            'tide' => $empire->getTide(),
-        ]);
-
-        // Broadcast territory update to user (@TODO: broadcast to alliance)
-        print json_encode($territory);
-        $this->socket_controller->broadcastToUser($match->getId(), $user->getId(), [
-            'action' => 'territory-update',
-            'territory' => $territory,
+            'updates' => [
+                'territories' => [$territory],
+                'resources' => [
+                    'supply' => $empire->getSupply(),
+                    'tide' => $empire->getTide(),
+                ]
+            ]
         ]);
 
         $this->em->clear();
@@ -229,7 +228,7 @@ class MatchService {
 
         // Check that the user has enough tide to complete the move
         if ($tide_cost > $empire->getTide()) {
-            throw new VisibleException('You do not have enough Tideto make that move. Needed: ' . $tide_cost . ', current: ' . $empire->getTide());
+            throw new VisibleException('You do not have enough Tide to make that move. Needed: ' . $tide_cost . ', current: ' . $empire->getTide());
         }
 
         // Move units
@@ -239,13 +238,15 @@ class MatchService {
         $user_army_end->setSize($user_army_end->getSize() + $units);
         $this->em->flush([$user_army_start, $user_army_end]);
 
-        $this->socket_controller->broadcastToMatch($match->getId(), [
-            'action' => 'territory-update',
-            'territory' => $territory_start,
-        ]);
-        $this->socket_controller->broadcastToMatch($match->getId(), [
-            'action' => 'territory-update',
-            'territory' => $territory_end,
+        // Broadcast unit move to user. @TODO: broadcast to alliance
+        $this->socket_controller->broadcastToUser($match->getId(), $user->getId(), [
+            'action' => 'units-moved',
+            'updates' => [
+                'territories' => [
+                    $territory_start,
+                    $territory_end,
+                ],
+            ],
         ]);
 
         $this->em->clear();

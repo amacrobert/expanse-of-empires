@@ -73,6 +73,43 @@ class MatchStore {
         });
     };
 
+    @action updateEmpire = (empire) => {
+        // Empire is new -- add it
+        if (!this.empiresById[empire.id]) {
+            this.newEmpire(empire);
+        }
+        else {
+            this.empiresById[empire.id] = empire;
+        }
+    };
+
+    @action updateTerritory = (newTerritory) => {
+        let empiresById = this.empiresById;
+        let map = this.map;
+        let index = _.findIndex(map.state, (t) => (t.id == newTerritory.id));
+        let oldTerritory = Object.assign(map.state[index]);
+
+        // Update teritory empire from empire_id
+        newTerritory.empire = newTerritory.empire_id ? this.empiresById[newTerritory.empire_id] : null;
+        map.state[index] = newTerritory;
+
+        // Update empire territory counts in case territory changed hands
+        if (empiresById[oldTerritory.empire_id]) {
+            empiresById[oldTerritory.empire_id.territory_count]--;
+        }
+        if (empiresById[newTerritory.empire_id]) {
+            empiresById[newTerritory.empire_id.territory_count]++;
+        }
+    };
+
+    @action updateSupply = (supply) => {
+        this.supply = supply;
+    };
+
+    @action updateTide = (tide) => {
+        this.tide = tide;
+    };
+
     @action clearMatch = () => {
         this.loaded = false;
         this.match = null;

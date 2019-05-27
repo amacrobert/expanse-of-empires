@@ -25,7 +25,6 @@ class Match extends Component {
 
         this.state = {
             focus: null,
-            selectedTerritory: null,
         };
     }
 
@@ -47,26 +46,45 @@ class Match extends Component {
         let socket = this.props.matchStore.socket;
 
         socket.addEventListener('message', (payload) => {
+            const matchStore = this.props.matchStore;
+            const uiStore = this.props.uiStore;
             const message = JSON.parse(payload.data);
+
             console.log('Received socket message:', message);
 
-            switch (message.action) {
-                case 'territory-update':
-                    this.updateTerritory(message.territory);
-                    break;
+            let updates = message.updates;
+            if (updates) {
+                if (updates.territories) {
+                    updates.territories.forEach(territory => matchStore.updateTerritory(territory));
+                }
 
+                if (updates.empires) {
+                    updates.empires.forEach(empire => matchStore.updateEmpire(empire));
+                }
+
+                if (updates.resources) {
+                    let resources = updates.resources;
+                    if (resources.supply) {
+                        matchStore.updateSupply(resources.supply);
+                    }
+
+                    if (resources.tide) {
+                        matchStore.updateTide(resources.tide);
+                    }
+                }
+            }
+
+            switch (message.action) {
                 case 'new-empire':
-                    this.props.matchStore.newEmpire(message.empire);
-                    this.props.matchStore.supply = message.supply;
-                    this.props.matchStore.tide = message.tide;
                     this.props.enqueueSnackbar(message.empire.username + ' joined the match');
                     break;
 
                 case 'update-resources':
                     let newSupply = message.supply - this.props.matchStore.supply;
                     let newTide = message.tide - this.props.matchStore.tide;
-                    this.props.matchStore.supply = message.supply;
-                    this.props.matchStore.tide = message.tide;
+                    matchStore.supply = message.supply;
+                    matchStore.tide = message.tide;
+
                     this.props.enqueueSnackbar(
                         'Resources distributed. +' +
                         Math.floor(newSupply*100)/100 + 'S +' +
@@ -75,16 +93,18 @@ class Match extends Component {
                     break;
 
                 case 'army-trained':
-                    this.props.matchStore.supply = message.supply;
-                    this.props.matchStore.tide = message.tide;
-                    this.props.uiStore.enableButton('train-army');
+                    uiStore.enableButton('train-army');
                     break;
 
                 case 'units-moved':
+                    this.props.enqueueSnackbar(
+                        'Units moved'
+                    );
+                    uiStore.movingUnits = false;
                     break;
 
                 case 'error':
-                    this.props.uiStore.error = message.message;
+                    uiStore.error = message.message;
                     break;
             }
         });
@@ -108,29 +128,6 @@ class Match extends Component {
         }
 
         socket.onerror = () => {
-        }
-    };
-
-    updateTerritory = (newTerritory) => {
-        let matchStore = this.props.matchStore;
-        let empiresById = matchStore.empiresById;
-        let map = matchStore.map;
-        const index = _.findIndex(map.state, (t) => (t.id == newTerritory.id));
-        let oldTerritory = Object.assign(map.state[index]);
-        // Update teritory empire from empire_id
-        newTerritory.empire = newTerritory.empire_id ? matchStore.empiresById[newTerritory.empire_id] : null;
-        map.state[index] = newTerritory;
-
-        if (empiresById[oldTerritory.empire_id]) {
-            empiresById[oldTerritory.empire_id.territory_count]--;
-        }
-        if (empiresById[newTerritory.empire_id]) {
-            empiresById[newTerritory.empire_id.territory_count]++;
-        }
-
-        // Update HUD if updated territory is selected
-        if (this.state.selectedTerritory && this.state.selectedTerritory.id === newTerritory.id) {
-            this.setState({ selectedTerritory: newTerritory });
         }
     };
 
@@ -182,6 +179,7 @@ class Match extends Component {
             // Move units
             else if (path && path.type == 'move') {
 
+                this.props.uiStore.movingUnits = true;
                 let units = matchStore.selectedUnits;
                 let path = matchStore.path.nodes.map(territory => territory.id);
 
@@ -231,16 +229,20 @@ class Match extends Component {
     };
 
     startEmpire = () => {
+        let territory = this.props.matchStore.selectedTerritory;
+
         this.socketSend({
             action: 'empire-start',
-            territory_id: this.props.matchStore.selectedTerritory.id,
+            territory_id: territory.id,
         });
     };
 
     trainSoldier = () => {
+        let territory = this.props.matchStore.selectedTerritory;
+
         this.socketSend({
             action: 'train-army',
-            territory_id: this.props.matchStore.selectedTerritory.id,
+            territory_id: territory.id,
         });
     };
 
