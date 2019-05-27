@@ -134,6 +134,7 @@ class DistributeResourcesCommand extends ContainerAwareCommand {
             );
         }
 
+        // Send batch of resource update messages to socket server for distribution to open connections
         \Ratchet\Client\connect('ws://127.0.0.1:8080')->then(function($conn) use ($match_id, $update_messages) {
             $conn->send(json_encode([
                 'action' => 'client-messages',
@@ -166,11 +167,15 @@ class DistributeResourcesCommand extends ContainerAwareCommand {
             ]);
 
             $update_messages[] = [
-                'action'    => 'update-resources',
+                'action'    => 'resources-distributed',
                 'match_id'  => $match_id,
                 'user_id'   => $resources['user_id'],
-                'supply'    => $new_supply + $resources['old_supply'],
-                'tide'      => $resources['new_tide'] + $resources['old_tide'],
+                'updates' => [
+                    'resources' => [
+                        'supply'    => $new_supply + $resources['old_supply'],
+                        'tide'      => $resources['new_tide'] + $resources['old_tide'],
+                    ],
+                ],
             ];
         }
 

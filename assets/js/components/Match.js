@@ -53,6 +53,8 @@ class Match extends Component {
             console.log('Received socket message:', message);
 
             let updates = message.updates;
+            let newSupply = 0;
+            let newTide = 0;
             if (updates) {
                 if (updates.territories) {
                     updates.territories.forEach(territory => matchStore.updateTerritory(territory));
@@ -64,6 +66,9 @@ class Match extends Component {
 
                 if (updates.resources) {
                     let resources = updates.resources;
+                    newSupply = message.updates.resources.supply - this.props.matchStore.supply;
+                    newTide = message.updates.resources.tide - this.props.matchStore.tide;
+
                     if (resources.supply) {
                         matchStore.updateSupply(resources.supply);
                     }
@@ -79,12 +84,7 @@ class Match extends Component {
                     this.props.enqueueSnackbar(message.empire.username + ' joined the match');
                     break;
 
-                case 'update-resources':
-                    let newSupply = message.supply - this.props.matchStore.supply;
-                    let newTide = message.tide - this.props.matchStore.tide;
-                    matchStore.supply = message.supply;
-                    matchStore.tide = message.tide;
-
+                case 'resources-distributed':
                     this.props.enqueueSnackbar(
                         'Resources distributed. +' +
                         Math.floor(newSupply*100)/100 + 'S +' +

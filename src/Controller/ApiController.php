@@ -110,7 +110,7 @@ class ApiController extends Controller {
         ])) {
             return new JsonResponse([
                 'supply' => $empire->getSupply(),
-                'tide'  =>$empire->getTide(),
+                'tide' => $empire->getTide(),
             ]);
         }
 

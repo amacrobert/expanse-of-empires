@@ -39,20 +39,20 @@ class Empire implements JsonSerializable {
         return $this->id;
     }
 
-    public function getSupply(): ?int {
+    public function getSupply(): ?float {
         return $this->supply ?: 0;
     }
 
-    public function setSupply(int $supply): Empire {
+    public function setSupply(float $supply): Empire {
         $this->supply = $supply;
         return $this;
     }
 
-    public function getTide(): ?int {
+    public function getTide(): ?float {
         return $this->tide ?: 0;
     }
 
-    public function setTide(int $tide): Empire {
+    public function setTide(float $tide): Empire {
         $this->tide = $tide;
         return $this;
     }
