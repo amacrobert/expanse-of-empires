@@ -1,13 +1,13 @@
 import React from 'react';
-import MapUtil from '../services/map-util';
-import GraphicsUtil from '../services/graphics-util';
-import MatchUtil from '../services/match-util';
+import MapUtil from '../../services/map-util';
+import GraphicsUtil from '../../services/graphics-util';
+import MatchUtil from '../../services/match-util';
 import { reaction } from 'mobx';
 const THREE = require('three');
 const assets = new GraphicsUtil();
 
-require('../three/controls/OrbitControls.js');
-const Stats = require('../extra/stats.min.js');
+require('../../three/controls/OrbitControls.js');
+const Stats = require('../../extra/stats.min.js');
 
 import { observer, inject } from 'mobx-react';
 

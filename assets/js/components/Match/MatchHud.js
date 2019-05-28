@@ -1,5 +1,5 @@
 import React from 'react';
-import MatchUtil from '../services/match-util';
+import MatchUtil from '../../services/match-util';
 import { observer, inject } from 'mobx-react';
 
 @inject('matchStore')

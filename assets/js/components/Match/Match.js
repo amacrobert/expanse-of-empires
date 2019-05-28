@@ -1,14 +1,14 @@
 import React, { Component } from 'react';
 import _ from 'underscore';
 import update from 'immutability-helper';
-import MatchUtil from '../services/match-util';
+import MatchUtil from '../../services/match-util';
 import MapViewport from './MapViewport';
 import TerritoryHud from './TerritoryHud';
 import MatchHud from './MatchHud';
-import Chat from './Chat';
-import ErrorModal from './Match/ErrorModal';
-import ConnectingOverlay from './Match/ConnectingOverlay';
-import Pathing from '../services/pathing';
+import Chat from '../Chat';
+import ErrorModal from './ErrorModal';
+import ConnectingOverlay from './ConnectingOverlay';
+import Pathing from '../../services/pathing';
 import { toJS } from 'mobx';
 import { observer, inject } from 'mobx-react';
 

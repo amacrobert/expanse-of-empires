@@ -10,7 +10,7 @@ import {
 
 import Nav from './components/Nav';
 import Home from './components/Home';
-import Match from './components/Match';
+import Match from './components/Match/Match';
 
 import { Provider, observer } from 'mobx-react';
 import UserStore from './store/UserStore';

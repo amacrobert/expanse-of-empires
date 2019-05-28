@@ -1,7 +1,7 @@
 import React from 'react';
-import MatchUtil from '../services/match-util';
+import MatchUtil from '../../services/match-util';
 import { observer, inject } from 'mobx-react';
-import ArmyList from './Match/ArmyList';
+import ArmyList from './ArmyList';
 import Button from '@material-ui/core/Button';
 
 @inject('matchStore', 'userStore', 'uiStore')
