@@ -34,13 +34,13 @@ class MatchCard extends React.Component {
                         <Typography gutterBottom variant="h5" component="h2">
                             {match.name}
                         </Typography>
-                        <Typography variant="body2" inline={true}>
+                        <Typography variant="body2" inline={false}>
                             Speed: {match.speed}
                         </Typography>
-                        <Typography variant="body2" inline={true}>
+                        <Typography variant="body2" inline={false}>
                             Map: {match.map_name}
                         </Typography>
-                        <Typography variant="body2" inline={true}>
+                        <Typography variant="body2" inline={false}>
                             Phase: {this.phaseText}
                         </Typography>
                     </CardContent>
@@ -92,11 +92,8 @@ class MatchCard extends React.Component {
         else {
             phaseText = match.phase;
         }
-        return (
-            <Typography color={color} inline={true}>
-                {phaseText}
-            </Typography>
-        );
+
+        return phaseText;
     }
 
     get matchOpen() {
