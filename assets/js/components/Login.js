@@ -9,6 +9,7 @@ import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import FormControl from '@material-ui/core/FormControl';
+import Typography from '@material-ui/core/Typography';
 
 class Login extends Component {
 
@@ -33,7 +34,9 @@ class Login extends Component {
             }
             else {
                 result.json().then((message) => {
-                    console.log('ERROR:', message.error);
+                    if (message.error) {
+                        this.setState({error: message.error});
+                    }
                 });
             }
         });
@@ -55,6 +58,11 @@ class Login extends Component {
                 <DialogTitle>Log In</DialogTitle>
                 <form onSubmit={this.handleLogin}>
                     <DialogContent>
+                        {this.state.error &&
+                            <Typography color="error" gutterBottom={true}>
+                                {this.state.error}
+                            </Typography>
+                        }
                         <TextField
                             autoFocus
                             label="Email address"
@@ -62,6 +70,7 @@ class Login extends Component {
                             margin="normal"
                             onChange={event => this.setState({email: event.target.value})}
                             value={this.state.email}
+                            required
                             fullWidth />
                         <TextField
                             label="Password"
@@ -69,6 +78,7 @@ class Login extends Component {
                             margin="normal"
                             onChange={event => this.setState({password: event.target.value})}
                             value={this.state.password}
+                            required
                             fullWidth />
                     </DialogContent>
                     <DialogActions>

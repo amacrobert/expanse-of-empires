@@ -126,6 +126,7 @@ class Register extends React.Component {
                         onChange={event => this.setState({email: event.target.value})}
                         value={this.state.email}
                         helperText="We will keep your email private"
+                        required
                         fullWidth />
                     <TextField
                         label="Username"
@@ -133,6 +134,7 @@ class Register extends React.Component {
                         margin="dense"
                         onChange={event => this.setState({username: event.target.value})}
                         value={this.state.username}
+                        required
                         fullWidth />
                     <TextField
                         label="Password"
@@ -140,6 +142,7 @@ class Register extends React.Component {
                         margin="dense"
                         onChange={event => this.setState({password: event.target.value})}
                         value={this.state.password}
+                        required
                         fullWidth />
                     <TextField
                         label="Repeat password"
@@ -147,6 +150,7 @@ class Register extends React.Component {
                         margin="dense"
                         onChange={event => this.setState({password2: event.target.value})}
                         value={this.state.password2}
+                        required
                         fullWidth />
                 </DialogContent>
                 <DialogActions>
