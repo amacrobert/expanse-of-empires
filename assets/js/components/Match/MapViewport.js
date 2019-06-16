@@ -442,9 +442,16 @@ class MapViewport extends React.Component {
             }
 
             if (path.nodes.length) {
-                let pathMaterial = new THREE.LineBasicMaterial({ color: 0x5555FF});
-                let pathGeometry = new THREE.Geometry();
+                let color;
+                if (path.type == 'move') {
+                    color = 0x5555FF;
+                }
+                else if (path.type == 'attack') {
+                    color = 0xFF5555;
+                }
 
+                let pathMaterial = new THREE.LineBasicMaterial({color});
+                let pathGeometry = new THREE.Geometry();
                 path.nodes.forEach(node => {
                     let real = MapUtil.axialToReal(node.q, node.r);
                     pathGeometry.vertices.push(new THREE.Vector3(real.x, 0.03, real.z));

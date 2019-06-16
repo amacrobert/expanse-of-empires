@@ -18,13 +18,31 @@ export default class Pathing {
             return;
         }
 
-        // If the user doesn't own the end territory and it's not a neighbor, no path.
-        // @TODO: Allow user to traverse through allies' territories
         let territoriesBorderingStart = MatchUtil.getBorderingTerritories(matchStore.map.state, start);
-        if (!_.contains(territoriesBorderingStart, end) && end.empire != userEmpire) {
-            matchStore.clearPath();
-            return;
+        let endBordersStart = _.contains(territoriesBorderingStart, end);
+
+        if (end.empire != userEmpire) {
+
+            // If the user doesn't own the end territory and it's not a neighbor, no path.
+            // @TODO: Allow user to traverse through allies' territories
+            if (!endBordersStart) {
+                matchStore.clearPath();
+                return;
+            }
+            // Attack from an adjactent territory
+            // @TODO: Don't allow attacking allies
+            else {
+                matchStore.path = {
+                    type: 'attack',
+                    cost: end.terrain.tide * 2,
+                    nodes: [start, end],
+                };
+                return;
+            }
+
         }
+
+        // If the
 
         let path = Pathing.findPath(matchStore, start, end);
 

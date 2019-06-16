@@ -22,11 +22,14 @@ class Territory implements JsonSerializable {
     private $state;
 
     public function jsonSerialize() {
-        $state = $this->state;
+        $state = $this->getState();
+        $name = '(' . $this->getAxialQ() . ', ' . $this->getAxialR() . ')';
+
         return [
             'id'                => $this->getId(),
             'q'                 => $this->getAxialQ(),
             'r'                 => $this->getAxialR(),
+            'name'              => $name,
             'coordinates'       => $this->getCoordinates(),
             'terrain'           => $this->getTerrain(),
             'starting_position' => $this->isStartingPosition(),

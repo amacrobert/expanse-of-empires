@@ -4,6 +4,7 @@ import update from 'immutability-helper';
 import MatchUtil from '../../services/match-util';
 import MapViewport from './MapViewport';
 import TerritoryHud from './TerritoryHud';
+import PathingHud from './PathingHud';
 import MatchHud from './MatchHud';
 import Chat from '../Chat';
 import ErrorModal from './ErrorModal';
@@ -250,6 +251,7 @@ class Match extends Component {
 
         const loaded = this.props.matchStore.loaded;
         const socket = this.props.matchStore.socket;
+        const path = this.props.matchStore.path;
 
         return (
             <Grid container spacing={0}>
@@ -270,12 +272,16 @@ class Match extends Component {
                             startEmpire={this.startEmpire}
                             trainSoldier={this.trainSoldier} />
 
-                        {socket && <Chat
+                        {path && path.type &&
+                            <PathingHud />
+                        }
+
+                        {/*socket && <Chat
                             user={this.props.userStore.user}
                             match={this.props.matchStore.match}
                             onChatSubmit={this.socketSend}
                             setFocus={this.setFocus} />
-                        }
+                        */}
 
                         <ErrorModal />
                     </Grid>
