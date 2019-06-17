@@ -11,16 +11,22 @@ export default class PathingHud extends Component {
 
     render() {
 
-        let path = this.props.matchStore.path;
-        let start = this.props.matchStore.path.nodes[0];
-        let end = this.props.matchStore.path.nodes.slice(-1)[0];
+        let match = this.props.matchStore;
+        let path = match.path;
+        let start = match.path.nodes[0];
+        let end = match.path.nodes.slice(-1)[0];
         let verb = path.type == 'move' ? 'Move to' : 'Attack';
+        let units = match.selectedUnits;
+        let tideCost = match.path.cost * units;
 
         return (
             <Card className="pathing-hud-card">
                 <CardContent>
-                    <Typography gutterBottom variant="body2">
+                    <Typography variant="body2">
                         {verb} {end.name} from {start.name}
+                    </Typography>
+                    <Typography variant="body2">
+                        {units} units / -{tideCost} Tide
                     </Typography>
                 </CardContent>
             </Card>
