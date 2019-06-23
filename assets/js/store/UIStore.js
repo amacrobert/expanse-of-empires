@@ -6,11 +6,13 @@ class UIStore {
         this.clearUI();
     }
 
-    @observable error;
+    @observable showError = false;
+    @observable errorMessage;
     @observable buttons;
     @observable showConnectingOverlay = false;
     @observable connectingMessage;
     @observable movingUnits = false;
+    @observable attacking = false;
 
     @action enableButton = (button) => {
         this.buttons[button].disabled = false;
@@ -28,7 +30,7 @@ class UIStore {
 
         this.showConnectingOverlay = false;
         this.connectingMessage = null;
-        this.error = null;
+        this.showError = false;
     };
 }
 

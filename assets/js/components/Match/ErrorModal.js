@@ -23,12 +23,12 @@ export default class ErrorModal extends Component {
         return (
             <div>
                 <Dialog
-                    open={this.props.uiStore.error ? true : false}
+                    open={this.props.uiStore.showError ? true : false}
                     onClose={this.onClose}>
                     <DialogTitle>Error</DialogTitle>
                     <DialogContent>
                         <DialogContentText>
-                            {this.props.uiStore.error}
+                            {this.props.uiStore.errorMessage}
                         </DialogContentText>
                         <DialogActions>
                             <Button onClick={this.onClose} color="primary">

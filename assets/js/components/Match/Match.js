@@ -105,7 +105,8 @@ class Match extends Component {
                     break;
 
                 case 'error':
-                    uiStore.error = message.message;
+                    uiStore.errorMessage = message.message;
+                    uiStore.showError = true;
                     break;
             }
         });
@@ -189,6 +190,19 @@ class Match extends Component {
 
                 this.socketSend({
                     action: 'move-units',
+                    units,
+                    path,
+                });
+            }
+            else if (path && path.type == 'attack') {
+                this.props.uiStore.attacking = true;
+                let units = matchStore.selectedUnits;
+                let path = matchStore.path.nodes.map(territory => territory.id);
+
+                matchStore.setSelectedUnits(0);
+
+                this.socketSend({
+                    action: 'attack',
                     units,
                     path,
                 });
