@@ -3,7 +3,7 @@ App\Entity\User\User:
     type: entity
     table: '`user`'
 
-    id: { id: { type: integer, unsigned: true, generator: { strategy: auto } } }
+    id: { id: { type: integer, options: { unsigned: true } , generator: { strategy: auto } } }
 
     fields:
         username: { type: string(24) }

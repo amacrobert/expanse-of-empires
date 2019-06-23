@@ -3,7 +3,7 @@ App\Entity\Match\Empire:
     type: entity
     table: empire
 
-    id: { id: { type: integer, unsigned: true, generator: { strategy: auto } } }
+    id: { id: { type: integer, options: { unsigned: true } , generator: { strategy: auto } } }
 
     fields:
         date_founded: { type: datetime }

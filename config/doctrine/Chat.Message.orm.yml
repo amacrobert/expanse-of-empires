@@ -3,7 +3,7 @@ App\Entity\Chat\Message:
     type: entity
     table: chat_message
 
-    id: { id: { type: integer, unsigned: true, generator: { strategy: auto } } }
+    id: { id: { type: integer, options: { unsigned: true } , generator: { strategy: auto } } }
 
     fields:
         message: { type: string }

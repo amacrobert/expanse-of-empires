@@ -3,7 +3,7 @@ App\Entity\Match\Building:
     type: entity
     table: building
 
-    id: { id: { type: integer, unsigned: true, generator: { strategy: auto } } }
+    id: { id: { type: integer, options: { unsigned: true } , generator: { strategy: auto } } }
 
     fields:
         name: { type: string }

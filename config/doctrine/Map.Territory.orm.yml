@@ -3,7 +3,7 @@ App\Entity\Map\Territory:
     type: entity
     table: territory
 
-    id: { id: { type: integer, unsigned: true, generator: { strategy: auto } } }
+    id: { id: { type: integer, options: { unsigned: true } , generator: { strategy: auto } } }
 
     fields:
         axial_r: { type: integer }

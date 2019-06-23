@@ -6,6 +6,7 @@ use \JsonSerializable;
 
 class Army implements JsonSerializable {
 
+    private $id;
     private $territory_state;
     private $empire;
     private $size = 0;
@@ -15,6 +16,10 @@ class Army implements JsonSerializable {
             'empire_id' => $this->getEmpire()->getId(),
             'size' => $this->getSize(),
         ];
+    }
+
+    public function getId(): ?int {
+        return $this->id;
     }
 
     public function getTerritoryState(): ?TerritoryState {

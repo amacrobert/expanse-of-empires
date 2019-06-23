@@ -3,7 +3,7 @@ App\Entity\User\ValidationToken:
     type: entity
     table: validation_token
 
-    id: { id: { type: integer, unsigned: true, generator: { strategy: auto } } }
+    id: { id: { type: integer, options: { unsigned: true } , generator: { strategy: auto } } }
 
     fields:
         date_created: { type: datetime }

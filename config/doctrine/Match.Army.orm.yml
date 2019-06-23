@@ -3,9 +3,7 @@ App\Entity\Match\Army:
     type: entity
     table: army
 
-    id:
-        empire: { associationKey: true }
-        territory_state: { associationKey: true }
+    id: { id: { type: integer, options: { unsigned: true } , generator: { strategy: auto } } }
 
     fields:
         size: { type: integer }
