@@ -276,8 +276,18 @@ class Match extends Component {
         const socket = this.props.matchStore.socket;
         const path = this.props.matchStore.path;
 
+        let cursor = 'auto';
+        if (path) {
+            if (path.type == 'move') {
+                cursor = 's-resize';
+            }
+            else if (path.type == 'attack') {
+                cursor = 'crosshair';
+            }
+        }
+
         return (
-            <Grid container spacing={0}>
+            <Grid container spacing={0} style={{cursor}}>
 
                 <ConnectingOverlay />
 
