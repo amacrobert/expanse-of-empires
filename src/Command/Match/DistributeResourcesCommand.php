@@ -17,21 +17,24 @@ class DistributeResourcesCommand extends ContainerAwareCommand {
 
     protected $em;
 
+    const BASE_TIDE = 600;
+    const TIDE_PER_TERRITORY = 2;
+
     const UPDATE_DISTRIBUTION_DATE = "
         UPDATE `match`
         SET date_last_resource_distribution = :now
         WHERE id = :match_id
     ";
-    const ADD_SUPPLY_TO_EMPIRE = "
+    const ADD_RESOURCES_TO_EMPIRE = "
         UPDATE empire
-        SET supply = (empire.supply + :new_supply)
+        SET supply = (empire.supply + :new_supply), tide = (empire.tide + :new_tide)
         WHERE id = :empire_id
     ";
 
     public function __construct(EntityManagerInterface $em) {
         $this->em = $em;
         $this->pdo = $this->em->getConnection()->getWrappedConnection();
-        $this->add_supply_statement = $this->pdo->prepare(self::ADD_SUPPLY_TO_EMPIRE);
+        $this->add_supply_statement = $this->pdo->prepare(self::ADD_RESOURCES_TO_EMPIRE);
         $this->update_distribution_date_statement = $this->pdo->prepare(self::UPDATE_DISTRIBUTION_DATE);
 
         parent::__construct();
@@ -102,7 +105,7 @@ class DistributeResourcesCommand extends ContainerAwareCommand {
             if (!isset($supply_income[$match_id][$empire_id])) {
                 $income[$match_id][$empire_id] = [
                     'new_supply' => 0,
-                    'new_tide' => 0,
+                    'new_tide' => self::BASE_TIDE,
                     'old_supply' => $old_supply,
                     'old_tide' => $old_tide,
                     'user_id' => $user_id,
@@ -110,10 +113,8 @@ class DistributeResourcesCommand extends ContainerAwareCommand {
             }
 
             $income[$match_id][$empire_id]['new_supply'] += $base_supply_output;
-            $income[$match_id][$empire_id]['new_tide'] += 0;
+            $income[$match_id][$empire_id]['new_tide'] += self::TIDE_PER_TERRITORY;
         }
-
-
         $update_messages = [];
         foreach ($income as $match_id => $empires) {
             $now = new DateTime;
@@ -159,10 +160,12 @@ class DistributeResourcesCommand extends ContainerAwareCommand {
         $update_messages = [];
         foreach ($empires as $empire_id => $resources) {
             $new_supply = $resources['new_supply'] * $seconds_since_last_supply / 3600;
+            $new_tide = $resources['new_tide'] * $seconds_since_last_supply / 3600;
             $total_distributed += $new_supply;
             $total_empires++;
             $this->add_supply_statement->execute([
                 'new_supply' => $new_supply,
+                'new_tide' => $new_tide,
                 'empire_id' => $empire_id,
             ]);
 
@@ -173,7 +176,7 @@ class DistributeResourcesCommand extends ContainerAwareCommand {
                 'updates' => [
                     'resources' => [
                         'supply'    => $new_supply + $resources['old_supply'],
-                        'tide'      => $resources['new_tide'] + $resources['old_tide'],
+                        'tide'      => $new_tide + $resources['old_tide'],
                     ],
                 ],
             ];
