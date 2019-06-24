@@ -15,7 +15,6 @@ class TerritoryState {
     private $territory;
     private $building;
     private $fortification = 0;
-    private $units;
     private $armies;
 
     public function __construct() {

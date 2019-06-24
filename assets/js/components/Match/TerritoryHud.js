@@ -3,6 +3,7 @@ import MatchUtil from '../../services/match-util';
 import { observer, inject } from 'mobx-react';
 import ArmyList from './ArmyList';
 import Button from '@material-ui/core/Button';
+import AttackOutput from './Attack/AttackOutput';
 
 @inject('matchStore', 'userStore', 'uiStore')
 @observer
@@ -97,6 +98,7 @@ export default class TerritoryHud extends React.Component {
                 }
                 {trainSoldier}
                 <ArmyList armies={t.armies} />
+                <AttackOutput />
             </div>
         );
     }

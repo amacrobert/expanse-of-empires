@@ -50,6 +50,13 @@ export default class ArmyListItem extends React.Component {
         let matchStore = this.props.matchStore;
         let army = this.props.army;
         let empire =  this.props.empire;
+        // NPC-owned
+        if (!empire) {
+            empire = {
+                id: 0,
+                username: 'NPC',
+            };
+        }
         let isUserEmpire = this.props.matchStore.userEmpire == empire;
         let armyIcons = [];
         let userIsMovingUnits = this.props.uiStore.movingUnits && isUserEmpire;
@@ -132,12 +139,15 @@ export default class ArmyListItem extends React.Component {
             );
         }
 
-        return (
-            <ListItemText
-                primary={isUserEmpire ? 'Your army' : empire.username + "'s army"}
-                secondary={armyIcons}
-            />
-        );
+        if (armyIcons.length) {
+            return (
+                <ListItemText
+                    primary={isUserEmpire ? 'Your army' : empire.username + "'s army"}
+                    secondary={armyIcons}
+                />
+            );
+        }
 
+        return null;
     }
 }

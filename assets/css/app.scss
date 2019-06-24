@@ -38,3 +38,12 @@ body {
     // right: -16px;
     height: calc(100vh - 64px);
 }
+
+.defeated {
+    color: pink;
+    text-decoration: line-through;
+}
+
+.victorious {
+    color: lightblue;
+}

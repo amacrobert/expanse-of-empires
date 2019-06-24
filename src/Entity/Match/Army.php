@@ -13,7 +13,7 @@ class Army implements JsonSerializable {
 
     public function jsonSerialize() {
         return [
-            'empire_id' => $this->getEmpire()->getId(),
+            'empire_id' => $this->getEmpire() ? $this->getEmpire()->getId() : null,
             'size' => $this->getSize(),
         ];
     }

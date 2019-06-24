@@ -104,7 +104,16 @@ class Match extends Component {
                     uiStore.movingUnits = false;
                     break;
 
+                case 'territory-attacked':
+                    this.props.enqueueSnackbar(
+                        'Attack!'
+                    );
+                    uiStore.attackOutput = message.output;
+                    uiStore.attacking = false;
+                    break;
+
                 case 'error':
+                    uiStore.clearUI();
                     uiStore.errorMessage = message.message;
                     uiStore.showError = true;
                     break;

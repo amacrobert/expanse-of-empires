@@ -13,6 +13,7 @@ class UIStore {
     @observable connectingMessage;
     @observable movingUnits = false;
     @observable attacking = false;
+    @observable attackOutput;
 
     @action enableButton = (button) => {
         this.buttons[button].disabled = false;
@@ -28,9 +29,12 @@ class UIStore {
             'train-army': {disabled: false},
         };
 
+        this.movingUnits = false;
+        this.attacking = false;
         this.showConnectingOverlay = false;
         this.connectingMessage = null;
         this.showError = false;
+        this.attackOutput = null;
     };
 }
 

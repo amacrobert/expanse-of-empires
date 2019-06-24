@@ -122,6 +122,8 @@ class SocketController implements MessageComponentInterface {
         catch(Exception $e) {
             print (string)$e;
         }
+
+        $this->em->clear();
     }
 
     public function onClose(ConnectionInterface $closed_connection) {

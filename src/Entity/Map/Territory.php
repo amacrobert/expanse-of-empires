@@ -23,13 +23,12 @@ class Territory implements JsonSerializable {
 
     public function jsonSerialize() {
         $state = $this->getState();
-        $name = '(' . $this->getAxialQ() . ', ' . $this->getAxialR() . ')';
 
         return [
             'id'                => $this->getId(),
             'q'                 => $this->getAxialQ(),
             'r'                 => $this->getAxialR(),
-            'name'              => $name,
+            'name'              => (string)$this,
             'coordinates'       => $this->getCoordinates(),
             'terrain'           => $this->getTerrain(),
             'starting_position' => $this->isStartingPosition(),
@@ -38,6 +37,10 @@ class Territory implements JsonSerializable {
             'fortification'     => $state ? $state->getFortification() : 0,
             'armies'            => $state ? $state->getArmies()->toArray() : [],
         ];
+    }
+
+    public function __toString() {
+        return '(' . $this->getAxialQ() . ', ' . $this->getAxialR() . ')';
     }
 
     public function getId(): ?int {

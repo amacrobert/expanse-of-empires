@@ -18,7 +18,7 @@ export default class ArmyList extends React.Component {
 
     render() {
 
-        const armyList = this.props.armies.map(army => {
+        const armyList = this.props.armies.map((army, index) => {
 
             const empire = this.props.matchStore.empiresById[army.empire_id];
             const isUserEmpire = this.props.matchStore.userEmpire == empire;
@@ -29,7 +29,7 @@ export default class ArmyList extends React.Component {
             }
 
             return (
-                <ListItem key={empire.id}>
+                <ListItem key={index}>
                     <ArmyListItem
                         army={army}
                         empire={empire} />
