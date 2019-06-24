@@ -12,6 +12,13 @@ import Paper from '@material-ui/core/Paper';
 @observer
 export default class AttackOutput extends React.Component {
 
+    getFontSize = score => {
+        let minSize = 0.8;
+        let maxSize =  1.4;
+        let size = (score / 100 * (maxSize - minSize)) + minSize;
+        return size + 'rem';
+    }
+
     render() {
         if (!this.props.uiStore.attackOutput) {
             return null;
@@ -44,13 +51,17 @@ export default class AttackOutput extends React.Component {
             return (
                 <TableRow key={index}>
                     <TableCell  component="th" scope="row" align="right">
-                        <span className={attackerStyle}>{outcome.attack_score}</span>
+                        <span className={attackerStyle} style={{fontSize: this.getFontSize(outcome.attack_score)}}>
+                            {outcome.attack_score}
+                        </span>
                     </TableCell>
                     <TableCell align="center">
                         {symbol}
                     </TableCell>
                     <TableCell align="left">
-                        <span className={defenderStyle}>{outcome.defense_score}</span>
+                        <span className={defenderStyle} style={{fontSize: this.getFontSize(outcome.defense_score)}}>
+                            {outcome.defense_score}
+                        </span>
                     </TableCell>
                 </TableRow>
             );
@@ -61,12 +72,12 @@ export default class AttackOutput extends React.Component {
                 <Table size="small">
                     <TableHead>
                         <TableRow>
-                            <TableCell colSpan={4} align="center">
+                            <TableCell colSpan={4} align="center" size="small">
                                 {output.territory_taken &&
-                                    <span style={{color: 'lightblue'}}>ATTACKER TAKES TERRITORY!</span>
+                                    <span style={{color: 'lightblue', fontSize: '1rem'}}>ATTACKER TAKES TERRITORY!</span>
                                 }
                                 {!output.territory_taken &&
-                                    <span style={{color: 'pink'}}>DEFENDER HOLDS TERRITORY</span>
+                                    <span style={{color: 'pink', fontSize: '1rem'}}>DEFENDER HOLDS TERRITORY</span>
                                 }
                             </TableCell>
                         </TableRow>
@@ -74,7 +85,7 @@ export default class AttackOutput extends React.Component {
                     <TableHead>
                         <TableRow>
                             <TableCell align="right">Attacker</TableCell>
-                            <TableCell></TableCell>
+                            <TableCell style={{}}></TableCell>
                             <TableCell align="left">Defender</TableCell>
                         </TableRow>
                     </TableHead>
@@ -83,7 +94,7 @@ export default class AttackOutput extends React.Component {
                             <TableCell align="right">
                                 <span>-{output.defeated_attack_units} units</span>
                             </TableCell>
-                            <TableCell></TableCell>
+                            <TableCell style={{}}></TableCell>
                             <TableCell align="left">
                                 <span>-{output.defeated_defense_units} units</span>
                             </TableCell>
