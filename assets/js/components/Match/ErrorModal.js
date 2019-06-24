@@ -31,7 +31,7 @@ export default class ErrorModal extends Component {
                             {this.props.uiStore.errorMessage}
                         </DialogContentText>
                         <DialogActions>
-                            <Button onClick={this.onClose} color="primary">
+                            <Button autoFocus onClick={this.onClose} color="primary">
                                 OK
                             </Button>
                         </DialogActions>
