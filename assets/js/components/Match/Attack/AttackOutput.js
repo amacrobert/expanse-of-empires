@@ -7,6 +7,7 @@ import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
+import Grow from '@material-ui/core/Grow';
 
 @inject('matchStore', 'uiStore')
 @observer
@@ -68,7 +69,7 @@ export default class AttackOutput extends React.Component {
         });
 
         return (
-            <Paper>
+            <Grow in={!this.props.uiStore.attacking} collapsedHeight="0px"><Paper>
                 <Table size="small">
                     <TableHead>
                         <TableRow>
@@ -111,7 +112,7 @@ export default class AttackOutput extends React.Component {
                         {outcomeTableRows}
                     </TableBody>
                 </Table>
-            </Paper>
+            </Paper></Grow>
         );
     }
 }
