@@ -16,9 +16,19 @@ class TerritoryState {
     private $building;
     private $fortification = 0;
     private $armies;
+    private $support = 0;
 
     public function __construct() {
         $this->armies = new ArrayCollection;
+    }
+
+    public function getSupport(): int {
+        return $this->support;
+    }
+
+    public function setSupport(int $support): TerritoryState {
+        $this->support = $support;
+        return $this;
     }
 
     public function getArmies(): Collection {
