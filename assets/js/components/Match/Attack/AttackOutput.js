@@ -69,7 +69,7 @@ export default class AttackOutput extends React.Component {
         });
 
         return (
-            <Grow in={!this.props.uiStore.attacking} collapsedHeight="0px"><Paper>
+            <Grow in={!this.props.uiStore.attacking}><Paper>
                 <Table size="small">
                     <TableHead>
                         <TableRow>
