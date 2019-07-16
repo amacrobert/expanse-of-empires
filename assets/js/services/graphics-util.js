@@ -105,7 +105,19 @@ class GraphicsUtil {
         borderShape.lineTo(borderPoints[0].x, borderPoints[0].z);
         this.borderGeometry = new THREE.ShapeGeometry(borderShape);
         this.borderMaterial = new THREE.MeshLambertMaterial({ color: 0x3333FF, transparent: true, opacity: 1 });
+
+        // Unit model
+        let unitHeight = 0.2;
+        let unitGeometry = new THREE.BoxGeometry(.05, unitHeight, .05);
+        let unitMaterial = new THREE.MeshLambertMaterial( {color: 0x3333FF} );
+        this.unitModel = new THREE.Mesh(unitGeometry, unitMaterial);
+        this.unitModel.position.y = unitHeight / 2;
     }
+
+    getUnitModel = () => {
+        let clone = this.unitModel.clone();
+        return clone;
+    };
 
     loadSprite = (file) => {
         return new Promise((resolve, reject) => {

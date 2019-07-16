@@ -388,6 +388,26 @@ class MapViewport extends React.Component {
                     this.scene.remove(graphics.building);
                     delete graphics.building;
                 }
+
+                // UNITS
+                // Add missing units to territory
+                if (territory.armies) {
+                    territory.armies.forEach(army => {
+                        if (army.size > 0) {
+
+                            let armyWidth = Math.ceil(Math.sqrt(army.size));
+                            let armyDepth = Math.ceil(army.size / h);
+
+                            for (var i = 0; i < army.size; i++) {
+                                let model = assets.getUnitModel();
+                                let realCoords = MapUtil.axialToReal(territory.q, territory.r);
+                                model.position.x = realCoords.x;
+                                model.position.z = realCoords.z;
+                                this.scene.add(model);
+                            }
+                        }
+                    });
+                }
             }
         });
     };
