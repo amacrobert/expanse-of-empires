@@ -396,7 +396,7 @@ class MapViewport extends React.Component {
                         if (army.size > 0) {
 
                             let armyWidth = Math.ceil(Math.sqrt(army.size));
-                            let armyDepth = Math.ceil(army.size / h);
+                            let armyDepth = Math.ceil(army.size / armyWidth);
 
                             for (var i = 0; i < army.size; i++) {
                                 let model = assets.getUnitModel();
