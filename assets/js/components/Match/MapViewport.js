@@ -261,6 +261,7 @@ class MapViewport extends React.Component {
                     hex.userData.graphics = {
                         borders: {},
                         building: null,
+                        armies: {},
                     };
                 }
                 let borderMeshUpdated = false;
@@ -387,6 +388,30 @@ class MapViewport extends React.Component {
                     console.debug('Removing building ' + graphics.building.name.toUpperCase() + ' from territory ' + territory.id);
                     this.scene.remove(graphics.building);
                     delete graphics.building;
+                }
+
+                // UNITS
+                // Add missing units to territory
+                if (territory.armies) {
+                    territory.armies.forEach(army => {
+
+                        let armyKey = army.empire_id ? army.empire_id : 'npc';
+
+                        if (army.size > 0 && !graphics.armies[armyKey]) {
+
+                            let armyWidth = Math.ceil(Math.sqrt(army.size));
+                            let armyDepth = Math.ceil(army.size / armyWidth);
+
+                            for (var i = 0; i < army.size; i++) {
+                                let model = assets.getUnitModel();
+                                let realCoords = MapUtil.axialToReal(territory.q, territory.r);
+                                model.position.x = realCoords.x + (Math.random() * 1.5 - .75);
+                                model.position.z = realCoords.z + (Math.random() * 1.5 - .75);
+                                graphics.armies[armyKey] = army;
+                                this.scene.add(model);
+                            }
+                        }
+                    });
                 }
             }
         });
