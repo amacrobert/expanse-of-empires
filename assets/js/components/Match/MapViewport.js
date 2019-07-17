@@ -410,13 +410,14 @@ class MapViewport extends React.Component {
                             for (var i = 0; i < army.size; i++) {
 
                                 if ((i + 1) > renderedUnitCount) {
+                                    console.log('ADDING UNIT');
                                     let model = assets.getUnitModel();
                                     this.scene.add(model);
                                     graphics.armies[armyKey].unitModels[i] = model;
                                 }
                             }
 
-                            this.arrangeUnits(territory, graphics);
+                            this.arrangeUnits(graphics, territory.q, territory.r);
                         }
 
                         // Remove units
@@ -425,12 +426,13 @@ class MapViewport extends React.Component {
                             for (var i = 0; i < renderedUnitCount; i++) {
 
                                 if ((i + 1) > army.size) {
+                                    console.log('REMOVING UNIT');
                                     let model = graphics.armies[armyKey].unitModels.pop();
                                     this.scene.remove(model);
                                 }
                             }
 
-                            this.arrangeUnits(territory, graphics);
+                            this.arrangeUnits(graphics, territory.q, territory.r);
                         }
                     });
                 }
@@ -438,25 +440,31 @@ class MapViewport extends React.Component {
         });
     };
 
-    arrangeUnits = (territory, hexGraphics) => {
+    // arrange the unit models in a territory
+    arrangeUnits = (hexGraphics, q, r) => {
 
-        let realCoords = MapUtil.axialToReal(territory.q, territory.r);
+        let realCoords = MapUtil.axialToReal(q, r);
         let spacing = 0.15;
 
-        territory.armies.forEach(army => {
+        Object.keys(hexGraphics.armies).forEach(function(armyKey) {
 
-            let armyKey = army.empire_id ? army.empire_id : 'npc';
-            let armyWidth = Math.ceil(Math.sqrt(army.size));
-            let armyDepth = Math.ceil(army.size / armyWidth);
+            let army = hexGraphics.armies[armyKey];
+            let armySize = army.unitModels.length;
 
-            for (var i = 0; i < hexGraphics.armies[armyKey].unitModels.length; i++) {
+            if (armySize) {
 
-                let model = hexGraphics.armies[armyKey].unitModels[i];
-                let row = Math.ceil((i + 1) / armyWidth);
-                let col = i % armyWidth;
+                let armyWidth = Math.ceil(Math.sqrt(armySize));
+                let armyDepth = Math.ceil(armySize / armyWidth);
 
-                model.position.x = realCoords.x + (col * spacing) - (spacing * armyDepth / 2) - (spacing * 0.5 * (row % 2));
-                model.position.z = realCoords.z - (row * spacing) + (spacing * armyWidth / 2);
+                for (var i = 0; i < army.unitModels.length; i++) {
+
+                    let model = army.unitModels[i];
+                    let row = Math.ceil((i + 1) / armyWidth);
+                    let col = i % armyWidth;
+
+                    model.position.x = realCoords.x + (col * spacing) - (spacing * armyDepth / 2) - (spacing * 0.5 * (row % 2));
+                    model.position.z = realCoords.z - (row * spacing) + (spacing * armyWidth / 2);
+                }
             }
         });
     };
