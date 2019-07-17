@@ -391,28 +391,72 @@ class MapViewport extends React.Component {
                 }
 
                 // UNITS
-                // Add missing units to territory
                 if (territory.armies) {
                     territory.armies.forEach(army => {
 
                         let armyKey = army.empire_id ? army.empire_id : 'npc';
 
-                        if (army.size > 0 && !graphics.armies[armyKey]) {
+                        if (!graphics.armies[armyKey]) {
+                            graphics.armies[armyKey] = {
+                                unitModels: [],
+                            };
+                        }
 
-                            let armyWidth = Math.ceil(Math.sqrt(army.size));
-                            let armyDepth = Math.ceil(army.size / armyWidth);
+                        let renderedUnitCount = graphics.armies[armyKey].unitModels.length;
+
+                        // Add missing units
+                        if (army.size > renderedUnitCount) {
 
                             for (var i = 0; i < army.size; i++) {
-                                let model = assets.getUnitModel();
-                                let realCoords = MapUtil.axialToReal(territory.q, territory.r);
-                                model.position.x = realCoords.x + (Math.random() * 1.5 - .75);
-                                model.position.z = realCoords.z + (Math.random() * 1.5 - .75);
-                                graphics.armies[armyKey] = army;
-                                this.scene.add(model);
+
+                                if ((i + 1) > renderedUnitCount) {
+                                    let model = assets.getUnitModel();
+                                    this.scene.add(model);
+                                    graphics.armies[armyKey].unitModels[i] = model;
+                                }
                             }
+
+                            this.arrangeUnits(territory, graphics);
+                        }
+
+                        // Remove units
+                        if (army.size < renderedUnitCount) {
+
+                            for (var i = 0; i < renderedUnitCount; i++) {
+
+                                if ((i + 1) > army.size) {
+                                    let model = graphics.armies[armyKey].unitModels.pop();
+                                    this.scene.remove(model);
+                                }
+                            }
+
+                            this.arrangeUnits(territory, graphics);
                         }
                     });
                 }
+            }
+        });
+    };
+
+    arrangeUnits = (territory, hexGraphics) => {
+
+        let realCoords = MapUtil.axialToReal(territory.q, territory.r);
+        let spacing = 0.15;
+
+        territory.armies.forEach(army => {
+
+            let armyKey = army.empire_id ? army.empire_id : 'npc';
+            let armyWidth = Math.ceil(Math.sqrt(army.size));
+            let armyDepth = Math.ceil(army.size / armyWidth);
+
+            for (var i = 0; i < hexGraphics.armies[armyKey].unitModels.length; i++) {
+
+                let model = hexGraphics.armies[armyKey].unitModels[i];
+                let row = Math.ceil((i + 1) / armyWidth);
+                let col = i % armyWidth;
+
+                model.position.x = realCoords.x + (col * spacing) - (spacing * armyDepth / 2) - (spacing * 0.5 * (row % 2));
+                model.position.z = realCoords.z - (row * spacing) + (spacing * armyWidth / 2);
             }
         });
     };
