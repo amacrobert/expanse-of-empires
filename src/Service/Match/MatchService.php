@@ -528,8 +528,8 @@ class MatchService {
     private function clearMapTempValues($match) {
         // unset temp territory members
         foreach ($match->getMap()->getTerritories() as $territory) {
-            delete $territory->came_from;
-            delete $territory->distance_so_far;
+            unset($territory->came_from);
+            unset($territory->distance_so_far);
         }
     }
 
