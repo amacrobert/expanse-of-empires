@@ -8,6 +8,7 @@ use App\Exception\VisibleException;
 use App\Entity\User\User;
 use App\Entity\Match\{Match, Empire, TerritoryState, Building, Army};
 use App\Entity\Map\Territory;
+use App\Struct\SupportPathPriorityQueue;
 
 class MatchService {
 
@@ -501,6 +502,137 @@ class MatchService {
                 // ],
             ],
         ]);
+    }
+
+    // Compute the support for territories in a match
+    public function computeSupport(Match $match) {
+
+        $this->hydrateMapState($match);
+
+        $territories = $match->getMap()->getTerritories();
+
+        foreach ($territories as $territory) {
+            if ($territory->getState() && $territory->getState()->getEmpire()) {
+                $path = $this->computeShortestPathToCastle($match, $territory);
+
+                $this->clearMapTempValues($match);
+
+                if ($path === null) {
+                    print "No path from $territory to castle" . PHP_EOL;
+                }
+                else {
+                    print "Path from $territory to closest castle is " . count($path) . PHP_EOL;
+                }
+            }
+        }
+    }
+
+    private function clearMapTempValues($match) {
+        // unset temp territory members
+        foreach ($match->getMap()->getTerritories() as $territory) {
+            delete $territory->came_from;
+            delete $territory->distance_so_far;
+        }
+    }
+
+    private function computeShortestPathToCastle(Match $match, Territory $start) {
+        $territory_id = $start->getId();
+        $start->distance_so_far = 0;
+        $start->came_from = null;
+
+        $frontier = new \SplPriorityQueue();
+        $frontier->insert($start, 0);
+        $start_empire = $start->getState()->getEmpire();
+
+        // print "FROM $start" . PHP_EOL;
+
+        while (!$frontier->isEmpty()) {
+
+            // print ' frontier size: ' . count($frontier) . PHP_EOL;
+
+            $current = $frontier->extract();
+
+            // Found the closest castle
+            if ($current_state = $current->getState()) {
+                if ($building = $current_state->getBuilding()) {
+                    if ($building->getMachineName() == 'castle') {
+                        $path = [];
+                        $trace = $current;
+
+                        while ($trace) {
+                            $path[] = $trace;
+                            $trace = $trace->came_from;
+                        }
+
+                        return $path;
+                    }
+                }
+            }
+
+            $neighbors = $this->getBorderingTerritories($match, $start);
+            // print ' neighbors: ' . count($neighbors) . PHP_EOL;
+
+            foreach ($neighbors as $next) {
+                if ($next) {
+                    // print "  looking at $next" . PHP_EOL;
+                    $distance = 1; // @TODO: Possibly replace with tide cost of territory to restrict supply through
+                               // difficult terrain
+                    $new_distance = $current->distance_so_far + $distance;
+                    $has_visited = isset($next->came_from);
+                    $is_closer = $new_distance < ($next->distance_so_far ?? PHP_INT_MAX);
+
+                    // print "  new dist: " . $new_distance . PHP_EOL;
+                    // print "  has_visited: " . $has_visited . PHP_EOL;
+                    // print "  is_closer: " . $is_closer . PHP_EOL;
+
+                    $is_traversable = false;
+                    if ($next_state = $next->getState()) {
+                        if ($next_empire = $next_state->getEmpire()) {
+                            // @TODO: allow support through allies' territories
+                            $is_traversable = $next_empire == $start_empire;
+                        }
+                    }
+
+                    // print "  is_traversable: " . $is_traversable . PHP_EOL;
+
+                    if ($is_traversable && (!$has_visited || $is_closer)) {
+                        $next->distance_so_far = $new_distance;
+                        $frontier->insert($next, $new_distance);
+                        $next->came_from = $current;
+
+                        // print "inserted $next into frontier" . PHP_EOL;
+                    }
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private function getBorderingTerritories($match, $territory) {
+
+        $q = $territory->getAxialQ();
+        $r = $territory->getAxialR();
+
+        return array_filter([
+            $this->getTerritory($match, $q - 1, $r),
+            $this->getTerritory($match, $q, $r - 1),
+            $this->getTerritory($match, $q + 1, $r - 1),
+            $this->getTerritory($match, $q + 1, $r),
+            $this->getTerritory($match, $q, $r + 1),
+            $this->getTerritory($match, $q - 1, $r + 1),
+        ]);
+    }
+
+    // @TODO: possible performance improvement by caching in 2D array
+    private function getTerritory($match, $q, $r) {
+        foreach ($match->getMap()->getTerritories() as $territory) {
+            if ($territory->getAxialQ() == $q && $territory->getAxialR() == $r) {
+                return $territory;
+            }
+        }
+
+        return null;
     }
 
     private function territoriesAreNeighbors(Territory $t1, Territory $t2): bool {

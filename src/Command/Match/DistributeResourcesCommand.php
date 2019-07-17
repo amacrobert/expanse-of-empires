@@ -31,7 +31,8 @@ class DistributeResourcesCommand extends ContainerAwareCommand {
         WHERE id = :empire_id
     ";
 
-    public function __construct(EntityManagerInterface $em) {
+    public function __construct(EntityManagerInterface $em, \App\Service\Match\MatchService $ms) {
+        $this->ms = $ms;
         $this->em = $em;
         $this->pdo = $this->em->getConnection()->getWrappedConnection();
         $this->add_supply_statement = $this->pdo->prepare(self::ADD_RESOURCES_TO_EMPIRE);
@@ -48,6 +49,12 @@ class DistributeResourcesCommand extends ContainerAwareCommand {
     }
 
     protected function execute(InputInterface $input, OutputInterface $output) {
+
+        $match = $this->em->find(Match::class, 1);
+
+        var_dump($this->ms->computeSupport($match));
+
+        exit();
 
         // Select every income-earning territory
         $sql = "
