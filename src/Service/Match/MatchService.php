@@ -8,7 +8,6 @@ use App\Exception\VisibleException;
 use App\Entity\User\User;
 use App\Entity\Match\{Match, Empire, TerritoryState, Building, Army};
 use App\Entity\Map\Territory;
-use App\Struct\SupportPathPriorityQueue;
 
 class MatchService {
 
@@ -78,8 +77,7 @@ class MatchService {
         $state->setBuilding($this->em->find(Building::class, 1));
         $territory->setState($state);
 
-        $empire = new Empire;
-        $empire
+        $empire = (new Empire)
             ->setUser($user)
             ->setMatch($match)
             ->setActive(true)
