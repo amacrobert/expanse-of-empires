@@ -157,6 +157,7 @@ class MapViewport extends React.Component {
         // if there is one (or more) intersections
         if (intersects.length) {
             this.selectedHex = intersects[0].object;
+            console.log('hex:', intersects[0].object);
             // Send selected territory coordinates up
             this.props.onTerritorySelect(this.selectedHex.userData.coordinates);
         }
@@ -444,7 +445,6 @@ class MapViewport extends React.Component {
     arrangeUnits = (hexGraphics, q, r) => {
 
         let realCoords = MapUtil.axialToReal(q, r);
-        let spacing = 0.15;
 
         Object.keys(hexGraphics.armies).forEach(function(armyKey) {
 
@@ -453,17 +453,35 @@ class MapViewport extends React.Component {
 
             if (armySize) {
 
-                let armyWidth = Math.ceil(Math.sqrt(armySize));
-                let armyDepth = Math.ceil(armySize / armyWidth);
+                console.log('hexGraphics', hexGraphics);
 
-                for (var i = 0; i < army.unitModels.length; i++) {
+                // territory has building -- render army in circle surrounding it
+                if (hexGraphics.building) {
 
-                    let model = army.unitModels[i];
-                    let row = Math.ceil((i + 1) / armyWidth);
-                    let col = i % armyWidth;
+                    let radius = .5;
+                    let spacing = 2 * Math.PI / armySize;
 
-                    model.position.x = realCoords.x + (col * spacing) - (spacing * armyDepth / 2) - (spacing * 0.5 * (row % 2));
-                    model.position.z = realCoords.z - (row * spacing) + (spacing * armyWidth / 2);
+                    for (var i = 0; i < armySize; i++) {
+                        let model = army.unitModels[i];
+                        model.position.x = realCoords.x + (radius * Math.cos(i * spacing));
+                        model.position.z = realCoords.z + (radius * Math.sin(i * spacing));
+                    }
+                }
+                // No building -- render army in grid
+                else {
+                    let armyWidth = Math.ceil(Math.sqrt(armySize));
+                    let armyDepth = Math.ceil(armySize / armyWidth);
+                    let spacing = 0.15;
+
+                    for (var i = 0; i < armySize; i++) {
+
+                        let model = army.unitModels[i];
+                        let row = Math.ceil((i + 1) / armyWidth);
+                        let col = i % armyWidth;
+
+                        model.position.x = realCoords.x + (col * spacing) - (spacing * armyWidth / 2) - (spacing * 0.5 * (row % 2)) + spacing;
+                        model.position.z = realCoords.z - (row * spacing) + (spacing * armyDepth / 2) + (spacing / 2);
+                    }
                 }
             }
         });

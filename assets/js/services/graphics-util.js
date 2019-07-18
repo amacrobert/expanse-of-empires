@@ -190,7 +190,7 @@ class GraphicsUtil {
 
         // Rotate from x/y coordinates to x/z
         hexMesh.rotation.x = -Math.PI / 2;
-        hexMesh.scale.x = hexMesh.scale.y = 1;
+        hexMesh.scale.x = hexMesh.scale.y = .995;
 
         // Move the mesh to its real map position
         const realCoords = MapUtil.axialToReal(territory.q, territory.r);
