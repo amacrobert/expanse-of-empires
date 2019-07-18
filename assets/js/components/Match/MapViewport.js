@@ -17,6 +17,7 @@ class MapViewport extends React.Component {
 
     constructor(props) {
         super(props);
+        this.animationsObjects = [];
 
         this.mount = new React.createRef();
 
@@ -241,6 +242,12 @@ class MapViewport extends React.Component {
         this.renderScene()
         this.frameId = window.requestAnimationFrame(this.animate);
 
+        this.animationsObjects.forEach(mesh => {
+            if (mesh.userData.clock && mesh.userData.mixer) {
+                mesh.userData.mixer.update(mesh.userData.clock.getDelta());
+            }
+        });
+
         this.stats.end();
     };
 
@@ -448,8 +455,9 @@ class MapViewport extends React.Component {
     arrangeUnits = (hexGraphics, q, r) => {
 
         let realCoords = MapUtil.axialToReal(q, r);
+        let self = this;
 
-        Object.keys(hexGraphics.armies).forEach(function(armyKey) {
+        Object.keys(hexGraphics.armies).forEach(armyKey => {
 
             let army = hexGraphics.armies[armyKey];
             let armySize = army.unitModels.length;
@@ -469,13 +477,24 @@ class MapViewport extends React.Component {
                     for (var i = 0; i < armySize; i++) {
                         let model = army.unitModels[i];
 
+                        let currentX = model.position.x;
+                        let currentZ = model.position.z;
+
+                        if (!currentX && !currentZ) {
+                            currentX = realCoords.x;
+                            currentZ = realCoords.z;
+                        }
+
                         if (i >= innerCircleUnits) {
                             radius = .75;
                             spacing = 2 * Math.PI / outerCircleUnits;
                         }
 
-                        model.position.x = realCoords.x + (radius * Math.cos(i * spacing));
-                        model.position.z = realCoords.z + (radius * Math.sin(i * spacing));
+                        let newX = realCoords.x + (radius * Math.cos(i * spacing));
+                        let newZ = realCoords.z + (radius * Math.sin(i * spacing));
+
+                        model.position.x = newX;
+                        model.position.z = newZ;
                     }
                 }
                 // No building -- render army in grid
@@ -490,8 +509,39 @@ class MapViewport extends React.Component {
                         let row = Math.ceil((i + 1) / armyWidth);
                         let col = i % armyWidth;
 
-                        model.position.x = realCoords.x + (col * spacing) - (spacing * armyWidth / 2) - (spacing * 0.5 * (row % 2)) + spacing;
-                        model.position.z = realCoords.z - (row * spacing) + (spacing * armyDepth / 2) + (spacing / 2);
+                        let currentX = model.position.x;
+                        let currentZ = model.position.z;
+                        let newX = realCoords.x + (col * spacing) - (spacing * armyWidth / 2) - (spacing * 0.5 * (row % 2)) + spacing;
+                        let newZ = realCoords.z - (row * spacing) + (spacing * armyDepth / 2) + (spacing / 2);
+
+                        if (!currentX && !currentZ) {
+                            currentX = realCoords.x;
+                            currentZ = realCoords.z;
+                        }
+
+                        // animate rearrangement
+                        if (newX != currentX || newZ != currentZ) {
+                            model.userData.mixer = new THREE.AnimationMixer(model);
+
+                            let track = new THREE.VectorKeyframeTrack(
+                                '.position', [0, 1, 2], [
+                                    currentX,
+                                    model.position.y,
+                                    currentZ,
+                                    newX,
+                                    model.position.y,
+                                    newZ,
+                                ]
+                            );
+
+                            const animationClip = new THREE.AnimationClip(null, 5, [track]);
+                            const animationAction = model.userData.mixer.clipAction(animationClip);
+                            animationAction.setLoop(THREE.LoopOnce);
+                            animationAction.play();
+                            model.userData.clock = new THREE.Clock();
+                            console.log('THIS:', self);
+                            self.animationsObjects.push(model);
+                        }
                     }
                 }
             }
