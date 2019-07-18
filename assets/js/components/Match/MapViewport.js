@@ -382,6 +382,9 @@ class MapViewport extends React.Component {
                         console.debug('Adding building ' + building.name.toUpperCase() + ' to territory ' + territory.id);
                         graphics.building = building;
                         this.scene.add(building);
+
+                        // arrange units after building load in case this happens after initial unit placement
+                        this.arrangeUnits(graphics, q, r);
                     })
                 }
                 // Remove destroyed building
@@ -453,16 +456,24 @@ class MapViewport extends React.Component {
 
             if (armySize) {
 
-                console.log('hexGraphics', hexGraphics);
-
                 // territory has building -- render army in circle surrounding it
                 if (hexGraphics.building) {
 
                     let radius = .5;
-                    let spacing = 2 * Math.PI / armySize;
+                    let innerCircleLimit = 20;
+                    let innerCircleUnits = Math.min(innerCircleLimit, armySize);
+                    let outerCircleUnits = armySize - innerCircleUnits;
+                    let spacing = 2 * Math.PI / innerCircleUnits;
+
 
                     for (var i = 0; i < armySize; i++) {
                         let model = army.unitModels[i];
+
+                        if (i >= innerCircleUnits) {
+                            radius = .75;
+                            spacing = 2 * Math.PI / outerCircleUnits;
+                        }
+
                         model.position.x = realCoords.x + (radius * Math.cos(i * spacing));
                         model.position.z = realCoords.z + (radius * Math.sin(i * spacing));
                     }
