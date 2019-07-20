@@ -477,14 +477,6 @@ class MapViewport extends React.Component {
                     for (var i = 0; i < armySize; i++) {
                         let model = army.unitModels[i];
 
-                        let currentX = model.position.x;
-                        let currentZ = model.position.z;
-
-                        if (!currentX && !currentZ) {
-                            currentX = realCoords.x;
-                            currentZ = realCoords.z;
-                        }
-
                         if (i >= innerCircleUnits) {
                             radius = .75;
                             spacing = 2 * Math.PI / outerCircleUnits;
@@ -493,8 +485,7 @@ class MapViewport extends React.Component {
                         let newX = realCoords.x + (radius * Math.cos(i * spacing));
                         let newZ = realCoords.z + (radius * Math.sin(i * spacing));
 
-                        model.position.x = newX;
-                        model.position.z = newZ;
+                        this.animateUnitRearrangement(model, newX, newZ, realCoords.x, realCoords.z);
                     }
                 }
                 // No building -- render army in grid
@@ -509,44 +500,71 @@ class MapViewport extends React.Component {
                         let row = Math.ceil((i + 1) / armyWidth);
                         let col = i % armyWidth;
 
-                        let currentX = model.position.x;
-                        let currentZ = model.position.z;
                         let newX = realCoords.x + (col * spacing) - (spacing * armyWidth / 2) - (spacing * 0.5 * (row % 2)) + spacing;
                         let newZ = realCoords.z - (row * spacing) + (spacing * armyDepth / 2) + (spacing / 2);
 
-                        if (!currentX && !currentZ) {
-                            currentX = realCoords.x;
-                            currentZ = realCoords.z;
-                        }
-
-                        // animate rearrangement
-                        if (newX != currentX || newZ != currentZ) {
-                            model.userData.mixer = new THREE.AnimationMixer(model);
-
-                            let track = new THREE.VectorKeyframeTrack(
-                                '.position', [0, 1, 2], [
-                                    currentX,
-                                    model.position.y,
-                                    currentZ,
-                                    newX,
-                                    model.position.y,
-                                    newZ,
-                                ]
-                            );
-
-                            const animationClip = new THREE.AnimationClip(null, 5, [track]);
-                            const animationAction = model.userData.mixer.clipAction(animationClip);
-                            animationAction.setLoop(THREE.LoopOnce);
-                            animationAction.play();
-                            model.userData.clock = new THREE.Clock();
-                            console.log('THIS:', self);
-                            self.animationsObjects.push(model);
-                        }
+                        this.animateUnitRearrangement(model, newX, newZ, realCoords.x, realCoords.z);
                     }
                 }
             }
         });
     };
+
+    animateUnitRearrangement = (model, newX, newZ, defaultX, defaultZ) => {
+
+        let currentX = model.position.x;
+        let currentZ = model.position.z;
+
+        if (!currentX && !currentZ) {
+            currentX = defaultX;
+            currentZ = defaultZ;
+        }
+
+        // animate rearrangement
+        if (newX != currentX || newZ != currentZ) {
+            model.userData.mixer = new THREE.AnimationMixer(model);
+
+            let rearrangementTime = 0.3; // seconds
+            let track = new THREE.VectorKeyframeTrack(
+                '.position', [0, rearrangementTime], [
+                    currentX,
+                    model.position.y,
+                    currentZ,
+                    newX,
+                    model.position.y,
+                    newZ,
+                ]
+            );
+
+            const animationClip = new THREE.AnimationClip(null, rearrangementTime, [track]);
+            animationClip.zeroSlopeAtEnd = false;
+            animationClip.zeroSlopeAtStart = false;
+            const animationAction = model.userData.mixer.clipAction(animationClip);
+            animationAction.setLoop(THREE.LoopOnce);
+            animationAction.play();
+            model.userData.clock = new THREE.Clock();
+
+            model.userData.mixer.addEventListener("finished", function (e) {
+                var curAction = e.action;
+                curAction.reset();
+                curAction.stop();
+                model.userData.mixer.stopAllAction();
+
+                model.position.x = curAction._clip.tracks[0].values[3];
+                model.position.y = curAction._clip.tracks[0].values[4];
+                model.position.z = curAction._clip.tracks[0].values[5];
+                delete model.userData.mixer;
+                delete model.userData.clock;
+            });
+
+            this.animationsObjects.push(model);
+        }
+        else {
+            model.position.x = newX;
+            model.position.z = newZ;
+        }
+    };
+
 
     // Update the scene when the map state changes
     reactToSceneUpdate = reaction(
