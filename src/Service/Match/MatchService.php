@@ -63,10 +63,9 @@ class MatchService {
             'match' => $match,
         ]);
 
-        // There should always be a state for every territory per match, but if there isn't create one
+        // Create a new territory state if it doesn't exist
         if (!$state) {
-            $state = new TerritoryState;
-            $state
+            $state = (new TerritoryState)
                 ->setMatch($match)
                 ->setTerritory($territory)
             ;
@@ -77,12 +76,24 @@ class MatchService {
         $state->setBuilding($this->em->find(Building::class, 1));
         $territory->setState($state);
 
+        // Get the number of existing empires to assign the new one the next color in order
+        $empire_count = $this->em->createQueryBuilder()
+            ->select('count(empire.id)')
+            ->from(Empire::class, 'empire')
+            ->where('empire.match = :match')
+            ->setParameter('match', $match)
+            ->getQuery()
+            ->getSingleScalarResult()
+        ;
+
+        // Create the new empire
         $empire = (new Empire)
             ->setUser($user)
             ->setMatch($match)
             ->setActive(true)
             ->setSupply(self::STARTING_SUPPLY)
             ->setTide(self::STARTING_TIDE)
+            ->setColor(self::COLOR_CODES[$empire_count % count(self::COLOR_CODES)])
         ;
         $this->em->persist($empire);
 
@@ -230,7 +241,7 @@ class MatchService {
         // Check that the user has enough tide to complete the move
         $tide_cost = $tide_cost_per_unit * $units;
         if ($tide_cost > $empire->getTide()) {
-            throw new VisibleException('You do not have enough Tide to make that move. Needed: ' . $tide_cost . ', current: ' . $empire->getTide());
+            throw new VisibleException('You do not have enough Tide to make that move. Needed: ' . $tide_cost . ', current: ' . floor($empire->getTide()));
         }
 
         // Move units
@@ -308,7 +319,7 @@ class MatchService {
 
         // Make sure defending territory borders attacking territory
         if (!$this->territoriesAreNeighbors($attacking_territory, $defending_territory)) {
-            throw new VisibleException("You cannot attack $defending_territory from $attacking_territory");
+            throw new VisibleException('You cannot attack '. $defending_territory .' from $attacking_territory');
         }
 
         // Make sure attacker has all the units they're attacking with
@@ -467,9 +478,17 @@ class MatchService {
                 $attacker_takes_territory = false;
             }
         }
+        $attacking_units_left = $attacking_units - $defeated_attack_units;
 
+        // Attacker won
         if ($attacker_takes_territory) {
+            // Give attacker the territory
             $defending_territory->getState()->setEmpire($attacking_empire);
+
+            // Move what's left of the attacking units into the newly won territory
+            $attacking_army->setSize($attacking_army->getSize() - $attacking_units_left);
+            $new_territory_army = $this->getEmpireArmyInTerritory($attacking_empire, $defending_territory, true);
+            $new_territory_army->setSize($attacking_units_left);
         }
 
         // @TODO: manage resources
@@ -516,10 +535,10 @@ class MatchService {
                 $this->clearMapTempValues($match);
 
                 if ($path === null) {
-                    print "No path from $territory to castle" . PHP_EOL;
+                    print 'No path from $territory to castle' . PHP_EOL;
                 }
                 else {
-                    print "Path from $territory to closest castle is " . count($path) . PHP_EOL;
+                    print 'Path from $territory to closest castle is ' . count($path) . PHP_EOL;
                 }
             }
         }
@@ -572,16 +591,16 @@ class MatchService {
 
             foreach ($neighbors as $next) {
                 if ($next) {
-                    // print "  looking at $next" . PHP_EOL;
+                    // print '  looking at $next' . PHP_EOL;
                     $distance = 1; // @TODO: Possibly replace with tide cost of territory to restrict supply through
                                // difficult terrain
                     $new_distance = $current->distance_so_far + $distance;
                     $has_visited = isset($next->came_from);
                     $is_closer = $new_distance < ($next->distance_so_far ?? PHP_INT_MAX);
 
-                    // print "  new dist: " . $new_distance . PHP_EOL;
-                    // print "  has_visited: " . $has_visited . PHP_EOL;
-                    // print "  is_closer: " . $is_closer . PHP_EOL;
+                    // print '  new dist: ' . $new_distance . PHP_EOL;
+                    // print '  has_visited: ' . $has_visited . PHP_EOL;
+                    // print '  is_closer: ' . $is_closer . PHP_EOL;
 
                     $is_traversable = false;
                     if ($next_state = $next->getState()) {
@@ -591,14 +610,14 @@ class MatchService {
                         }
                     }
 
-                    // print "  is_traversable: " . $is_traversable . PHP_EOL;
+                    // print '  is_traversable: ' . $is_traversable . PHP_EOL;
 
                     if ($is_traversable && (!$has_visited || $is_closer)) {
                         $next->distance_so_far = $new_distance;
                         $frontier->insert($next, $new_distance);
                         $next->came_from = $current;
 
-                        // print "inserted $next into frontier" . PHP_EOL;
+                        // print 'inserted $next into frontier' . PHP_EOL;
                     }
                 }
             }
@@ -734,4 +753,29 @@ class MatchService {
             'map'               => $match->getMap(),
         ];
     }
+
+    const COLOR_CODES = [
+        'e6194b',
+        '3cb44b',
+        'ffe119',
+        '4363d8',
+        'f58231',
+        '911eb4',
+        '46f0f0',
+        'f032e6',
+        'bcf60c',
+        'fabebe',
+        '008080',
+        'e6beff',
+        '9a6324',
+        'fffac8',
+        '800000',
+        'aaffc3',
+        '808000',
+        'ffd8b1',
+        '000075',
+        '808080',
+        'ffffff',
+        '000000',
+    ];
 }

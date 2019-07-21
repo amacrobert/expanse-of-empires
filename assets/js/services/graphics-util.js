@@ -104,19 +104,20 @@ class GraphicsUtil {
         borderShape.lineTo(borderPoints[3].x, borderPoints[3].z);
         borderShape.lineTo(borderPoints[0].x, borderPoints[0].z);
         this.borderGeometry = new THREE.ShapeGeometry(borderShape);
-        this.borderMaterial = new THREE.MeshLambertMaterial({ color: 0x3333FF, transparent: true, opacity: 1 });
 
         // Unit model
-        let unitHeight = 0.2;
-        let unitGeometry = new THREE.BoxGeometry(.05, unitHeight, .05);
-        let unitMaterial = new THREE.MeshLambertMaterial( {color: 0x3333FF} );
-        this.unitModel = new THREE.Mesh(unitGeometry, unitMaterial);
-        this.unitModel.position.y = unitHeight / 2;
+        this.unitHeight = 0.2;
+        this.unitGeometry = new THREE.BoxGeometry(.05, this.unitHeight, .05);
     }
 
-    getUnitModel = () => {
-        let clone = this.unitModel.clone();
-        return clone;
+    getUnitModel = (color) => {
+        let unitModel = new THREE.Mesh(
+            this.unitGeometry,
+            new THREE.MeshLambertMaterial({color: parseInt(color, 16)})
+        );
+        unitModel.position.y = this.unitHeight / 2;
+
+        return unitModel;
     };
 
     loadSprite = (file) => {
@@ -236,12 +237,14 @@ class GraphicsUtil {
 
     getBorderSectionMesh = (territory, rotation) => {
         var borderMesh = new THREE.Mesh(this.borderGeometry);
+
         borderMesh.rotation.z = MapUtil.borderRotation[rotation];
         borderMesh.rotation.x = -Math.PI / 2;
-        borderMesh.position.y = 0.01;
+        borderMesh.position.y = .01;
         let realCoords = MapUtil.axialToReal(territory.q, territory.r);
         borderMesh.position.x = realCoords.x;
         borderMesh.position.z = realCoords.z;
+
 
         borderMesh.scale.x = borderMesh.scale.y = 1;
         borderMesh.updateMatrix();

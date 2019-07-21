@@ -6,6 +6,7 @@ App\Entity\Match\Empire:
     id: { id: { type: integer, options: { unsigned: true } , generator: { strategy: auto } } }
 
     fields:
+        color: { type: string, length: 6}
         date_founded: { type: datetime }
         active: { type: boolean }
         result: { type: string, nullable: true }

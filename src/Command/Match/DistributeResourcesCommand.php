@@ -143,8 +143,6 @@ class DistributeResourcesCommand extends ContainerAwareCommand {
 
         }
 
-        print_r($update_messages);
-
         // Send batch of resource update messages to socket server for distribution to open connections
         \Ratchet\Client\connect('ws://127.0.0.1:8080')->then(function($conn) use ($update_messages) {
             $conn->send(json_encode([
@@ -178,6 +176,7 @@ class DistributeResourcesCommand extends ContainerAwareCommand {
             $new_tide = $resources['new_tide'] * $seconds_since_last_supply / 3600;
             $total_distributed += $new_supply;
             $total_empires++;
+
             $this->add_supply_statement->execute([
                 'new_supply' => $new_supply,
                 'new_tide' => $new_tide,

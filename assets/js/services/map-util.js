@@ -45,4 +45,5 @@ export default {
     borderPoints,
     borderRotation,
     axialToCube,
+    borderWidth,
 };

@@ -57,11 +57,11 @@ class MapViewport extends React.Component {
 
         // selection glow
         this.selectionGlow = new THREE.Mesh(
-            new THREE.SphereGeometry(.98, 6, 10),
+            new THREE.SphereGeometry(1, 6, 10),
             new THREE.MeshBasicMaterial({
                 color: 0xFFFFFF,
                 transparent: true,
-                opacity: 0.3,
+                opacity: 0.25,
                 depthWrite: false,
             })
         );
@@ -263,7 +263,6 @@ class MapViewport extends React.Component {
             const hex = this.getHex(q, r);
 
             if (hex) {
-
                 // Add graphics object to userData if none exists
                 if (!hex.userData.graphics) {
                     hex.userData.graphics = {
@@ -274,6 +273,7 @@ class MapViewport extends React.Component {
                 }
                 let borderMeshUpdated = false;
                 let graphics = hex.userData.graphics;
+                let empireColor = territory.empire ? territory.empire.color : '777777';
 
                 // Delete starting position sprite
                 if (!MatchUtil.showStartPosition(this.props.matchStore.match, territory)
@@ -363,8 +363,11 @@ class MapViewport extends React.Component {
                         borderMergedGeo.merge(borderMesh.geometry, borderMesh.matrix);
                     });
 
-                    var borderMerged = new THREE.Mesh(borderMergedGeo, assets.borderMaterial);
-                    borderMerged.castShadow = true;
+                    var borderMerged = new THREE.Mesh(
+                        borderMergedGeo,
+                        new THREE.MeshLambertMaterial({ color: parseInt(empireColor, 16) })
+                    );
+
                     console.debug('Adding border mesh to territory ' + territory.id);
                     graphics.borderMerged = borderMerged;
                     this.scene.add(borderMerged);
@@ -422,7 +425,7 @@ class MapViewport extends React.Component {
 
                                 if ((i + 1) > renderedUnitCount) {
                                     console.log('ADDING UNIT');
-                                    let model = assets.getUnitModel();
+                                    let model = assets.getUnitModel(empireColor);
                                     this.scene.add(model);
                                     graphics.armies[armyKey].unitModels[i] = model;
                                 }

@@ -22,6 +22,7 @@ class Empire implements JsonSerializable {
 
     public function jsonSerialize() {
         return [
+            'id'                => $this->getId(),
             'username'          => $this->getUser()->getUsername(),
             'user_id'           => $this->getUser()->getId(),
             'result'            => $this->getResult(),
@@ -30,20 +31,28 @@ class Empire implements JsonSerializable {
             'result'            => $this->getResult(),
             'placement'         => $this->getPlacement(),
             'color'             => $this->getColor(),
-            'id'                => $this->getId(),
             'territory_count'   => $this->territory_count ?? null,
         ];
     }
 
-    public function getId(): int {
+    public function getId(): ?int {
         return $this->id;
+    }
+
+    public function getColor(): ?string {
+        return $this->color;
+    }
+
+    public function setColor(?string $color): self {
+        $this->color = $color;
+        return $this;
     }
 
     public function getSupply(): ?float {
         return $this->supply ?: 0;
     }
 
-    public function setSupply(float $supply): Empire {
+    public function setSupply(float $supply): self {
         $this->supply = $supply;
         return $this;
     }
@@ -52,17 +61,8 @@ class Empire implements JsonSerializable {
         return $this->tide ?: 0;
     }
 
-    public function setTide(float $tide): Empire {
+    public function setTide(float $tide): self {
         $this->tide = $tide;
-        return $this;
-    }
-
-    public function getColor(): ?string {
-        return $this->color;
-    }
-
-    public function setColor(?string $color): Empire {
-        $this->color = $color;
         return $this;
     }
 
@@ -70,7 +70,7 @@ class Empire implements JsonSerializable {
         return $this->user;
     }
 
-    public function setUser(User $user): Empire {
+    public function setUser(User $user): self {
         $this->user = $user;
         return $this;
     }
@@ -79,7 +79,7 @@ class Empire implements JsonSerializable {
         return $this->match;
     }
 
-    public function setMatch(Match $match): Empire {
+    public function setMatch(Match $match): self {
         $this->match = $match;
         return $this;
     }
@@ -88,12 +88,12 @@ class Empire implements JsonSerializable {
         return $this->date_founded;
     }
 
-    public function setDateFounded(DateTime $date_founded): Empire {
+    public function setDateFounded(DateTime $date_founded): self {
         $this->date_founded = $date_founded;
         return $this;
     }
 
-    public function setDateFoundedToNow(): Empire {
+    public function setDateFoundedToNow(): self {
         return $this->setDateFounded(new DateTime);
     }
 
@@ -101,7 +101,7 @@ class Empire implements JsonSerializable {
         return (bool)$this->active;
     }
 
-    public function setActive(bool $active): Empire {
+    public function setActive(bool $active): self {
         $this->$active = $active;
         return $this;
     }
@@ -110,7 +110,7 @@ class Empire implements JsonSerializable {
         return $this->result;
     }
 
-    public function setResult(?string $result): Empire {
+    public function setResult(?string $result): self {
         $this->result = $result;
         return $this;
     }
