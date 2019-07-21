@@ -478,7 +478,7 @@ class MapViewport extends React.Component {
                         let model = army.unitModels[i];
 
                         if (i >= innerCircleUnits) {
-                            radius = .75;
+                            radius = .7;
                             spacing = 2 * Math.PI / outerCircleUnits;
                         }
 
