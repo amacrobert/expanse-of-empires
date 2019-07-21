@@ -48,13 +48,13 @@ class DistributeResourcesCommand extends ContainerAwareCommand {
         ;
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output) {
-
-        $match = $this->em->find(Match::class, 1);
-
-        var_dump($this->ms->computeSupport($match));
-
-        exit();
+    protected function execute(
+        InputInterface $input,
+        OutputInterface $output)
+    {
+        // $match = $this->em->find(Match::class, 1);
+        // var_dump($this->ms->computeSupport($match));
+        // exit();
 
         // Select every income-earning territory
         $sql = "
@@ -90,8 +90,8 @@ class DistributeResourcesCommand extends ContainerAwareCommand {
 
         // last_distribution[match_id] => date
         $last_distribution = [];
-        // supply_income[match_id][empire_id] => float
-        $supply_income = [];
+        // income[match_id][empire_id] => [new_supply, new_tide, old_supply, old_tide, user_id]
+        $income = [];
 
         if (empty($rows)) {
             $output->writeln('No qualifying distributions');
@@ -99,7 +99,7 @@ class DistributeResourcesCommand extends ContainerAwareCommand {
         }
 
         foreach ($rows as $row) {
-            extract($row); // match_id, empire_id, user_id, territory_id, building_id, speed, name, base_supply_output
+            extract($row); // match_id, empire_id, user_id, pld_supply, old_tide, last_supply, territory_id, building_id, speed, name, base_tide_cost, base_supply_output
 
             if (!isset($last_distribution[$match_id])) {
                 $last_distribution[$match_id] = new DateTime($last_supply);
@@ -109,7 +109,7 @@ class DistributeResourcesCommand extends ContainerAwareCommand {
                 $income[$match_id] = [];
             }
 
-            if (!isset($supply_income[$match_id][$empire_id])) {
+            if (!isset($income[$match_id][$empire_id])) {
                 $income[$match_id][$empire_id] = [
                     'new_supply' => 0,
                     'new_tide' => self::BASE_TIDE,
@@ -140,10 +140,13 @@ class DistributeResourcesCommand extends ContainerAwareCommand {
                 $results['total_empires'] . ' empires ' .
                 '(' . $results['seconds_since_last_supply'] . 's)'
             );
+
         }
 
+        print_r($update_messages);
+
         // Send batch of resource update messages to socket server for distribution to open connections
-        \Ratchet\Client\connect('ws://127.0.0.1:8080')->then(function($conn) use ($match_id, $update_messages) {
+        \Ratchet\Client\connect('ws://127.0.0.1:8080')->then(function($conn) use ($update_messages) {
             $conn->send(json_encode([
                 'action' => 'client-messages',
                 'messages' => $update_messages,
@@ -154,8 +157,13 @@ class DistributeResourcesCommand extends ContainerAwareCommand {
         });
     }
 
-    private function distributeResourcesForMatch($match_id, $empires, $last_distribution, $distribution_date, &$update_messages) {
-
+    private function distributeResourcesForMatch(
+        $match_id,
+        $empires,
+        $last_distribution,
+        $distribution_date,
+        &$update_messages): array
+    {
         // Make all resource distributions and distribution records a single transaction for each match
         $this->pdo->beginTransaction();
 
@@ -164,7 +172,7 @@ class DistributeResourcesCommand extends ContainerAwareCommand {
 
         $total_empires = 0;
         $total_distributed = 0;
-        $update_messages = [];
+
         foreach ($empires as $empire_id => $resources) {
             $new_supply = $resources['new_supply'] * $seconds_since_last_supply / 3600;
             $new_tide = $resources['new_tide'] * $seconds_since_last_supply / 3600;
