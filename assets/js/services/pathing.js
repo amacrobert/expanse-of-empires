@@ -55,6 +55,7 @@ export default class Pathing {
 
         let costSoFar = {};
         let cameFrom = {};
+
         costSoFar[start.id] = 0;
         cameFrom[start.id] = null;
 

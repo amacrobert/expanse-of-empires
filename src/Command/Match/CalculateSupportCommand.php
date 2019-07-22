@@ -12,9 +12,9 @@ use App\Service\Match\MatchService;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\Match\Match;
 
-class CalculateSupplyCommand extends Command
+class CalculateSupportCommand extends Command
 {
-    protected static $defaultName = 'eoe:match:calculate-supply';
+    protected static $defaultName = 'eoe:match:calculate-support';
     protected $em;
     protected $match_service;
 

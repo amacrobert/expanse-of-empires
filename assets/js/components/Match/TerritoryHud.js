@@ -89,6 +89,7 @@ export default class TerritoryHud extends React.Component {
             <div className="match-hud match-hud-right">
                 {hexInfo}
                 <p>{t.terrain.type} | Movement cost: {t.terrain.tide}T</p>
+                <p>Support: {t.support}</p>
                 <p>{ownerInfo}</p>
                 {startPrompt &&
                     <div className="start-prompt">

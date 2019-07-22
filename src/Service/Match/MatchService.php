@@ -234,8 +234,6 @@ class MatchService {
             if ($order != 0) {
                 $tide_cost_per_unit += $territory->getTerrain()->getBaseTideCost();
             }
-
-            print 'path ' . $order . ': t.id ' . $territory->getId() . ', terrain cost: ' . $territory->getTerrain()->getBaseTideCost() . PHP_EOL;
         }
 
         // Check that the user has enough tide to complete the move
@@ -405,12 +403,24 @@ class MatchService {
                     $defense_bonuses['fortification'] = $fortification;
                 }
 
-                // @TODO: Add support bonuses and penalties
+                if ($attack_support = $attacking_territory->getState()->getSupport()) {
+                    $attack_bonuses[] = [
+                        'name' => 'support',
+                        'bonus' => $attack_support,
+                    ];
+                }
+                if ($defense_support = $defending_territory->getState()->getSupport()) {
+                    $defense_bonuses[] = [
+                        'name' => 'support',
+                        'bonus' => $defense_support,
+                    ];
+                }
+
                 // @TODO: Add tech bonuses
 
                 $defense_score = $defense_roll;
                 foreach ($defense_bonuses as $bonus) {
-                    $defense_score += $bonus;
+                    $defense_score += $bonus['bonus'];
                 }
             }
 
@@ -419,7 +429,7 @@ class MatchService {
                 // Add bonuses
                 $attack_score = $attack_roll;
                 foreach ($attack_bonuses as $bonus) {
-                    $attack_score += $bonus;
+                    $attack_score += $bonus['bonus'];
                 }
             }
 
@@ -482,8 +492,12 @@ class MatchService {
 
         // Attacker won
         if ($attacker_takes_territory) {
+
             // Give attacker the territory
             $defending_territory->getState()->setEmpire($attacking_empire);
+
+            // Re-calculate the support now that a territory has changed hands
+            $this->computeSupport($match, [$attacking_empire, $defending_empire]);
 
             // Move what's left of the attacking units into the newly won territory
             $attacking_army->setSize($attacking_army->getSize() - $attacking_units_left);
@@ -522,104 +536,114 @@ class MatchService {
     }
 
     // Compute the support for territories in a match
-    public function computeSupport(Match $match) {
+    public function computeSupport(Match $match, array $empires = null) {
 
         $this->hydrateMapState($match);
 
-        $territories = $match->getMap()->getTerritories();
+        if ($empire) {
+            $territories = $this->em->createQuery('
+                SELECT state.territory
+                FROM App\Entity\Match\TerritoryState state
+                WHERE state.empire IN :empires
+            ');
+        }
+        else {
+            $territories = $match->getMap()->getTerritories();
+        }
 
         foreach ($territories as $territory) {
-            if ($territory->getState() && $territory->getState()->getEmpire()) {
-                $path = $this->computeShortestPathToCastle($match, $territory);
 
-                $this->clearMapTempValues($match);
+            $state = $territory->getState();
+
+            if ($state && $state->getEmpire()) {
+
+                $path = $this->computeShortestPathToCastle($match, $territory);
 
                 if ($path === null) {
                     print "No path from $territory to castle" . PHP_EOL;
+                    $support = -20;
                 }
                 else {
-                    print "Path from $territory to closest castle is " . count($path) . PHP_EOL;
+                    $path_length = count($path) - 1;
+                    print "Path from $territory to closest castle is " . $path_length . PHP_EOL;
+
+                    if ($path_length <= 4) {
+                        $support = 20;
+                    }
+                    else if ($path_length <= 6) {
+                        $support = 10;
+                    }
+                    else {
+                        $support = 5;
+                    }
+                }
+
+                if ($state->getSupport() != $support) {
+                    $state->setSupport($support);
                 }
             }
         }
-    }
 
-    private function clearMapTempValues($match) {
-        // unset temp territory members
-        foreach ($match->getMap()->getTerritories() as $territory) {
-            unset($territory->came_from);
-            unset($territory->distance_so_far);
-        }
+        $this->em->flush();
     }
 
     private function computeShortestPathToCastle(Match $match, Territory $start) {
+
+        $distance_so_far = [];
+        $came_from = [];
+
         $territory_id = $start->getId();
-        $start->distance_so_far = 0;
-        $start->came_from = null;
+        $distance_so_far[$territory_id] = 0;
+        $came_from[$territory_id] = null;
 
         $frontier = new \SplPriorityQueue();
-        $frontier->insert($start, 0);
+        $frontier->insert($start, PHP_INT_MAX);
         $start_empire = $start->getState()->getEmpire();
-
-        print "FROM $start" . PHP_EOL;
 
         while (!$frontier->isEmpty()) {
 
-            print ' frontier size: ' . count($frontier) . PHP_EOL;
-
             $current = $frontier->extract();
-
-            print '    ' . $current . PHP_EOL;
 
             // Found the closest castle
             if ($current_state = $current->getState()) {
                 if ($building = $current_state->getBuilding()) {
                     if ($building->getMachineName() == 'castle') {
+
                         $path = [];
                         $trace = $current;
 
                         while ($trace) {
-                            $path[] = $trace;
-                            $trace = $trace->came_from;
+                            $path[] = $trace->getId();
+                            $trace = $came_from[$trace->getId()];
                         }
 
-                        return $path;
+                        return array_reverse($path);
                     }
                 }
             }
 
             $neighbors = $this->getBorderingTerritories($match, $current);
-            print '   neighbors: ' . count($neighbors) . PHP_EOL;
 
             foreach ($neighbors as $next) {
                 if ($next) {
-                    print "     looking at $next";
                     $distance = 1; // @TODO: Possibly replace with tide cost of territory to restrict supply through
-                               // difficult terrain
-                    $new_distance = $current->distance_so_far + $distance;
-                    $has_visited = isset($next->came_from);
-                    $is_closer = $new_distance < ($next->distance_so_far ?? PHP_INT_MAX);
-
+                                   // difficult terrain
+                    $new_distance = $distance_so_far[$current->getId()] + $distance;
+                    $has_visited = array_key_exists($next->getId(), $came_from);
+                    $is_closer = $new_distance < ($distance_so_far[$next->getId()] ?? PHP_INT_MAX);
 
                     $is_traversable = false;
                     if ($next_state = $next->getState()) {
                         if ($next_empire = $next_state->getEmpire()) {
                             // @TODO: allow support through allies' territories
-                            $is_traversable = $next_empire == $start_empire;
+                            $is_traversable = ($next_empire == $start_empire);
                         }
                     }
 
-                    print ' | is_traversable: ' . ($is_traversable ? 1 : 0);
-                    print ' | has_visited: ' . ($has_visited ? 1 : 0);
-                    print ' | is_closer: ' . ($is_closer ? 1 : 0) . PHP_EOL;
-                    // print '  is_traversable: ' . $is_traversable . PHP_EOL;
-
                     if ($is_traversable && (!$has_visited || $is_closer)) {
-                        $next->distance_so_far = $new_distance;
-                        $frontier->insert($next, $new_distance);
-                        $next->came_from = $current;
-
-                        // print 'inserted $next into frontier' . PHP_EOL;
+                        $distance_so_far[$next->getId()] = $new_distance;
+                        $frontier->insert($next, PHP_INT_MAX - $new_distance);
+                        $came_from[$next->getId()] = $current;
                     }
                 }
             }

@@ -51,9 +51,9 @@ export default class AttackOutput extends React.Component {
 
             return (
                 <TableRow key={index}>
-                    <TableCell  component="th" scope="row" align="right">
+                    <TableCell component="th" scope="row" align="right">
                         <span className={attackerStyle} style={{fontSize: this.getFontSize(outcome.attack_score)}}>
-                            {outcome.attack_score}
+                            {outcome.attack_score} / {outcome.attack_roll}
                         </span>
                     </TableCell>
                     <TableCell align="center">
@@ -61,7 +61,7 @@ export default class AttackOutput extends React.Component {
                     </TableCell>
                     <TableCell align="left">
                         <span className={defenderStyle} style={{fontSize: this.getFontSize(outcome.defense_score)}}>
-                            {outcome.defense_score}
+                            {outcome.defense_score} / {outcome.defense_roll}
                         </span>
                     </TableCell>
                 </TableRow>
