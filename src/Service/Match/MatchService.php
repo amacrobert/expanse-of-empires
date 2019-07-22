@@ -535,10 +535,10 @@ class MatchService {
                 $this->clearMapTempValues($match);
 
                 if ($path === null) {
-                    print 'No path from $territory to castle' . PHP_EOL;
+                    print "No path from $territory to castle" . PHP_EOL;
                 }
                 else {
-                    print 'Path from $territory to closest castle is ' . count($path) . PHP_EOL;
+                    print "Path from $territory to closest castle is " . count($path) . PHP_EOL;
                 }
             }
         }
@@ -561,13 +561,15 @@ class MatchService {
         $frontier->insert($start, 0);
         $start_empire = $start->getState()->getEmpire();
 
-        // print "FROM $start" . PHP_EOL;
+        print "FROM $start" . PHP_EOL;
 
         while (!$frontier->isEmpty()) {
 
-            // print ' frontier size: ' . count($frontier) . PHP_EOL;
+            print ' frontier size: ' . count($frontier) . PHP_EOL;
 
             $current = $frontier->extract();
+
+            print '    ' . $current . PHP_EOL;
 
             // Found the closest castle
             if ($current_state = $current->getState()) {
@@ -586,21 +588,18 @@ class MatchService {
                 }
             }
 
-            $neighbors = $this->getBorderingTerritories($match, $start);
-            // print ' neighbors: ' . count($neighbors) . PHP_EOL;
+            $neighbors = $this->getBorderingTerritories($match, $current);
+            print '   neighbors: ' . count($neighbors) . PHP_EOL;
 
             foreach ($neighbors as $next) {
                 if ($next) {
-                    // print '  looking at $next' . PHP_EOL;
+                    print "     looking at $next";
                     $distance = 1; // @TODO: Possibly replace with tide cost of territory to restrict supply through
                                // difficult terrain
                     $new_distance = $current->distance_so_far + $distance;
                     $has_visited = isset($next->came_from);
                     $is_closer = $new_distance < ($next->distance_so_far ?? PHP_INT_MAX);
 
-                    // print '  new dist: ' . $new_distance . PHP_EOL;
-                    // print '  has_visited: ' . $has_visited . PHP_EOL;
-                    // print '  is_closer: ' . $is_closer . PHP_EOL;
 
                     $is_traversable = false;
                     if ($next_state = $next->getState()) {
@@ -610,6 +609,9 @@ class MatchService {
                         }
                     }
 
+                    print ' | is_traversable: ' . ($is_traversable ? 1 : 0);
+                    print ' | has_visited: ' . ($has_visited ? 1 : 0);
+                    print ' | is_closer: ' . ($is_closer ? 1 : 0) . PHP_EOL;
                     // print '  is_traversable: ' . $is_traversable . PHP_EOL;
 
                     if ($is_traversable && (!$has_visited || $is_closer)) {

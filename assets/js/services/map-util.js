@@ -46,4 +46,5 @@ export default {
     borderRotation,
     axialToCube,
     borderWidth,
+    radius,
 };

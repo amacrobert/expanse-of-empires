@@ -365,7 +365,7 @@ class MapViewport extends React.Component {
 
                     var borderMerged = new THREE.Mesh(
                         borderMergedGeo,
-                        new THREE.MeshLambertMaterial({ color: parseInt(empireColor, 16) })
+                        new THREE.MeshPhongMaterial({ color: parseInt(empireColor, 16) })
                     );
 
                     console.debug('Adding border mesh to territory ' + territory.id);
