@@ -121,6 +121,7 @@ class GraphicsUtil {
             new THREE.MeshLambertMaterial({color: parseInt(color, 16)})
         );
         unitModel.position.y = this.unitHeight / 2;
+        unitModel.rotation.y = Math.PI / 4;
 
         return unitModel;
     };

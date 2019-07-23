@@ -19,8 +19,18 @@ class MatchService {
     const TRAIN_ARMY_TIDE = -10;
     const MAX_ATTACK_SIZE = 5;
     const MAX_DEFENSE_SIZE = 5;
-    const MIN_NPC_ARMY_SIZE = 1;
+    const MIN_NPC_ARMY_SIZE = 3;
     const MAX_NPC_ARMY_SIZE = 6;
+
+    const HIGH_SUPPLY = 20;
+    const MED_SUPPLY = 10;
+    const LOW_SUPPLY = 5;
+    const NO_SUPPLY = -20;
+    const HIGH_SUPPLY_RADIUS = 3;
+    const MED_SUPPLY_RADIUS = 6;
+
+    const ATTACKING_TIDE_COST_COEF = 2; // twice as much tide cost to attack than to move
+    const FAILED_ATTACK_TIDE_REFUND_COEF = 0.5; // you get refunded tide at this rate in case of a failed attack
 
     public function __construct(
         SocketController $socket_controller,
@@ -68,6 +78,7 @@ class MatchService {
             $state = (new TerritoryState)
                 ->setMatch($match)
                 ->setTerritory($territory)
+                ->setSupport(self::HIGH_SUPPLY)
             ;
             $this->em->persist($state);
         }
@@ -332,7 +343,7 @@ class MatchService {
         }
 
         // Make sure attacking player has enough tide to attack
-        $tide_cost = $defending_territory->getTerrain()->getBaseTideCost() * $attacking_units;
+        $tide_cost = $defending_territory->getTerrain()->getBaseTideCost() * $attacking_units * self::ATTACKING_TIDE_COST_COEF;
         if ($attacking_empire->getTide() < $tide_cost) {
             throw new VisibleException('Not enough Tide');
         }
@@ -497,7 +508,8 @@ class MatchService {
             $defending_territory->getState()->setEmpire($attacking_empire);
 
             // Re-calculate the support now that a territory has changed hands
-            $this->computeSupport($match, [$attacking_empire, $defending_empire]);
+            $updated_territories = [];
+            $this->computeSupport($match, $updated_territories, [$attacking_empire, $defending_empire], [$defending_territory]);
 
             // Move what's left of the attacking units into the newly won territory
             $attacking_army->setSize($attacking_army->getSize() - $attacking_units_left);
@@ -505,48 +517,68 @@ class MatchService {
             $new_territory_army->setSize($attacking_units_left);
         }
 
-        // @TODO: manage resources
+        // Subtract tide from the attacker, at a rate dependent upon whether or not the territory was won
+        $final_tide_cost = $tide_cost * ($attacker_takes_territory ? 1 : self::FAILED_ATTACK_TIDE_REFUND_COEF);
+        $attacking_empire->setTide($attacking_empire->getTide() - $final_tide_cost);
 
         $this->em->flush(array_merge(
-            [$defending_state, $attacking_army],
+            [$defending_state, $attacking_army, $attacking_empire],
             $defending_armies->toArray()
         ));
 
-        $this->socket_controller->broadcastToMatch($match->getId(), [
+        $this->socket_controller->broadcastToUser($match->getId(), $user->getId(), [
             'action' => 'territory-attacked',
             'output' => [
                 'territory_taken' => $attacker_takes_territory,
                 'outcomes' => $outcomes,
                 'defeated_defense_units' => $defeated_defense_units,
                 'defeated_attack_units' => $defeated_attack_units,
-                'attacking_territory' => (string)$attacking_territory,
-                'defending_territory' => (string)$defending_territory,
+                'attacking_territory_id' => $attacking_territory->getId(),
+                'defending_territory_id' => $defending_territory->getId(),
             ],
             'updates' => [
-                'territories' => [
-                    $defending_territory,
-                    $attacking_territory,
+                'resources' => [
+                    'tide' => $attacking_empire->getTide(),
                 ],
-                // 'resources' => [
-                //     'supply' => $empire->getSupply(),
-                //     'tide' => $empire->getTide(),
-                // ],
+            ],
+        ]);
+
+        $this->socket_controller->broadcastToMatch($match->getId(), [
+            'action' => 'territory-attacked-in-match',
+            'updates' => [
+                'territories' => array_values(array_unique(array_merge(
+                    ($updated_territories ?? []),
+                    [$defending_territory, $attacking_territory]
+                ))),
             ],
         ]);
     }
 
     // Compute the support for territories in a match
-    public function computeSupport(Match $match, array $empires = null) {
-
+    public function computeSupport(
+        Match $match,
+        array &$updated_territories = null,
+        array $empires = null,
+        array $additional_territories = null)
+    {
         $this->hydrateMapState($match);
 
-        if ($empire) {
+        // If empires given, only check territories belonging to them
+        if ($empires) {
             $territories = $this->em->createQuery('
-                SELECT state.territory
-                FROM App\Entity\Match\TerritoryState state
-                WHERE state.empire IN :empires
-            ');
+                SELECT territory
+                FROM App\Entity\Map\Territory territory
+                JOIN App\Entity\Match\TerritoryState state WITH state.territory = territory
+                WHERE state.empire IN (:empires)')
+                ->setParameter('empires', $empires)
+                ->getResult();
+
+            if ($additional_territories) {
+                $territories = array_merge($territories, $additional_territories);
+                $territories = array_unique($territories);
+            }
         }
+        // Otherwise, recompute support for every territory in the match
         else {
             $territories = $match->getMap()->getTerritories();
         }
@@ -560,26 +592,25 @@ class MatchService {
                 $path = $this->computeShortestPathToCastle($match, $territory);
 
                 if ($path === null) {
-                    print "No path from $territory to castle" . PHP_EOL;
-                    $support = -20;
+                    $support = self::NO_SUPPLY;
                 }
                 else {
                     $path_length = count($path) - 1;
-                    print "Path from $territory to closest castle is " . $path_length . PHP_EOL;
 
-                    if ($path_length <= 4) {
-                        $support = 20;
+                    if ($path_length <= self::HIGH_SUPPLY_RADIUS) {
+                        $support = self::HIGH_SUPPLY;
                     }
-                    else if ($path_length <= 6) {
-                        $support = 10;
+                    else if ($path_length <= self::MED_SUPPLY_RADIUS) {
+                        $support = self::MED_SUPPLY;
                     }
                     else {
-                        $support = 5;
+                        $support = self::LOW_SUPPLY;
                     }
                 }
 
                 if ($state->getSupport() != $support) {
                     $state->setSupport($support);
+                    $updated_territories[] = $territory;
                 }
             }
         }

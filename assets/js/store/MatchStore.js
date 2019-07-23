@@ -30,6 +30,12 @@ class MatchStore {
         return indexedEmpires;
     };
 
+    @computed get territoriesById() {
+        let indexedTerritories = {};
+        this.map.state.forEach(territory => indexedTerritories[territory.id] = territory);
+        return indexedTerritories;
+    }
+
     @computed get userEmpire() {
         return _.find(this.empires, empire => empire.user_id === this.userStore.user.id);
     }
@@ -42,12 +48,18 @@ class MatchStore {
         return new Promise((resolve, reject) => {
             Api.getMatchDetails(matchId).then(matchFull => {
                 this.empires = matchFull.empires;
-                this.map = matchFull.map;
+
+                // Store the map outside an observable while we populate transform it, only setting the observable
+                // once it's ready to be rendered. This is to prevent premature rendering.
+                let loadingMap = matchFull.map;
 
                 // reference each territory to its empire
-                this.map.state.forEach(territory => {
+                loadingMap.state.forEach(territory => {
                     territory.empire = territory.empire_id ? this.empiresById[territory.empire_id] : null;
                 });
+
+                // the map may now be observed
+                this.map = loadingMap;
 
                 delete(matchFull.empires);
                 delete(matchFull.map);
@@ -95,10 +107,10 @@ class MatchStore {
 
         // Update empire territory counts in case territory changed hands
         if (empiresById[oldTerritory.empire_id]) {
-            empiresById[oldTerritory.empire_id.territory_count]--;
+            empiresById[oldTerritory.empire_id].territory_count--;
         }
         if (empiresById[newTerritory.empire_id]) {
-            empiresById[newTerritory.empire_id.territory_count]++;
+            empiresById[newTerritory.empire_id].territory_count++;
         }
     };
 

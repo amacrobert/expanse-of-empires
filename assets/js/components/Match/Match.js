@@ -57,12 +57,12 @@ class Match extends Component {
             let newSupply = 0;
             let newTide = 0;
             if (updates) {
-                if (updates.territories) {
-                    updates.territories.forEach(territory => matchStore.updateTerritory(territory));
-                }
-
                 if (updates.empires) {
                     updates.empires.forEach(empire => matchStore.updateEmpire(empire));
+                }
+
+                if (updates.territories) {
+                    updates.territories.forEach(territory => matchStore.updateTerritory(territory));
                 }
 
                 if (updates.resources) {
@@ -82,7 +82,8 @@ class Match extends Component {
 
             switch (message.action) {
                 case 'new-empire':
-                    this.props.enqueueSnackbar(message.empire.username + ' joined the match');
+                    let newEmpire = message.updates.empires[0];
+                    this.props.enqueueSnackbar(newEmpire.username + ' joined the match');
                     break;
 
                 case 'resources-distributed':
@@ -110,6 +111,10 @@ class Match extends Component {
                     );
                     uiStore.attackOutput = message.output;
                     uiStore.attacking = false;
+                    // if won, select the newly gained territory
+                    if (message.output.territory_taken) {
+                        matchStore.setSelectedTerritory(matchStore.territoriesById[message.output.defending_territory_id]);
+                    }
                     break;
 
                 case 'error':

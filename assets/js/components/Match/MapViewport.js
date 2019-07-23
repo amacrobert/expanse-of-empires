@@ -258,6 +258,7 @@ class MapViewport extends React.Component {
     updateScene = () => {
         // iterate territories and determine if any graphics elements need to be updated
         this.props.matchStore.map.state.forEach(territory => {
+
             const q = territory.q;
             const r = territory.r;
             const hex = this.getHex(q, r);
@@ -273,6 +274,7 @@ class MapViewport extends React.Component {
                 }
                 let borderMeshUpdated = false;
                 let graphics = hex.userData.graphics;
+
                 let empireColor = territory.empire ? territory.empire.color : '777777';
 
                 // Delete starting position sprite
@@ -371,6 +373,13 @@ class MapViewport extends React.Component {
                     console.debug('Adding border mesh to territory ' + territory.id);
                     graphics.borderMerged = borderMerged;
                     this.scene.add(borderMerged);
+                }
+
+                // update border mesh color if needed
+                let borderColor = graphics.borderMerged ? graphics.borderMerged.material.color.getHexString() : null;
+                if (borderColor && borderColor != empireColor) {
+                    console.log('Updating border mesh color from ' + graphics.borderMerged.material.color.getHexString() + ' to ' + empireColor);
+                    graphics.borderMerged.material.color.setHex(parseInt(empireColor, 16));
                 }
 
                 // BUILDINGS
@@ -568,13 +577,21 @@ class MapViewport extends React.Component {
         }
     };
 
-
     // Update the scene when the map state changes
     reactToSceneUpdate = reaction(
         () => {
             let matchStore = this.props.matchStore;
-            return matchStore.map.state && matchStore.map.state.slice()
+            return matchStore.map.state && matchStore.map.state.slice();
         },
+        () => {
+            if (this.props.matchStore.map.state) {
+                this.updateScene();
+            }
+        }
+    );
+
+    reactToEmpireUpdate = reaction(
+        () => (this.props.matchStore.empires.slice()),
         () => {
             if (this.props.matchStore.map.state) {
                 this.updateScene();

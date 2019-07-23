@@ -49,20 +49,35 @@ export default class AttackOutput extends React.Component {
                 symbol = '-';
             }
 
+            let totalAttackMod = outcome.attack_score - outcome.attack_roll;
+            let totalDefenseMod = outcome.defense_score - outcome.defense_roll;
+            if (totalAttackMod > 0) {
+                totalAttackMod = "+" + totalAttackMod;
+            }
+            if (totalDefenseMod > 0) {
+                totalDefenseMod = "+" + totalDefenseMod;
+            }
+
             return (
                 <TableRow key={index}>
                     <TableCell component="th" scope="row" align="right">
-                        <span className={attackerStyle} style={{fontSize: this.getFontSize(outcome.attack_score)}}>
-                            {outcome.attack_score} / {outcome.attack_roll}
-                        </span>
+                        <div className={attackerStyle} style={{fontSize: this.getFontSize(outcome.attack_score)}}>
+                            {outcome.attack_roll}
+                        </div>
+                        <div>
+                            {totalAttackMod != 0 && totalAttackMod}
+                        </div>
                     </TableCell>
                     <TableCell align="center">
                         {symbol}
                     </TableCell>
                     <TableCell align="left">
-                        <span className={defenderStyle} style={{fontSize: this.getFontSize(outcome.defense_score)}}>
-                            {outcome.defense_score} / {outcome.defense_roll}
-                        </span>
+                        <div className={defenderStyle} style={{fontSize: this.getFontSize(outcome.defense_score)}}>
+                            {outcome.defense_score}
+                        </div>
+                        <div>
+                            {totalDefenseMod != 0 && totalDefenseMod}
+                        </div>
                     </TableCell>
                 </TableRow>
             );
