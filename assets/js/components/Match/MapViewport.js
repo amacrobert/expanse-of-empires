@@ -403,7 +403,7 @@ class MapViewport extends React.Component {
                         this.scene.add(building);
 
                         // arrange units after building load in case this happens after initial unit placement
-                        this.arrangeUnits(graphics, q, r);
+                        this.arrangeUnits(hex);
                     })
                 }
                 // Remove destroyed building
@@ -440,7 +440,7 @@ class MapViewport extends React.Component {
                                 }
                             }
 
-                            this.arrangeUnits(graphics, territory.q, territory.r);
+                            this.arrangeUnits(hex);
                         }
 
                         // Remove units
@@ -455,7 +455,7 @@ class MapViewport extends React.Component {
                                 }
                             }
 
-                            this.arrangeUnits(graphics, territory.q, territory.r);
+                            this.arrangeUnits(hex);
                         }
                     });
                 }
@@ -464,9 +464,10 @@ class MapViewport extends React.Component {
     };
 
     // arrange the unit models in a territory
-    arrangeUnits = (hexGraphics, q, r) => {
+    arrangeUnits = (hex) => {
 
-        let realCoords = MapUtil.axialToReal(q, r);
+        let hexGraphics = hex.userData.graphics;
+        let realCoords = MapUtil.axialToReal(hex.userData.coordinates.q, hex.userData.coordinates.r);
         let self = this;
 
         Object.keys(hexGraphics.armies).forEach(armyKey => {
