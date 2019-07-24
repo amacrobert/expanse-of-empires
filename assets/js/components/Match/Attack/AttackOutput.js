@@ -51,32 +51,46 @@ export default class AttackOutput extends React.Component {
 
             let totalAttackMod = outcome.attack_score - outcome.attack_roll;
             let totalDefenseMod = outcome.defense_score - outcome.defense_roll;
+            let attackModStyle = 'penalty';
+            let defenseModStyle = 'penalty';
             if (totalAttackMod > 0) {
                 totalAttackMod = "+" + totalAttackMod;
+                attackModStyle = 'bonus';
             }
             if (totalDefenseMod > 0) {
                 totalDefenseMod = "+" + totalDefenseMod;
+                defenseModStyle = 'bonus';
             }
 
             return (
                 <TableRow key={index}>
-                    <TableCell component="th" scope="row" align="right">
+                    <TableCell component="th" scope="row" align="center">
                         <div className={attackerStyle} style={{fontSize: this.getFontSize(outcome.attack_score)}}>
-                            {outcome.attack_roll}
+                            {outcome.attack_score}
                         </div>
                         <div>
-                            {totalAttackMod != 0 && totalAttackMod}
+                            <span>
+                                {outcome.attack_roll}
+                            </span>
+                            <span className={attackModStyle}>
+                                {totalAttackMod != 0 && totalAttackMod}
+                            </span>
                         </div>
                     </TableCell>
                     <TableCell align="center">
                         {symbol}
                     </TableCell>
-                    <TableCell align="left">
+                    <TableCell align="center">
                         <div className={defenderStyle} style={{fontSize: this.getFontSize(outcome.defense_score)}}>
                             {outcome.defense_score}
                         </div>
                         <div>
-                            {totalDefenseMod != 0 && totalDefenseMod}
+                            <span>
+                                {outcome.defense_roll}
+                            </span>
+                            <span className={defenseModStyle}>
+                                {totalDefenseMod != 0 && totalDefenseMod}
+                            </span>
                         </div>
                     </TableCell>
                 </TableRow>
