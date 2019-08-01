@@ -13,7 +13,8 @@ class MatchStore {
     @observable match;
     @observable matchList = [];
     @observable empires = [];
-    @observable map = {state: null};
+    @observable map;
+    @observable territoriesById = {};
     @observable error;
     @observable selectedTerritoryId;
     @observable hoverTerritoryId;
@@ -30,10 +31,22 @@ class MatchStore {
         return indexedEmpires;
     };
 
-    @computed get territoriesById() {
-        let indexedTerritories = {};
-        this.map.state.forEach(territory => indexedTerritories[territory.id] = territory);
-        return indexedTerritories;
+    @computed get territories() {
+        return Object.values(this.territoriesById);
+    }
+
+    @computed get territoriesByAxial() {
+
+        let mappedTerritories = {};
+
+        this.territories.forEach(territory => {
+            if (!mappedTerritories[territory.q]) {
+                mappedTerritories[territory.q] = {};
+            }
+            mappedTerritories[territory.q][territory.r] = territory;
+        });
+
+        return mappedTerritories;
     }
 
     @computed get userEmpire() {
@@ -52,19 +65,22 @@ class MatchStore {
                 // Store the map outside an observable while we populate transform it, only setting the observable
                 // once it's ready to be rendered. This is to prevent premature rendering.
                 let loadingMap = matchFull.map;
+                let loadingTerritoriesById = {};
 
                 // reference each territory to its empire
                 loadingMap.state.forEach(territory => {
                     territory.empire = territory.empire_id ? this.empiresById[territory.empire_id] : null;
+                    loadingTerritoriesById[territory.id] = territory;
                 });
-
-                // the map may now be observed
-                this.map = loadingMap;
 
                 // load empire capitals
                 this.empires.forEach(empire => {
-                    empire.capital = this.territoriesById[empire.capital_id];
+                    empire.capital = loadingTerritoriesById[empire.capital_id];
                 });
+
+                // the map may now be observed
+                this.territoriesById = loadingTerritoriesById;
+                this.map = loadingMap;
 
                 delete(matchFull.empires);
                 delete(matchFull.map);
@@ -104,12 +120,12 @@ class MatchStore {
     @action updateTerritory = (newTerritory) => {
         let empiresById = this.empiresById;
         let map = this.map;
-        let index = _.findIndex(map.state, (t) => (t.id == newTerritory.id));
-        let oldTerritory = Object.assign(map.state[index]);
+        let index = newTerritory.id;
+        let oldTerritory = Object.assign(this.territoriesById[index]);
 
         // Update teritory empire from empire_id
         newTerritory.empire = newTerritory.empire_id ? this.empiresById[newTerritory.empire_id] : null;
-        map.state[index] = newTerritory;
+        this.territoriesById[index] = newTerritory;
 
         // Update empire territory counts in case territory changed hands
         if (empiresById[oldTerritory.empire_id]) {
@@ -154,7 +170,7 @@ class MatchStore {
 
         this.empires.push(empire);
 
-        this.map.state.forEach(territory => {
+        this.territories.forEach(territory => {
             territory.empire = territory.empire_id ? this.empiresById[territory.empire_id] : null;
         })
     };
@@ -219,11 +235,11 @@ class MatchStore {
     };
 
     @computed get selectedTerritory() {
-        return _.find(this.map.state, t => t.id === this.selectedTerritoryId);
+        return this.territoriesById[this.selectedTerritoryId];
     };
 
     @computed get hoverTerritory() {
-        return _.find(this.map.state, t => t.id === this.hoverTerritoryId);
+        return this.territoriesById[this.hoverTerritoryId];
     };
 }
 

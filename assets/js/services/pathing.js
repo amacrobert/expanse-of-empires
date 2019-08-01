@@ -18,7 +18,7 @@ export default class Pathing {
             return;
         }
 
-        let territoriesBorderingStart = MatchUtil.getBorderingTerritories(matchStore.map.state, start);
+        let territoriesBorderingStart = MatchUtil.getBorderingTerritories(matchStore.territoriesByAxial, start);
         let endBordersStart = _.contains(territoriesBorderingStart, end);
 
         if (end.empire != userEmpire) {
@@ -86,7 +86,7 @@ export default class Pathing {
                 };
             }
 
-            let neighbors = MatchUtil.getBorderingTerritories(matchStore.map.state, current);
+            let neighbors = MatchUtil.getBorderingTerritories(matchStore.territoriesByAxial, current);
 
             neighbors.forEach(next => {
                 if (next) {
