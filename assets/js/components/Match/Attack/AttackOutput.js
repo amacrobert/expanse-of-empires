@@ -1,6 +1,8 @@
 import React from 'react';
 import { observer, inject } from 'mobx-react';
 
+import Modifier from './Modifier';
+
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
@@ -51,16 +53,6 @@ export default class AttackOutput extends React.Component {
 
             let totalAttackMod = outcome.attack_score - outcome.attack_roll;
             let totalDefenseMod = outcome.defense_score - outcome.defense_roll;
-            let attackModStyle = 'penalty';
-            let defenseModStyle = 'penalty';
-            if (totalAttackMod > 0) {
-                totalAttackMod = "+" + totalAttackMod;
-                attackModStyle = 'bonus';
-            }
-            if (totalDefenseMod > 0) {
-                totalDefenseMod = "+" + totalDefenseMod;
-                defenseModStyle = 'bonus';
-            }
 
             return (
                 <TableRow key={index}>
@@ -72,9 +64,7 @@ export default class AttackOutput extends React.Component {
                             <span>
                                 {outcome.attack_roll}
                             </span>
-                            <span className={attackModStyle}>
-                                {totalAttackMod != 0 && totalAttackMod}
-                            </span>
+                            <Modifier number={totalAttackMod} hideIfZero />
                         </div>
                     </TableCell>
                     <TableCell align="center">
@@ -88,9 +78,7 @@ export default class AttackOutput extends React.Component {
                             <span>
                                 {outcome.defense_roll}
                             </span>
-                            <span className={defenseModStyle}>
-                                {totalDefenseMod != 0 && totalDefenseMod}
-                            </span>
+                            <Modifier number={totalDefenseMod} hideIfZero />
                         </div>
                     </TableCell>
                 </TableRow>

@@ -101,6 +101,7 @@ class MatchService {
         $empire = (new Empire)
             ->setUser($user)
             ->setMatch($match)
+            ->setCapital($territory)
             ->setActive(true)
             ->setSupply(self::STARTING_SUPPLY)
             ->setTide(self::STARTING_TIDE)

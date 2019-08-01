@@ -17,6 +17,7 @@ App\Entity\Match\Empire:
     manyToOne:
         user: { targetEntity: App\Entity\User\User }
         match: { targetEntity: App\Entity\Match\Match, inversedBy: empires }
+        capital: { targetEntity: App\Entity\Map\Territory }
 
     lifecycleCallbacks:
         prePersist: [setDateFoundedToNow]

@@ -4,6 +4,7 @@ import { observer, inject } from 'mobx-react';
 import ArmyList from './ArmyList';
 import Button from '@material-ui/core/Button';
 import AttackOutput from './Attack/AttackOutput';
+import Modifier from './Attack/Modifier';
 
 @inject('matchStore', 'userStore', 'uiStore')
 @observer
@@ -89,7 +90,7 @@ export default class TerritoryHud extends React.Component {
             <div className="match-hud match-hud-right">
                 {hexInfo}
                 <p>{t.terrain.type} | Movement cost: {t.terrain.tide}T</p>
-                <p>Support: {t.support || 0}</p>
+                <p>Support: <Modifier number={t.support || 0} /></p>
                 <p>{ownerInfo}</p>
                 {startPrompt &&
                     <div className="start-prompt">

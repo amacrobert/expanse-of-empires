@@ -61,6 +61,11 @@ class MatchStore {
                 // the map may now be observed
                 this.map = loadingMap;
 
+                // load empire capitals
+                this.empires.forEach(empire => {
+                    empire.capital = this.territoriesById[empire.capital_id];
+                });
+
                 delete(matchFull.empires);
                 delete(matchFull.map);
                 this.match = matchFull;
@@ -87,6 +92,7 @@ class MatchStore {
 
     @action updateEmpire = (empire) => {
         // Empire is new -- add it
+        empire.capital = this.territoriesById[empire.capital_id];
         if (!this.empiresById[empire.id]) {
             this.newEmpire(empire);
         }
@@ -145,6 +151,7 @@ class MatchStore {
     }
 
     @action newEmpire = (empire) => {
+
         this.empires.push(empire);
 
         this.map.state.forEach(territory => {
