@@ -540,7 +540,7 @@ class MatchService {
 
         $this->hydrateMapState($match);
 
-        if ($empire) {
+        if ($empires) {
             $territories = $this->em->createQuery('
                 SELECT state.territory
                 FROM App\Entity\Match\TerritoryState state
