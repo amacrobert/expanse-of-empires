@@ -2,7 +2,7 @@ import React from 'react';
 import MatchUtil from '../../services/match-util';
 import { observer, inject } from 'mobx-react';
 
-@inject('matchStore')
+@inject('matchStore', 'uiStore')
 @observer
 class MatchHud extends React.Component {
 
@@ -12,17 +12,26 @@ class MatchHud extends React.Component {
         const empireList = this.props.matchStore.empires.map(empire => (
             <p key={empire.id}>{empire.username} ({empire.territory_count})</p>
         ));
-        const userEmpire = this.props.matchStore.userEmpire;
+        const { userEmpire, supply, tide } = this.props.matchStore;
 
-        const supply = <p>Supply: {Math.floor(this.props.matchStore.supply)}</p>;
-        const tide = <p>Tide: {Math.floor(this.props.matchStore.tide)}</p>;
+        const supplyOutput = (
+            <div>
+                Supply: {Math.floor(supply)}
+            </div>
+        );
+
+        const tideOutput = (
+            <div>
+                Tide: {Math.floor(tide)}
+            </div>
+        );
 
         return (
             <div className="match-hud match-hud-left">
                 <p>Phase: {phase}</p>
                 <hr />
-                {userEmpire && supply}
-                {userEmpire && tide}
+                {userEmpire && supplyOutput}
+                {userEmpire && tideOutput}
                 <hr />
                 {empireList}
             </div>

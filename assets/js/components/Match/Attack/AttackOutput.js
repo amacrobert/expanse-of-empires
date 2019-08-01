@@ -1,6 +1,8 @@
 import React from 'react';
 import { observer, inject } from 'mobx-react';
 
+import Modifier from './Modifier';
+
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
@@ -49,20 +51,35 @@ export default class AttackOutput extends React.Component {
                 symbol = '-';
             }
 
+            let totalAttackMod = outcome.attack_score - outcome.attack_roll;
+            let totalDefenseMod = outcome.defense_score - outcome.defense_roll;
+
             return (
                 <TableRow key={index}>
-                    <TableCell component="th" scope="row" align="right">
-                        <span className={attackerStyle} style={{fontSize: this.getFontSize(outcome.attack_score)}}>
-                            {outcome.attack_score} / {outcome.attack_roll}
-                        </span>
+                    <TableCell component="th" scope="row" align="center">
+                        <div className={attackerStyle} style={{fontSize: this.getFontSize(outcome.attack_score)}}>
+                            {outcome.attack_score}
+                        </div>
+                        <div>
+                            <span>
+                                {outcome.attack_roll}
+                            </span>
+                            <Modifier number={totalAttackMod} hideIfZero />
+                        </div>
                     </TableCell>
                     <TableCell align="center">
                         {symbol}
                     </TableCell>
-                    <TableCell align="left">
-                        <span className={defenderStyle} style={{fontSize: this.getFontSize(outcome.defense_score)}}>
-                            {outcome.defense_score} / {outcome.defense_roll}
-                        </span>
+                    <TableCell align="center">
+                        <div className={defenderStyle} style={{fontSize: this.getFontSize(outcome.defense_score)}}>
+                            {outcome.defense_score}
+                        </div>
+                        <div>
+                            <span>
+                                {outcome.defense_roll}
+                            </span>
+                            <Modifier number={totalDefenseMod} hideIfZero />
+                        </div>
                     </TableCell>
                 </TableRow>
             );

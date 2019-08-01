@@ -51,21 +51,26 @@ const showStartPosition = (match, territory) => {
         && !territory.empire_id;
 };
 
-const getTerritory = (mapState, q, r) => {
-    return _.findWhere(mapState, {q: q, r: r});
+const getTerritory = (territoriesByAxial, q, r) => {
+
+    if (!territoriesByAxial[q] || !territoriesByAxial[q][r]) {
+        return null;
+    }
+
+    return territoriesByAxial[q][r];
 };
 
-const getBorderingTerritories = (mapState, territory) => {
+const getBorderingTerritories = (territoriesByAxial, territory) => {
     let q = territory.coordinates.q;
     let r = territory.coordinates.r;
 
     return [
-        getTerritory(mapState, q - 1, r),
-        getTerritory(mapState, q, r - 1),
-        getTerritory(mapState, q + 1, r - 1),
-        getTerritory(mapState, q + 1, r),
-        getTerritory(mapState, q, r + 1),
-        getTerritory(mapState, q - 1, r + 1),
+        getTerritory(territoriesByAxial, q - 1, r),
+        getTerritory(territoriesByAxial, q, r - 1),
+        getTerritory(territoriesByAxial, q + 1, r - 1),
+        getTerritory(territoriesByAxial, q + 1, r),
+        getTerritory(territoriesByAxial, q, r + 1),
+        getTerritory(territoriesByAxial, q - 1, r + 1),
     ];
 };
 

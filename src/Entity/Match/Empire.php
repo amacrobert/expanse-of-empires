@@ -3,6 +3,7 @@
 namespace App\Entity\Match;
 
 use App\Entity\User\User;
+use App\Entity\Map\Territory;
 use Doctrine\Common\Collections\ArrayCollection;
 use JsonSerializable;
 use DateTime;
@@ -13,6 +14,7 @@ class Empire implements JsonSerializable {
     private $user;
     private $match;
     private $date_founded;
+    private $capital;
     private $active = true;
     private $result;
     private $placement;
@@ -32,11 +34,21 @@ class Empire implements JsonSerializable {
             'placement'         => $this->getPlacement(),
             'color'             => $this->getColor(),
             'territory_count'   => $this->territory_count ?? null,
+            'capital_id'        => $this->getCapital()->getId(),
         ];
     }
 
     public function getId(): ?int {
         return $this->id;
+    }
+
+    public function getCapital(): ?Territory {
+        return $this->capital;
+    }
+
+    public function setCapital(?Territory $capital): self {
+        $this->capital = $capital;
+        return $this;
     }
 
     public function getColor(): ?string {

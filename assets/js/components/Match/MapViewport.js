@@ -88,8 +88,11 @@ class MapViewport extends React.Component {
         this.scene.fog = new THREE.Fog(skyColor, 50, 200);
         this.scene.background = skyColor;
 
-        // hex grid
-        this.props.matchStore.map.state.forEach(territory => {
+        // create hex tiles
+        Object.keys(this.props.matchStore.territoriesById).forEach(territoryId => {
+
+            let territory = this.props.matchStore.territoriesById[territoryId];
+
             let q = territory.q;
             let r = territory.r;
             let hexMesh = assets.getHexMesh(territory);
@@ -257,7 +260,9 @@ class MapViewport extends React.Component {
 
     updateScene = () => {
         // iterate territories and determine if any graphics elements need to be updated
-        this.props.matchStore.map.state.forEach(territory => {
+        Object.keys(this.props.matchStore.territoriesById).forEach(territoryId => {
+
+            let territory = this.props.matchStore.territoriesById[territoryId];
             const q = territory.q;
             const r = territory.r;
             const hex = this.getHex(q, r);
@@ -273,6 +278,7 @@ class MapViewport extends React.Component {
                 }
                 let borderMeshUpdated = false;
                 let graphics = hex.userData.graphics;
+
                 let empireColor = territory.empire ? territory.empire.color : '777777';
 
                 // Delete starting position sprite
@@ -317,7 +323,7 @@ class MapViewport extends React.Component {
 
                     if (borderingHex) {
                         borderingTerritory = MatchUtil.getTerritory(
-                            this.props.matchStore.map.state,
+                            this.props.matchStore.territoriesByAxial,
                             borderingHex.userData.coordinates.q,
                             borderingHex.userData.coordinates.r
                         );
@@ -373,6 +379,13 @@ class MapViewport extends React.Component {
                     this.scene.add(borderMerged);
                 }
 
+                // update border mesh color if needed
+                let borderColor = graphics.borderMerged ? graphics.borderMerged.material.color.getHexString() : null;
+                if (borderColor && borderColor != empireColor) {
+                    console.log('Updating border mesh color from ' + graphics.borderMerged.material.color.getHexString() + ' to ' + empireColor);
+                    graphics.borderMerged.material.color.setHex(parseInt(empireColor, 16));
+                }
+
                 // BUILDINGS
                 // Add or replace building if it's missing
                 let buildingName = territory.building ? territory.building.machine_name : null;
@@ -394,7 +407,7 @@ class MapViewport extends React.Component {
                         this.scene.add(building);
 
                         // arrange units after building load in case this happens after initial unit placement
-                        this.arrangeUnits(graphics, q, r);
+                        this.arrangeUnits(hex);
                     })
                 }
                 // Remove destroyed building
@@ -431,7 +444,7 @@ class MapViewport extends React.Component {
                                 }
                             }
 
-                            this.arrangeUnits(graphics, territory.q, territory.r);
+                            this.arrangeUnits(hex);
                         }
 
                         // Remove units
@@ -446,7 +459,7 @@ class MapViewport extends React.Component {
                                 }
                             }
 
-                            this.arrangeUnits(graphics, territory.q, territory.r);
+                            this.arrangeUnits(hex);
                         }
                     });
                 }
@@ -455,9 +468,10 @@ class MapViewport extends React.Component {
     };
 
     // arrange the unit models in a territory
-    arrangeUnits = (hexGraphics, q, r) => {
+    arrangeUnits = (hex) => {
 
-        let realCoords = MapUtil.axialToReal(q, r);
+        let hexGraphics = hex.userData.graphics;
+        let realCoords = MapUtil.axialToReal(hex.userData.coordinates.q, hex.userData.coordinates.r);
         let self = this;
 
         Object.keys(hexGraphics.armies).forEach(armyKey => {
@@ -568,15 +582,16 @@ class MapViewport extends React.Component {
         }
     };
 
-
     // Update the scene when the map state changes
     reactToSceneUpdate = reaction(
+        () => this.props.matchStore.territories,
+        () => this.updateScene()
+    );
+
+    reactToEmpireUpdate = reaction(
+        () => (this.props.matchStore.empires && this.props.matchStore.empires),
         () => {
-            let matchStore = this.props.matchStore;
-            return matchStore.map.state && matchStore.map.state.slice()
-        },
-        () => {
-            if (this.props.matchStore.map.state) {
+            if (this.props.matchStore.territories) {
                 this.updateScene();
             }
         }
