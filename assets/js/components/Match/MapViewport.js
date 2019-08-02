@@ -33,6 +33,12 @@ class MapViewport extends React.Component {
 
     }
 
+    lookAtTerritory = (q, r) => {
+        let {x, z} = MapUtil.axialToReal(q, r);
+        this.camera.position.set(x, 20, z + 20);
+        this.controls.target.set(x, 0, z);
+    }
+
     componentDidMount() {
         const phase = MatchUtil.getPhase(this.props.matchStore.match);
 
@@ -110,6 +116,12 @@ class MapViewport extends React.Component {
         window.addEventListener('resize', this.onWindowResize, false);
 
         this.start();
+
+        // put camera on user's capital
+        let { userEmpire } = this.props.matchStore;
+        if (userEmpire && userEmpire.capital) {
+            this.lookAtTerritory(userEmpire.capital.q, userEmpire.capital.r);
+        }
     }
 
     addHex = (hexMesh, q, r) => {

@@ -14,7 +14,6 @@ import { toJS } from 'mobx';
 import { observer, inject } from 'mobx-react';
 
 import Grid from '@material-ui/core/Grid';
-import CircularProgress from '@material-ui/core/CircularProgress';
 import { withSnackbar } from 'notistack';
 
 @inject('userStore', 'matchStore', 'uiStore')

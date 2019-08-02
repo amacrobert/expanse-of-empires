@@ -8,6 +8,7 @@ import { computed } from 'mobx';
 import Paper from '@material-ui/core/Paper';
 import Table from '@material-ui/core/Table';
 import Typography from '@material-ui/core/Typography';
+import LinearProgress from '@material-ui/core/LinearProgress';
 
 @inject('matchStore')
 @observer
@@ -77,7 +78,12 @@ class MatchList extends React.Component {
             ]);
         }
         else {
-            return (<p>Loading matches...</p>)
+            return (
+                <p style={{textAlign: 'center'}}>
+                    Loading matches
+                    <LinearProgress />
+                </p>
+            );
         }
     }
 }
