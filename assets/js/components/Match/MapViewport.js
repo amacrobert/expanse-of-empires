@@ -52,6 +52,13 @@ class MapViewport extends React.Component {
         this.renderer.setSize(this.mount.current.offsetWidth, this.mount.current.offsetHeight);
         this.scene = new THREE.Scene();
 
+        // uncomment for orthographic camera
+        // let w = this.mount.current.offsetWidth;
+        // let h = this.mount.current.offsetHeight;
+        // let aspectRatio = w / h;
+        // let zoom = 15;
+        // this.camera = new THREE.OrthographicCamera(-(zoom/2) * aspectRatio, (zoom/2) * aspectRatio, (zoom/2), -(zoom/2), 1, 200);
+
         this.camera = new THREE.PerspectiveCamera(20, this.mount.current.offsetWidth / this.mount.current.offsetHeight, 1, 200);
         this.camera.position.set(0, 90, 90);
         this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
@@ -81,12 +88,26 @@ class MapViewport extends React.Component {
         this.scene.add(assets.getHoverOutline());
 
         // light
-        this.scene.add(new THREE.AmbientLight(0xFFFFFF, .5));
-        var sun = new THREE.PointLight(0xFFFFFF, 1, 150, 1);
+        this.scene.add(new THREE.AmbientLight(0xFFFFFF, 1));
+        // var sun = new THREE.PointLight(0xFFFFFF, 1, 150, 1);
+        // sun.castShadow = true;
+        // sun.position.x = 0;
+        // sun.position.y = 50;
+        // sun.position.z = 0;
+        // this.scene.add(sun);
+        var sun = new THREE.DirectionalLight(0xFFFFFF, .5);
+        sun.position.set(20, 10, -10);
+        sun.shadow.mapSize.width = 2048;  // default
+        sun.shadow.mapSize.height = 2048; // default
+        sun.shadow.camera.near = 0.0;    // default
+        sun.shadow.camera.far = 500;     // default
+        sun.shadow.camera.left = -30;
+        sun.shadow.camera.bottom = -30;
+        sun.shadow.camera.right = 30;
+        sun.shadow.camera.top = 30;
         sun.castShadow = true;
-        sun.position.x = 0;
-        sun.position.y = 50;
-        sun.position.z = 0;
+
+        // sun.target.position.set(100, 0, 100);
         this.scene.add(sun);
 
         // fog

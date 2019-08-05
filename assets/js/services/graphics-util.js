@@ -122,6 +122,8 @@ class GraphicsUtil {
         );
         unitModel.position.y = this.unitHeight / 2;
         unitModel.rotation.y = Math.PI / 4;
+        unitModel.castShadow = true;
+        unitModel.receiveShadow = false;
 
         return unitModel;
     };
@@ -175,6 +177,14 @@ class GraphicsUtil {
                     object.position.set(position.x, position.y, position.z);
                     object.rotation.set(rotation.x, rotation.y, rotation.z);
                     object.castShadow = true;
+
+                    object.traverse(function(child) {
+                        if (child instanceof THREE.Mesh) {
+                            //child.material.map = texture;
+                            child.castShadow = true;
+                        }
+                    });
+
                     resolve(object);
                 });
             });
@@ -204,6 +214,7 @@ class GraphicsUtil {
         hexMesh.position.x = realCoords.x;
         hexMesh.position.z = realCoords.z;
 
+        hexMesh.castShadow = false;
         hexMesh.receiveShadow = true;
 
         return hexMesh;
