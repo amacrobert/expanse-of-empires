@@ -14,6 +14,15 @@ class UIStore {
     @observable movingUnits = false;
     @observable attacking = false;
     @observable attackOutput;
+    @observable cameraTargetTerritory;
+
+    @action lookAtTerritory = (territory) => {
+        this.cameraTargetTerritory = territory;
+    };
+
+    @action clearCameraTarget = () => {
+        this.cameraTargetTerritory = null;
+    };
 
     @action enableButton = (button) => {
         this.buttons[button].disabled = false;

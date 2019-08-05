@@ -4,6 +4,7 @@ import GraphicsUtil from '../../services/graphics-util';
 import MatchUtil from '../../services/match-util';
 import { reaction } from 'mobx';
 const THREE = require('three');
+const TWEEN = require('@tweenjs/tween.js');
 const assets = new GraphicsUtil();
 
 require('../../three/controls/OrbitControls.js');
@@ -11,7 +12,7 @@ const Stats = require('../../extra/stats.min.js');
 
 import { observer, inject } from 'mobx-react';
 
-@inject('matchStore')
+@inject('matchStore', 'uiStore')
 @observer
 class MapViewport extends React.Component {
 
@@ -33,10 +34,25 @@ class MapViewport extends React.Component {
 
     }
 
-    lookAtTerritory = (q, r) => {
+    lookAtTerritory = (q, r, duration = null) => {
         let {x, z} = MapUtil.axialToReal(q, r);
-        this.camera.position.set(x, 20, z + 20);
-        this.controls.target.set(x, 0, z);
+
+        if (duration) {
+
+            var cameraPositionTween = new TWEEN.Tween(this.camera.position)
+                .to(new THREE.Vector3(x, 20, z + 20), duration)
+                .easing(TWEEN.Easing.Quadratic.Out)
+                .start();
+
+            var targetPositionTween = new TWEEN.Tween(this.controls.target)
+                .to(new THREE.Vector3(x, 0, z), duration)
+                .easing(TWEEN.Easing.Quadratic.Out)
+                .start();
+        }
+        else {
+            this.camera.position.set(x, 20, z + 20);
+            this.controls.target.set(x, 0, z);
+        }
     }
 
     componentDidMount() {
@@ -51,13 +67,6 @@ class MapViewport extends React.Component {
         this.mount.current.appendChild(this.renderer.domElement);
         this.renderer.setSize(this.mount.current.offsetWidth, this.mount.current.offsetHeight);
         this.scene = new THREE.Scene();
-
-        // uncomment for orthographic camera
-        // let w = this.mount.current.offsetWidth;
-        // let h = this.mount.current.offsetHeight;
-        // let aspectRatio = w / h;
-        // let zoom = 15;
-        // this.camera = new THREE.OrthographicCamera(-(zoom/2) * aspectRatio, (zoom/2) * aspectRatio, (zoom/2), -(zoom/2), 1, 200);
 
         this.camera = new THREE.PerspectiveCamera(20, this.mount.current.offsetWidth / this.mount.current.offsetHeight, 1, 200);
         this.camera.position.set(0, 90, 90);
@@ -136,13 +145,13 @@ class MapViewport extends React.Component {
         this.renderer.domElement.addEventListener('mousemove', this.onMouseMove, false);
         window.addEventListener('resize', this.onWindowResize, false);
 
-        this.start();
-
         // put camera on user's capital
         let { userEmpire } = this.props.matchStore;
         if (userEmpire && userEmpire.capital) {
             this.lookAtTerritory(userEmpire.capital.q, userEmpire.capital.r);
         }
+
+        this.start();
     }
 
     addHex = (hexMesh, q, r) => {
@@ -268,7 +277,7 @@ class MapViewport extends React.Component {
         cancelAnimationFrame(this.frameId);
     };
 
-    animate = () => {
+    animate = (time) => {
 
         this.stats.begin();
 
@@ -283,6 +292,8 @@ class MapViewport extends React.Component {
                 mesh.userData.mixer.update(mesh.userData.clock.getDelta());
             }
         });
+
+        TWEEN.update(time);
 
         this.stats.end();
     };
@@ -684,6 +695,20 @@ class MapViewport extends React.Component {
 
                 this.scenePath = new THREE.Line(pathGeometry, pathMaterial);
                 this.scene.add(this.scenePath);
+            }
+        }
+    );
+
+    // Move the camera when cameraTargetTerritory changes
+    reactToCameraTargetChange = reaction(
+        () => this.props.uiStore.cameraTargetTerritory,
+        () => {
+            let territory = this.props.uiStore.cameraTargetTerritory;
+
+            if (territory) {
+                let {q, r} = this.props.uiStore.cameraTargetTerritory;
+                this.lookAtTerritory(q, r, 500);
+                this.props.uiStore.clearCameraTarget();
             }
         }
     );

@@ -10,7 +10,7 @@ class MatchHud extends React.Component {
 
         const phase = MatchUtil.getPhase(this.props.matchStore.match);
         const empireList = this.props.matchStore.empires.map(empire => (
-            <p key={empire.id}>{empire.username} ({empire.territory_count})</p>
+            <p onClick={() => this.props.uiStore.lookAtTerritory(empire.capital)} key={empire.id}>{empire.username} ({empire.territory_count})</p>
         ));
         const { userEmpire, supply, tide } = this.props.matchStore;
 
