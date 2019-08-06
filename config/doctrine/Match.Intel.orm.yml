@@ -1,0 +1,18 @@
+App\Entity\Match\Intel:
+
+    type: entity
+
+    id: { id: { type: integer, options: { unsigned: true } , generator: { strategy: auto } } }
+
+    fields:
+        size: { type: integer, options: { unsigned: true, default: 0 } }
+        date: { type: datetime }
+
+    manyToOne:
+        empire: { targetEntity: App\Entity\Match\Empire }
+        territory_state: { targetEntity: App\Entity\Match\TerritoryState }
+        army_empire: { targetEntity: App\Entity\Match\Empire }
+
+    lifecycleCallbacks:
+        prePersist: [setDateToNow]
+        preUpdate: [setDateToNow]

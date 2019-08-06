@@ -6,7 +6,7 @@ App\Entity\Match\Army:
     id: { id: { type: integer, options: { unsigned: true } , generator: { strategy: auto } } }
 
     fields:
-        size: { type: integer }
+        size: { type: integer, options: { unsigned: true, default: 0 } }
 
     manyToOne:
         empire: { targetEntity: App\Entity\Match\Empire }
