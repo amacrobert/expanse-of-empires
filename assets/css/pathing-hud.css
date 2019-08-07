@@ -1,7 +1,4 @@
 .pathing-hud-card {
-
     z-index: 10;
     position: absolute;
-    bottom: 0;
-    left: calc(50% - 50px);
 }

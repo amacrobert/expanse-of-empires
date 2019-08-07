@@ -20,7 +20,7 @@ class MapService
         return null;
     }
 
-    private function territoriesAreNeighbors(Territory $t1, Territory $t2): bool
+    public function territoriesAreNeighbors(Territory $t1, Territory $t2): bool
     {
         $t1_q = $t1->getAxialQ();
         $t1_r = $t1->getAxialR();
@@ -52,7 +52,7 @@ class MapService
         ]);
     }
 
-    private function computeShortestPathToCastle(Match $match, Territory $start): array
+    public function computeShortestPathToCastle(Match $match, Territory $start): array
     {
         $distance_so_far = [];
         $came_from = [];

@@ -214,6 +214,9 @@ class MapViewport extends React.Component {
     };
 
     onMouseMove = (event) => {
+        this.props.uiStore.mouse.x = event.clientX;
+        this.props.uiStore.mouse.y = event.clientY;
+
         let bounds = this.mount.current.getBoundingClientRect();
         let element = this.renderer.domElement;
         this.mouse.hover = assets.mouseToReal(bounds, element, event.clientX, event.clientY);

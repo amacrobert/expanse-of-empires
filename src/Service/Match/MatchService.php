@@ -387,23 +387,23 @@ class MatchService {
             }
         }
 
-        $total_defending_armies = count($defending_armies);
-        $defending_units = 0;
-        $armies_all_in = 0;
-        $defending_units_by_empire_id = [];
+        // $total_defending_armies = count($defending_armies);
+        // $defending_units = 0;
+        // $armies_all_in = 0;
+        // $defending_units_by_empire_id = [];
 
-        while ($defending_units < self::MAX_DEFENSE_SIZE) {
-            $army_index = $defending_units % $total_defending_armies;
-            $defending_army = $defending_armies[$army_index];
+        // while ($defending_units < self::MAX_DEFENSE_SIZE) {
+        //     $army_index = $defending_units % $total_defending_armies;
+        //     $defending_army = $defending_armies[$army_index];
 
-            $army_size = $defending_army->getSize();
-            if ($army_size > 0) {
-                $defending_army->setSize($army_size - 1);
-                $losses_to_distribute--;
-            }
+        //     $army_size = $defending_army->getSize();
+        //     if ($army_size > 0) {
+        //         $defending_army->setSize($army_size - 1);
+        //         $losses_to_distribute--;
+        //     }
 
-            $i++;
-        }
+        //     $i++;
+        // }
 
         // Each attacking and defending unit rolls a 100-sided die
         $defense_rolls = $attack_rolls = [];

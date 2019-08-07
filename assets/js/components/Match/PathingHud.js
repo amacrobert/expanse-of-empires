@@ -5,12 +5,14 @@ import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
 import Typography from '@material-ui/core/Typography';
 
-@inject('matchStore')
+@inject('matchStore', 'uiStore')
 @observer
 export default class PathingHud extends Component {
 
     render() {
 
+
+        let {x, y} = this.props.uiStore.mouse;
         let match = this.props.matchStore;
         let path = match.path;
         let start = match.path.nodes[0];
@@ -19,17 +21,21 @@ export default class PathingHud extends Component {
         let units = match.selectedUnits;
         let tideCost = match.path.cost * units;
 
+        let location = {
+            left: x + 30,
+            top: y,
+            textShadow: '1px 1px 6px #000000',
+        };
+
         return (
-            <Card className="pathing-hud-card">
-                <CardContent>
-                    <Typography variant="body2">
-                        {verb} {end.name} from {start.name}
-                    </Typography>
-                    <Typography variant="body2">
-                        {units} units / -{tideCost} Tide
-                    </Typography>
-                </CardContent>
-            </Card>
+            <div className="pathing-hud-card" style={location}>
+                <Typography variant="body2">
+                    {verb} {end.name} from {start.name}
+                </Typography>
+                <Typography variant="body2">
+                    {units} units / -{tideCost} Tide
+                </Typography>
+            </div>
         );
     }
 }
