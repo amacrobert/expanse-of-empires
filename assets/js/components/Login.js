@@ -10,7 +10,7 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import FormControl from '@material-ui/core/FormControl';
 import Typography from '@material-ui/core/Typography';
-import CircularProgress from '@material-ui/core/CircularProgress';
+import LinearProgress from '@material-ui/core/LinearProgress';
 
 class Login extends Component {
 
@@ -99,9 +99,8 @@ class Login extends Component {
                             disabled={this.state.submitting}>
                             Log in
                         </Button>
-                        {this.state.submitting && <CircularProgress size={24} />}
-
                     </DialogActions>
+                    {this.state.submitting && <LinearProgress />}
                 </form>
             </Dialog>
         ]);

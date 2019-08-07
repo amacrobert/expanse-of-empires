@@ -10,17 +10,21 @@ use Symfony\Component\Security\Http\Authentication\AuthenticationFailureHandlerI
 use Symfony\Component\Security\Http\Authentication\AuthenticationSuccessHandlerInterface;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
-class AuthenticationHandler implements AuthenticationSuccessHandlerInterface, AuthenticationFailureHandlerInterface {
+class AuthenticationHandler implements
+    AuthenticationSuccessHandlerInterface,
+    AuthenticationFailureHandlerInterface
+{
 
     protected $session;
 
-    public function __construct(SessionInterface $session) {
+    public function __construct(SessionInterface $session)
+    {
         $session->start();
         $this->session = $session;
     }
 
-    public function onAuthenticationSuccess(Request $request, TokenInterface $token) {
-
+    public function onAuthenticationSuccess(Request $request, TokenInterface $token)
+    {
         $user = $token->getUser();
 
         return new JsonResponse([
@@ -30,10 +34,13 @@ class AuthenticationHandler implements AuthenticationSuccessHandlerInterface, Au
         ]);
     }
 
-    public function onAuthenticationFailure( Request $request, AuthenticationException $exception ) {
+    public function onAuthenticationFailure( Request $request, AuthenticationException $exception )
+    {
 
-        // Sleep on failed login attempts to deter prevent brute force attacks
+        // Sleep on failed login attempts to deter brute force attacks
         sleep(4);
+
+        // @TODO: flood control
 
         return new JsonResponse([
             'error' => $exception->getMessage(),
