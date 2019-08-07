@@ -21,7 +21,7 @@ export default class Pathing {
         let territoriesBorderingStart = MatchUtil.getBorderingTerritories(matchStore.territoriesByAxial, start);
         let endBordersStart = _.contains(territoriesBorderingStart, end);
 
-        if (end.empire != userEmpire) {
+        if (!end || end.empire != userEmpire) {
 
             // If the user doesn't own the end territory and it's not a neighbor, no path.
             // @TODO: Allow user to traverse through allies' territories

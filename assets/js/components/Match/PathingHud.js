@@ -10,32 +10,47 @@ import Typography from '@material-ui/core/Typography';
 export default class PathingHud extends Component {
 
     render() {
-
-
         let {x, y} = this.props.uiStore.mouse;
-        let match = this.props.matchStore;
-        let path = match.path;
-        let start = match.path.nodes[0];
-        let end = match.path.nodes.slice(-1)[0];
-        let verb = path.type == 'move' ? 'Move to' : 'Attack';
-        let units = match.selectedUnits;
-        let tideCost = match.path.cost * units;
+        let {path, selectedUnits} = this.props.matchStore;
+        let start = path.nodes[0];
+        let end = path.nodes.slice(-1)[0];
+        let units = selectedUnits;
+        let tideCost = path.cost * units;
+        let distance = path.nodes.length - 1;
+
+        let hudWidth = 160;
 
         let location = {
-            left: x + 30,
-            top: y,
-            textShadow: '1px 1px 6px #000000',
+            left: x - (hudWidth / 2),
+            top: y + 50,
+            textAlign: 'center',
+            width: hudWidth,
+            fontSize: 12,
+            opacity: 0.8,
+            padding: 0,
         };
 
+        let defenderUsername = end.empire ? end.empire.username : 'NPC';
+        let s = units == 1 ? '' : 's';
+
         return (
-            <div className="pathing-hud-card" style={location}>
-                <Typography variant="body2">
-                    {verb} {end.name} from {start.name}
-                </Typography>
-                <Typography variant="body2">
-                    {units} units / -{tideCost} Tide
-                </Typography>
-            </div>
+            <Card className="pathing-hud-card" style={location}>
+                <CardContent style={{padding: 0, paddingTop: 3, paddingBottom: 3}}>
+                    {path.type == 'move' &&
+                        <span>
+                            Move {units} unit{s} {distance} tiles<br />
+                            -{tideCost} Tide
+                        </span>
+                    }
+                    {path.type == 'attack' &&
+                        <span>
+                            Attack {defenderUsername} with {units} unit{s}<br />
+                            -{tideCost} Tide<br />
+                            +{tideCost / 2} Tide on fail
+                        </span>
+                    }
+                </CardContent>
+            </Card>
         );
     }
 }
