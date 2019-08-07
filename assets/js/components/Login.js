@@ -10,6 +10,7 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import FormControl from '@material-ui/core/FormControl';
 import Typography from '@material-ui/core/Typography';
+import CircularProgress from '@material-ui/core/CircularProgress';
 
 class Login extends Component {
 
@@ -20,13 +21,21 @@ class Login extends Component {
             open: false,
             email: '',
             password: '',
+            submitting: false,
+            error: null,
         };
     }
 
     handleLogin = (e) => {
         e.preventDefault();
 
-        Api.login(this.state.email, this.state.password).then(result => {
+        this.setState({
+            submitting: true,
+            error: null,
+        });
+
+        Api.login(this.state.email, this.state.password)
+        .then(result => {
             if (result.status == 200) {
                 result.json().then((data) => {
                     this.props.onLogin(data);
@@ -39,6 +48,9 @@ class Login extends Component {
                     }
                 });
             }
+        })
+        .finally(() => {
+            this.setState({submitting: false});
         });
     };
 
@@ -82,7 +94,13 @@ class Login extends Component {
                             fullWidth />
                     </DialogContent>
                     <DialogActions>
-                        <Button type="submit">Log in</Button>
+                        <Button
+                            type="submit"
+                            disabled={this.state.submitting}>
+                            Log in
+                        </Button>
+                        {this.state.submitting && <CircularProgress size={24} />}
+
                     </DialogActions>
                 </form>
             </Dialog>

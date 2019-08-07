@@ -31,6 +31,10 @@ class AuthenticationHandler implements AuthenticationSuccessHandlerInterface, Au
     }
 
     public function onAuthenticationFailure( Request $request, AuthenticationException $exception ) {
+
+        // Sleep on failed login attempts to deter prevent brute force attacks
+        sleep(4);
+
         return new JsonResponse([
             'error' => $exception->getMessage(),
         ], 403);

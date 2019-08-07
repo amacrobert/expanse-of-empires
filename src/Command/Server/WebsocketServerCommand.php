@@ -28,7 +28,6 @@ class WebsocketServerCommand extends command {
 
     protected function execute(InputInterface $input, OutputInterface $output) {
         $output->writeln('Starting websocket server');
-        $container = $this->getContainer();
         $verbose = $input->getOption('verbose');
 
         $websocket_server = new WsServer($this->socket_controller);

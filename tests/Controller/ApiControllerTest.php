@@ -90,6 +90,18 @@ class ApiControllerTest extends WebTestCase
         );
     }
 
+    public function testGetUserEmpire()
+    {
+        $path = '/api/match/1/empire';
+        $this->client->request('GET', $path);
+
+        $response = $this->client->getResponse();
+        $this->assertEquals(
+            200, $response->getStatusCode(),
+            'Bad response: GET ' . $path
+        );
+    }
+
     public function provideMatchIds()
     {
         return [
