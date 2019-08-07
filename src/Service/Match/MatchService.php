@@ -8,10 +8,9 @@ use App\Exception\VisibleException;
 use App\Entity\User\User;
 use App\Entity\Match\{Match, Empire, TerritoryState, Building, Army};
 use App\Entity\Map\Territory;
+use App\Service\Map\MapService;
 
 class MatchService {
-
-    private $em;
 
     const STARTING_SUPPLY = 100;
     const STARTING_TIDE = 100;
@@ -32,16 +31,22 @@ class MatchService {
     const ATTACKING_TIDE_COST_COEF = 2; // twice as much tide cost to attack than to move
     const FAILED_ATTACK_TIDE_REFUND_COEF = 0.5; // you get refunded tide at this rate in case of a failed attack
 
+    private $em;
+    private $map_service;
+    private $socket_controller;
+
     public function __construct(
         SocketController $socket_controller,
-        EntityManagerInterface $em
-    ) {
-        $this->socket_controller = $socket_controller;
+        EntityManagerInterface $em,
+        MapService $map_service)
+    {
         $this->em = $em;
+        $this->socket_controller = $socket_controller;
+        $this->map_service = $map_service;
     }
 
-    public function createEmpire(User $user, Match $match, Territory $territory) {
-
+    public function createEmpire(User $user, Match $match, Territory $territory): void
+    {
         $empire = $this->em->getRepository(Empire::class)->findOneBy([
             'user' => $user,
             'match' => $match,
@@ -131,8 +136,8 @@ class MatchService {
         ]);
     }
 
-    public function trainArmy($user, $match, $territory) {
-
+    public function trainArmy($user, $match, $territory): void
+    {
         // Get the user's empire
         $empire = $this->em->getRepository(Empire::class)->findOneBy([
             'user' => $user,
@@ -197,8 +202,8 @@ class MatchService {
         ]);
     }
 
-    public function moveUnits(User $user, Match $match, array $territory_path, int $units) {
-
+    public function moveUnits(User $user, Match $match, array $territory_path, int $units): void
+    {
         $empire = $this->em->getRepository(Empire::class)->findOneBy([
             'user' => $user,
             'match' => $match,
@@ -231,7 +236,7 @@ class MatchService {
             // Make sure there is a direct path from the previous territory to the current one
             if (!empty($territory_path[$order - 1])) {
                 $previous_territory = $territory_path[$order - 1];
-                if (!$this->territoriesAreNeighbors($territory, $previous_territory)) {
+                if (!$this->map_service->territoriesAreNeighbors($territory, $previous_territory)) {
                     throw new VisibleException('Invalid path. ' . $territory->getId() . 'isnot neighbor of ' . $previous_territory->getId());
                 }
             }
@@ -286,8 +291,8 @@ class MatchService {
         Match $match,
         Territory $attacking_territory,
         Territory $defending_territory,
-        int $attacking_units
-    ) {
+        int $attacking_units)
+    {
         $attacking_empire = $this->em->getRepository(Empire::class)->findOneBy([
             'user' => $user,
             'match' => $match,
@@ -328,7 +333,7 @@ class MatchService {
         }
 
         // Make sure defending territory borders attacking territory
-        if (!$this->territoriesAreNeighbors($attacking_territory, $defending_territory)) {
+        if (!$this->map_service->territoriesAreNeighbors($attacking_territory, $defending_territory)) {
             throw new VisibleException('You cannot attack '. $defending_territory .' from $attacking_territory');
         }
 
@@ -380,6 +385,24 @@ class MatchService {
                 $defending_units = self::MAX_DEFENSE_SIZE;
                 break;
             }
+        }
+
+        $total_defending_armies = count($defending_armies);
+        $defending_units = 0;
+        $armies_all_in = 0;
+        $defending_units_by_empire_id = [];
+
+        while ($defending_units < self::MAX_DEFENSE_SIZE) {
+            $army_index = $defending_units % $total_defending_armies;
+            $defending_army = $defending_armies[$army_index];
+
+            $army_size = $defending_army->getSize();
+            if ($army_size > 0) {
+                $defending_army->setSize($army_size - 1);
+                $losses_to_distribute--;
+            }
+
+            $i++;
         }
 
         // Each attacking and defending unit rolls a 100-sided die
@@ -590,7 +613,7 @@ class MatchService {
 
             if ($state && $state->getEmpire()) {
 
-                $path = $this->computeShortestPathToCastle($match, $territory);
+                $path = $this->map_service->computeShortestPathToCastle($match, $territory);
 
                 if ($path === null) {
                     $support = self::NO_SUPPLY;
@@ -619,119 +642,11 @@ class MatchService {
         $this->em->flush();
     }
 
-    private function computeShortestPathToCastle(Match $match, Territory $start) {
-
-        $distance_so_far = [];
-        $came_from = [];
-
-        $territory_id = $start->getId();
-        $distance_so_far[$territory_id] = 0;
-        $came_from[$territory_id] = null;
-
-        $frontier = new \SplPriorityQueue();
-        $frontier->insert($start, PHP_INT_MAX);
-        $start_empire = $start->getState()->getEmpire();
-
-        while (!$frontier->isEmpty()) {
-
-            $current = $frontier->extract();
-
-            // Found the closest castle
-            if ($current_state = $current->getState()) {
-                if ($building = $current_state->getBuilding()) {
-                    if ($building->getMachineName() == 'castle') {
-
-                        $path = [];
-                        $trace = $current;
-
-                        while ($trace) {
-                            $path[] = $trace->getId();
-                            $trace = $came_from[$trace->getId()];
-                        }
-
-                        return array_reverse($path);
-                    }
-                }
-            }
-
-            $neighbors = $this->getBorderingTerritories($match, $current);
-
-            foreach ($neighbors as $next) {
-                if ($next) {
-                    $distance = 1; // @TODO: Possibly replace with tide cost of territory to restrict supply through
-                                   // difficult terrain
-                    $new_distance = $distance_so_far[$current->getId()] + $distance;
-                    $has_visited = array_key_exists($next->getId(), $came_from);
-                    $is_closer = $new_distance < ($distance_so_far[$next->getId()] ?? PHP_INT_MAX);
-
-                    $is_traversable = false;
-                    if ($next_state = $next->getState()) {
-                        if ($next_empire = $next_state->getEmpire()) {
-                            // @TODO: allow support through allies' territories
-                            $is_traversable = ($next_empire == $start_empire);
-                        }
-                    }
-
-                    if ($is_traversable && (!$has_visited || $is_closer)) {
-                        $distance_so_far[$next->getId()] = $new_distance;
-                        $frontier->insert($next, PHP_INT_MAX - $new_distance);
-                        $came_from[$next->getId()] = $current;
-                    }
-                }
-            }
-        }
-
-        return null;
-    }
-
-    private function getBorderingTerritories($match, $territory) {
-
-        $q = $territory->getAxialQ();
-        $r = $territory->getAxialR();
-
-        return array_filter([
-            $this->getTerritory($match, $q - 1, $r),
-            $this->getTerritory($match, $q, $r - 1),
-            $this->getTerritory($match, $q + 1, $r - 1),
-            $this->getTerritory($match, $q + 1, $r),
-            $this->getTerritory($match, $q, $r + 1),
-            $this->getTerritory($match, $q - 1, $r + 1),
-        ]);
-    }
-
-    // @TODO: possible performance improvement by caching in 2D array
-    private function getTerritory($match, $q, $r) {
-        foreach ($match->getMap()->getTerritories() as $territory) {
-            if ($territory->getAxialQ() == $q && $territory->getAxialR() == $r) {
-                return $territory;
-            }
-        }
-
-        return null;
-    }
-
-    private function territoriesAreNeighbors(Territory $t1, Territory $t2): bool {
-        $t1_q = $t1->getAxialQ();
-        $t1_r = $t1->getAxialR();
-        $t2_q = $t2->getAxialQ();
-        $t2_r = $t2->getAxialR();
-
-        return (
-            ($t1_q == $t2_q + 0 && $t1_r == $t2_r - 1) || // top left neighbor
-            ($t1_q == $t2_q + 1 && $t1_r == $t2_r - 1) || // top right neighbor
-            ($t1_q == $t2_q + 1 && $t1_r == $t2_r + 0) || // right neighbor
-            ($t1_q == $t2_q + 0 && $t1_r == $t2_r + 1) || // bottom right neighbor
-            ($t1_q == $t2_q - 1 && $t1_r == $t2_r + 1) || // bottom left neighbor
-            ($t1_q == $t2_q - 1 && $t1_r == $t2_r + 0)    // left neighbor
-        );
-    }
-
     private function getEmpireArmyInTerritory(
         Empire $empire,
         Territory $territory,
-        bool $create_if_missing = false
-    ): ?Army {
-
+        bool $create_if_missing = false): ?Army
+    {
         $territory_armies = $territory->getState()->getArmies()->toArray();
         $empire_armies = array_filter($territory_armies, function($army) use ($empire) {
             return $army->getEmpire() == $empire;
@@ -756,8 +671,8 @@ class MatchService {
         return null;
     }
 
-    public function hydrateMapState(Match $match, array $territories = null) {
-
+    public function hydrateMapState(Match $match, array $territories = null): void
+    {
         $search_params = ['match' => $match];
         if (!empty($territories)) {
             $search_params['territory'] = $territories;
@@ -771,7 +686,8 @@ class MatchService {
         }
     }
 
-    public function getDetails($match) {
+    public function getDetails($match): array
+    {
         $this->hydrateMapState($match);
 
         $empires = $match->getEmpires();

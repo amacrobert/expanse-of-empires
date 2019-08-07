@@ -3,7 +3,7 @@
 namespace App\Controller;
 
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\{Request, JsonResponse};
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
@@ -23,7 +23,7 @@ use Exception;
 /**
  * @Route("/api")
  */
-class ApiController extends Controller {
+class ApiController extends AbstractController {
     /**
      * @Route("/match/{match_id}/empire", name="create_empire", methods={"POST"})
      */
@@ -31,9 +31,8 @@ class ApiController extends Controller {
         $match_id,
         Request $request,
         MatchService $match_service,
-        EntityManagerInterface $em
-    ) {
-
+        EntityManagerInterface $em)
+    {
         $post_body = json_decode($request->getContent());
         $territory_id = $post_body->territory_id ?? 0;
         $user = $this->getUser();
@@ -69,7 +68,8 @@ class ApiController extends Controller {
     /**
      * @Route("/matches", name="matches")
      */
-    public function getMatches(EntityManagerInterface $em) {
+    public function getMatches(EntityManagerInterface $em)
+    {
         $matches = $em->getRepository(Match::class)->findBy([
             'visible' => true,
             'date_completed' => null,
@@ -97,7 +97,8 @@ class ApiController extends Controller {
     /**
      * @Route("/match/{match_id}/empire", name="user_empire")
      */
-    public function getUserEmpire(EntityManagerInterface $em, $match_id) {
+    public function getUserEmpire(EntityManagerInterface $em, $match_id)
+    {
         $user = $this->getUser();
 
         if (!$user) {
@@ -120,7 +121,8 @@ class ApiController extends Controller {
     /**
      * @Route("/match/{match_id}/chat", name="match_chat")
      */
-    public function getMatchChat($match_id, EntityManagerInterface $em) {
+    public function getMatchChat($match_id, EntityManagerInterface $em)
+    {
         $messages = $em->getRepository(Message::class)->findBy([
             'match' => $em->getReference(Match::class, $match_id),
         ]);
@@ -131,7 +133,8 @@ class ApiController extends Controller {
     /**
      * @Route("/match/{match_id}", name="match_details")
      */
-    public function getMatchDetails($match_id, MatchService $match_service, EntityManagerInterface $em) {
+    public function getMatchDetails($match_id, MatchService $match_service, EntityManagerInterface $em)
+    {
         if ($match = $em->getRepository(Match::class)->find($match_id)) {
             $details = $match_service->getDetails($match);
             return new JsonResponse($details);
@@ -145,7 +148,8 @@ class ApiController extends Controller {
     /**
      * @Route("/register", name="register", methods={"POST"})
      */
-    public function register(Request $request, AuthService $auth) {
+    public function register(Request $request, AuthService $auth)
+    {
         $post_body = json_decode($request->getContent());
 
         $email = $post_body->email;
@@ -164,7 +168,8 @@ class ApiController extends Controller {
     /**
      * @Route("/user", name="user")
      */
-    public function getAppUser() {
+    public function getAppUser()
+    {
         $user = $this->getUser();
         if ($user) {
             $user_array = $user->jsonSerialize();
@@ -173,5 +178,4 @@ class ApiController extends Controller {
 
         return new JsonResponse(null, 401);
     }
-
 }

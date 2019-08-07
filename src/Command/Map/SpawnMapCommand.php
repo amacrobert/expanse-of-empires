@@ -2,14 +2,14 @@
 
 namespace App\Command\Map;
 
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\InputArgument;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\Map\{Map, Territory, Terrain};
 
-class SpawnMapCommand extends ContainerAwareCommand {
+class SpawnMapCommand extends Command {
 
     protected $em;
 

@@ -24,7 +24,6 @@ class CalculateSupportCommand extends Command
     {
         $this->match_service = $ms;
         $this->em = $em;
-
         parent::__construct();
     }
 
