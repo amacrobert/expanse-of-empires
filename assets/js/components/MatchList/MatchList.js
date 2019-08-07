@@ -79,10 +79,12 @@ class MatchList extends React.Component {
         }
         else {
             return (
-                <p style={{textAlign: 'center'}}>
-                    Loading matches
+                <div>
+                    <p style={{textAlign: 'center'}}>
+                        Loading matches
+                    </p>
                     <LinearProgress />
-                </p>
+                </div>
             );
         }
     }
