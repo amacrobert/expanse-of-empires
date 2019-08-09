@@ -155,7 +155,7 @@ class DistributeResourcesCommand extends Command {
         $empires,
         $last_distribution,
         $distribution_date,
-        &$update_messages): array
+        &$update_messages): ?array
     {
         // Make all resource distributions and distribution records a single transaction for each match
         $this->pdo->beginTransaction();
@@ -171,6 +171,10 @@ class DistributeResourcesCommand extends Command {
             $new_tide = $resources['new_tide'] * $seconds_since_last_supply / 3600;
             $total_distributed += $new_supply;
             $total_empires++;
+
+            if ($new_tide < 0 || $new_supply < 0) {
+                return null;
+            }
 
             $this->add_supply_statement->execute([
                 'new_supply' => $new_supply,

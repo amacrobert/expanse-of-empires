@@ -98,9 +98,6 @@ class Match extends Component {
                     break;
 
                 case 'units-moved':
-                    this.props.enqueueSnackbar(
-                        'Units moved'
-                    );
                     uiStore.movingUnits = false;
                     break;
 
