@@ -7,24 +7,30 @@ use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpKernel\KernelEvents;
 use App\Service\Chat\ChatService;
-use App\Service\Match\MatchService;
+use App\Service\Match\{MatchService, EmpireService, ArmyService, BattleService};
 use App\Entity\Match\Match;
 use App\Entity\Map\Territory;
 
-class SocketApiSubscriber implements EventSubscriberInterface {
-
+class SocketApiSubscriber implements EventSubscriberInterface
+{
     private $em;
     private $chat_service;
-    private $match_service;
+    private $empire_service;
+    private $army_service;
+    private $battle_service;
 
     public function __construct(
         EntityManagerInterface $em,
         ChatService $chat_service,
-        MatchService $match_service
-    ) {
+        EmpireService $empire_service,
+        ArmyService $army_service,
+        BattleService $battle_service)
+    {
         $this->em = $em;
         $this->chat_service = $chat_service;
-        $this->match_service = $match_service;
+        $this->empire_service = $empire_service;
+        $this->army_service = $army_service;
+        $this->battle_service = $battle_service;
     }
 
     public static function getSubscribedEvents() {
@@ -49,12 +55,12 @@ class SocketApiSubscriber implements EventSubscriberInterface {
 
     public function startEmpire($event) {
         $this->deriveMessageData($event, $user, $match, $territory);
-        $this->match_service->createEmpire($user, $match, $territory);
+        $this->empire_service->createEmpire($user, $match, $territory);
     }
 
     public function trainArmy($event) {
         $this->deriveMessageData($event, $user, $match, $territory);
-        $this->match_service->trainArmy($user, $match, $territory);
+        $this->army_service->trainArmy($user, $match, $territory);
     }
 
     public function moveUnits($event) {
@@ -72,7 +78,7 @@ class SocketApiSubscriber implements EventSubscriberInterface {
             return $territory_path_order[$t1->getId()] > $territory_path_order[$t2->getId()];
         });
 
-        $this->match_service->moveUnits($user, $match, $territory_path, $units);
+        $this->army_service->moveUnits($user, $match, $territory_path, $units);
     }
 
     public function attack($event) {
@@ -92,7 +98,7 @@ class SocketApiSubscriber implements EventSubscriberInterface {
         $attacking_territory = $territory_path[0];
         $defending_territory = $territory_path[1];
 
-        $this->match_service->attack($user, $match, $attacking_territory, $defending_territory, $units);
+        $this->battle_service->attack($user, $match, $attacking_territory, $defending_territory, $units);
     }
 
     private function deriveMessageData($event, &$user, &$match, &$territory = null) {
