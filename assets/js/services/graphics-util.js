@@ -98,17 +98,12 @@ class GraphicsUtil {
         // Border section mesh assets
         let borderShape = new THREE.Shape();
         const borderPoints = MapUtil.borderPoints;
-        let centerOffset = 0;//(MapUtil.radius * Math.cos(Math.PI / 6)) - (MapUtil.borderWidth / 2);
-        borderShape.moveTo(borderPoints[0].x + centerOffset, borderPoints[0].z);
-        borderShape.lineTo(borderPoints[1].x + centerOffset, borderPoints[1].z);
-        borderShape.lineTo(borderPoints[2].x + centerOffset, borderPoints[2].z);
-        borderShape.lineTo(borderPoints[3].x + centerOffset, borderPoints[3].z);
-        borderShape.lineTo(borderPoints[0].x + centerOffset, borderPoints[0].z);
+        borderShape.moveTo(borderPoints[0].x, borderPoints[0].z);
+        borderShape.lineTo(borderPoints[1].x, borderPoints[1].z);
+        borderShape.lineTo(borderPoints[2].x, borderPoints[2].z);
+        borderShape.lineTo(borderPoints[3].x, borderPoints[3].z);
+        borderShape.lineTo(borderPoints[0].x, borderPoints[0].z);
         this.borderGeometry = new THREE.ShapeGeometry(borderShape);
-        this.borderGeometry.vertices[2].z += .01;
-        this.borderGeometry.vertices[3].z += .01;
-
-        console.log('this.borderGeometry', this.borderGeometry);
 
         // Unit model
         this.unitHeight = 0.2;
@@ -257,7 +252,7 @@ class GraphicsUtil {
 
         borderMesh.rotation.z = MapUtil.borderRotation[rotation];
         borderMesh.rotation.x = -Math.PI / 2;
-        borderMesh.position.y = 0;//0.01;
+        borderMesh.position.y = 0.01;
         let realCoords = MapUtil.axialToReal(territory.q, territory.r);
         borderMesh.position.x = realCoords.x;
         borderMesh.position.z = realCoords.z;

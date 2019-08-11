@@ -76,7 +76,7 @@ class DistributeResourcesCommand extends Command {
             WHERE
                 state.empire_id IS NOT NULL
                 AND `match`.date_completed IS NULL
-                AND `match`.date_npc <= NOW()
+                AND `match`.date_npc <= UTC_TIMESTAMP()
                 AND empire.result IS NULL
             ;
         ";

@@ -15,7 +15,6 @@ class EmpireService
     const STARTING_TIDE = 100;
     const COLOR_CODES = [
         'e6194b',
-        '3cb44b',
         'ffe119',
         '4363d8',
         'f58231',
@@ -33,6 +32,7 @@ class EmpireService
         '808000',
         'ffd8b1',
         '000075',
+        '3cb44b',
         '808080',
         'ffffff',
         '000000',

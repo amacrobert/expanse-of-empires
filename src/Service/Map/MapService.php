@@ -52,7 +52,7 @@ class MapService
         ]);
     }
 
-    public function computeShortestPathToCastle(Match $match, Territory $start): array
+    public function computeShortestPathToCastle(Match $match, Territory $start): ?array
     {
         $distance_so_far = [];
         $came_from = [];

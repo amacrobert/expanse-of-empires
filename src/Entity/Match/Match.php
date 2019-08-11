@@ -4,8 +4,7 @@ namespace App\Entity\Match;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-use JsonSerializable;
-use DateTime;
+use JsonSerializable, DateTime, DateTimeInterface;
 use App\Entity\Map\Map;
 
 class Match implements JsonSerializable {
@@ -90,11 +89,11 @@ class Match implements JsonSerializable {
         return $this;
     }
 
-    public function getDateLastResourceDistribution(): ?DateTime {
+    public function getDateLastResourceDistribution(): ?DateTimeInterface {
         return $this->date_last_resource_distribution;
     }
 
-    public function setDateLastResourceDistribution(DateTime $date): Match {
+    public function setDateLastResourceDistribution(?DateTimeInterface $date): Match {
         $this->date_last_resource_distribution = $date;
         return $this;
     }
@@ -155,20 +154,20 @@ class Match implements JsonSerializable {
         return $this;
     }
 
-    public function getDateRegistration(): ?DateTime {
+    public function getDateRegistration(): ?DateTimeInterface {
         return $this->date_registration;
     }
 
-    public function setDateRegistration(?DateTime $date_registration) {
+    public function setDateRegistration(?DateTimeInterface $date_registration) {
         $this->date_registration = $date_registration;
         return $this;
     }
 
-    public function getDateNPC(): ?DateTime {
+    public function getDateNPC(): ?DateTimeInterface {
         return $this->date_npc;
     }
 
-    public function setDateNPC(?DateTime $date_npc) {
+    public function setDateNPC(?DateTimeInterface $date_npc) {
         $this->date_npc = $date_npc;
         // Set resources to start accumulating once registration phase ends
         if (!$this->date_last_resource_distribution || $this->date_last_resource_distribution < $date_npc) {
@@ -177,20 +176,20 @@ class Match implements JsonSerializable {
         return $this;
     }
 
-    public function getDateP2P(): ?DateTime {
+    public function getDateP2P(): ?DateTimeInterface {
         return $this->date_p2p;
     }
 
-    public function setDateP2P(?DateTime $date_p2p) {
+    public function setDateP2P(?DateTimeInterface $date_p2p) {
         $this->date_p2p = $date_p2p;
         return $this;
     }
 
-    public function getDateCompleted(): ?DateTime {
+    public function getDateCompleted(): ?DateTimeInterface {
         return $this->date_completed;
     }
 
-    public function setDateCompleted(DateTime $date_completed) {
+    public function setDateCompleted(DateTimeInterface $date_completed) {
         $this->date_completed = $date_completed;
         return $this;
     }
