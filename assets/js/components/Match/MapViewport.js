@@ -289,13 +289,6 @@ class MapViewport extends React.Component {
         this.controls.update();
         this.renderScene()
         this.frameId = window.requestAnimationFrame(this.animate);
-
-        this.animationsObjects.forEach(mesh => {
-            if (mesh.userData.clock && mesh.userData.mixer) {
-                mesh.userData.mixer.update(mesh.userData.clock.getDelta());
-            }
-        });
-
         TWEEN.update(time);
 
         this.stats.end();
@@ -578,50 +571,22 @@ class MapViewport extends React.Component {
 
         let currentX = model.position.x;
         let currentZ = model.position.z;
+        let duration = 500;
 
         if (!currentX && !currentZ) {
+            model.position.x = defaultX;
+            model.position.z = defaultZ;
             currentX = defaultX;
             currentZ = defaultZ;
         }
 
         // animate rearrangement
         if (newX != currentX || newZ != currentZ) {
-            model.userData.mixer = new THREE.AnimationMixer(model);
-
-            let rearrangementTime = 0.3; // seconds
-            let track = new THREE.VectorKeyframeTrack(
-                '.position', [0, rearrangementTime], [
-                    currentX,
-                    model.position.y,
-                    currentZ,
-                    newX,
-                    model.position.y,
-                    newZ,
-                ]
-            );
-
-            const animationClip = new THREE.AnimationClip(null, rearrangementTime, [track]);
-            animationClip.zeroSlopeAtEnd = false;
-            animationClip.zeroSlopeAtStart = false;
-            const animationAction = model.userData.mixer.clipAction(animationClip);
-            animationAction.setLoop(THREE.LoopOnce);
-            animationAction.play();
-            model.userData.clock = new THREE.Clock();
-
-            model.userData.mixer.addEventListener("finished", function (e) {
-                var curAction = e.action;
-                curAction.reset();
-                curAction.stop();
-                model.userData.mixer.stopAllAction();
-
-                model.position.x = curAction._clip.tracks[0].values[3];
-                model.position.y = curAction._clip.tracks[0].values[4];
-                model.position.z = curAction._clip.tracks[0].values[5];
-                delete model.userData.mixer;
-                delete model.userData.clock;
-            });
-
-            this.animationsObjects.push(model);
+            new TWEEN.Tween(model.position)
+                .to(new THREE.Vector3(newX, model.position.y, newZ), duration)
+                .easing(TWEEN.Easing.Quadratic.Out)
+                .onUpdate(() => console.log(model.position))
+                .start();
         }
         else {
             model.position.x = newX;
