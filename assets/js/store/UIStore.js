@@ -16,6 +16,7 @@ class UIStore {
     @observable attackOutput;
     @observable cameraTargetTerritory;
     @observable mouse = {x: null, y: null};
+    @observable actionQueue = [];
 
     @action lookAtTerritory = (territory) => {
         this.cameraTargetTerritory = territory;

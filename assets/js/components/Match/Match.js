@@ -50,11 +50,17 @@ class Match extends Component {
             const uiStore = this.props.uiStore;
             const message = JSON.parse(payload.data);
 
-            console.log('Received socket message:', message);
+            console.log('Received:', message);
 
             let updates = message.updates;
+            let uiAction = message.ui_action;
             let newSupply = 0;
             let newTide = 0;
+
+            if (uiAction) {
+                this.props.uiStore.actionQueue.push(uiAction);
+            }
+
             if (updates) {
                 if (updates.empires) {
                     updates.empires.forEach(empire => matchStore.updateEmpire(empire));

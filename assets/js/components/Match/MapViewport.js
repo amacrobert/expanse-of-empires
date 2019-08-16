@@ -168,6 +168,13 @@ class MapViewport extends React.Component {
         }
 
         return this.hexes[q][r];
+    };
+
+    getHexByTerritoryId = (id) => {
+        let territory = this.props.matchStore.territoriesById[id];
+        if (territory) {
+            return this.getHex(territory.q, territory.r);
+        }
     }
 
     componentWillUnmount() {
@@ -284,7 +291,6 @@ class MapViewport extends React.Component {
 
         this.stats.begin();
 
-        //this.updateScene();
         this.controls.enabled = this.props.inFocus;
         this.controls.update();
         this.renderScene()
@@ -299,13 +305,56 @@ class MapViewport extends React.Component {
     };
 
     updateScene = () => {
+
+        let {actionQueue} = this.props.uiStore;
+
+        while (actionQueue.length) {
+            console.log('Reading action queue');
+            let action = actionQueue.pop();
+
+            switch (action.action) {
+                case 'units-moved':
+                    console.log('animating movement of '+action.units_moved+' units from territory id '+action.from_id+' to territory id '+action.to_id);
+
+                    let empireId = action.empire_id;
+                    var fromHex = this.getHexByTerritoryId(action.from_id);
+                    var toHex = this.getHexByTerritoryId(action.to_id);
+
+                    for (var i = 0; i < action.units_moved; i++) {
+                        // let unitModel = fromHex.userData.graphics.armies[empireId].unitModels.pop();
+                        // console.log('popped unit model:', unitModel);
+                        if (!toHex.userData.graphics.armies[empireId]) {
+                            toHex.userData.graphics.armies[empireId] = {unitModels: []};
+                        }
+                        toHex.userData.graphics.armies[empireId].unitModels.push(fromHex.userData.graphics.armies[empireId].unitModels.pop());
+                    }
+
+                    console.log('arranging unit move');
+                    this.arrangeUnits(fromHex);
+                    this.arrangeUnits(toHex);
+
+                    break;
+
+                default:
+                    break;
+            }
+        }
+        console.log('finished with action queue')
+
+
         // iterate territories and determine if any graphics elements need to be updated
         Object.keys(this.props.matchStore.territoriesById).forEach(territoryId => {
 
             let territory = this.props.matchStore.territoriesById[territoryId];
             const q = territory.q;
             const r = territory.r;
-            const hex = this.getHex(q, r);
+            let hex = this.getHex(q, r);
+            if (fromHex && hex.uuid == fromHex.uuid) {
+                hex = fromHex;
+            }
+            if (toHex && hex.uuid == toHex.uuid) {
+                hex = toHex;
+            }
 
             if (hex) {
                 // Add graphics object to userData if none exists
@@ -509,7 +558,6 @@ class MapViewport extends React.Component {
 
     // arrange the unit models in a territory
     arrangeUnits = (hex) => {
-
         let hexGraphics = hex.userData.graphics;
         let realCoords = MapUtil.axialToReal(hex.userData.coordinates.q, hex.userData.coordinates.r);
         let self = this;
@@ -571,7 +619,7 @@ class MapViewport extends React.Component {
 
         let currentX = model.position.x;
         let currentZ = model.position.z;
-        let duration = 500;
+        let duration = 5000;
 
         if (!currentX && !currentZ) {
             model.position.x = defaultX;
@@ -596,13 +644,17 @@ class MapViewport extends React.Component {
     // Update the scene when the map state changes
     reactToSceneUpdate = reaction(
         () => this.props.matchStore.territories,
-        () => this.updateScene()
+        () => {
+            console.log('reactToSceneUpdate');
+            this.updateScene();
+        }
     );
 
     reactToEmpireUpdate = reaction(
         () => (this.props.matchStore.empires && this.props.matchStore.empires),
         () => {
             if (this.props.matchStore.territories) {
+                console.log('reactToEmpireUpdate');
                 this.updateScene();
             }
         }

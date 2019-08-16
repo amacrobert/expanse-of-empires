@@ -113,7 +113,7 @@ class ArmyService
 
         $this->match_service->hydrateMapState($match, $territory_path);
 
-        // Check that the user has at the requested units in the starting territory
+        // Check that the user has the requested units in the starting territory
         $territory_start = current($territory_path);
         if (!$territory_start instanceof Territory) {
             throw new VisibleException('There was an error trying to execute the move command. Please refresh and try again.');
@@ -170,6 +170,13 @@ class ArmyService
         // Broadcast unit move to user. @TODO: broadcast to alliance
         $this->socket_controller->broadcastToUser($match->getId(), $user->getId(), [
             'action' => 'units-moved',
+            'ui_action' => [
+                'action' => 'units-moved',
+                'empire_id' => $empire->getId(),
+                'from_id' => $territory_start->getId(),
+                'to_id' => $territory_end->getId(),
+                'units_moved' => $units,
+            ],
             'updates' => [
                 'territories' => [
                     $territory_start,
