@@ -585,7 +585,6 @@ class MapViewport extends React.Component {
             new TWEEN.Tween(model.position)
                 .to(new THREE.Vector3(newX, model.position.y, newZ), duration)
                 .easing(TWEEN.Easing.Quadratic.Out)
-                .onUpdate(() => console.log(model.position))
                 .start();
         }
         else {
