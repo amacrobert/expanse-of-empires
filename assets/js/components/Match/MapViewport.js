@@ -314,24 +314,22 @@ class MapViewport extends React.Component {
 
             switch (action.action) {
                 case 'units-moved':
-                    console.log('animating movement of '+action.units_moved+' units from territory id '+action.from_id+' to territory id '+action.to_id);
-
-                    let empireId = action.empire_id;
-                    var fromHex = this.getHexByTerritoryId(action.from_id);
-                    var toHex = this.getHexByTerritoryId(action.to_id);
+                    let armyKey = action.empire_id;
+                    let unitsMoved = action.units_moved;
+                    let fromHex = this.getHexByTerritoryId(action.from_id);
+                    let toHex = this.getHexByTerritoryId(action.to_id);
+                    let fromArmyModels = fromHex.userData.graphics.armies[armyKey].unitModels;
+                    if (!toHex.userData.graphics.armies[armyKey]) {
+                        toHex.userData.graphics.armies[armyKey] = {unitModels: []}
+                    }
+                    let toArmyModels = toHex.userData.graphics.armies[armyKey].unitModels;
 
                     for (var i = 0; i < action.units_moved; i++) {
-                        // let unitModel = fromHex.userData.graphics.armies[empireId].unitModels.pop();
-                        // console.log('popped unit model:', unitModel);
-                        if (!toHex.userData.graphics.armies[empireId]) {
-                            toHex.userData.graphics.armies[empireId] = {unitModels: []};
-                        }
-                        toHex.userData.graphics.armies[empireId].unitModels.push(fromHex.userData.graphics.armies[empireId].unitModels.pop());
+                        toArmyModels.unshift(fromArmyModels.pop());
                     }
 
-                    console.log('arranging unit move');
-                    this.arrangeUnits(fromHex);
-                    this.arrangeUnits(toHex);
+                    this.arrangeUnits(fromHex, 5000);
+                    this.arrangeUnits(toHex, 5000);
 
                     break;
 
@@ -339,8 +337,6 @@ class MapViewport extends React.Component {
                     break;
             }
         }
-        console.log('finished with action queue')
-
 
         // iterate territories and determine if any graphics elements need to be updated
         Object.keys(this.props.matchStore.territoriesById).forEach(territoryId => {
@@ -349,12 +345,6 @@ class MapViewport extends React.Component {
             const q = territory.q;
             const r = territory.r;
             let hex = this.getHex(q, r);
-            if (fromHex && hex.uuid == fromHex.uuid) {
-                hex = fromHex;
-            }
-            if (toHex && hex.uuid == toHex.uuid) {
-                hex = toHex;
-            }
 
             if (hex) {
                 // Add graphics object to userData if none exists
@@ -557,7 +547,7 @@ class MapViewport extends React.Component {
     };
 
     // arrange the unit models in a territory
-    arrangeUnits = (hex) => {
+    arrangeUnits = (hex, duration = 500) => {
         let hexGraphics = hex.userData.graphics;
         let realCoords = MapUtil.axialToReal(hex.userData.coordinates.q, hex.userData.coordinates.r);
         let self = this;
@@ -590,7 +580,7 @@ class MapViewport extends React.Component {
                         let newX = realCoords.x + (radius * Math.cos(i * spacing));
                         let newZ = realCoords.z + (radius * Math.sin(i * spacing));
 
-                        this.animateUnitRearrangement(model, newX, newZ, realCoords.x, realCoords.z);
+                        this.animateUnitRearrangement(model, newX, newZ, realCoords.x, realCoords.z, duration);
                     }
                 }
                 // No building -- render army in grid
@@ -608,18 +598,17 @@ class MapViewport extends React.Component {
                         let newX = realCoords.x + (col * spacing) - (spacing * armyWidth / 2) - (spacing * 0.5 * (row % 2)) + spacing;
                         let newZ = realCoords.z - (row * spacing) + (spacing * armyDepth / 2) + (spacing / 2);
 
-                        this.animateUnitRearrangement(model, newX, newZ, realCoords.x, realCoords.z);
+                        this.animateUnitRearrangement(model, newX, newZ, realCoords.x, realCoords.z, duration);
                     }
                 }
             }
         });
     };
 
-    animateUnitRearrangement = (model, newX, newZ, defaultX, defaultZ) => {
+    animateUnitRearrangement = (model, newX, newZ, defaultX, defaultZ, duration = 500) => {
 
         let currentX = model.position.x;
         let currentZ = model.position.z;
-        let duration = 5000;
 
         if (!currentX && !currentZ) {
             model.position.x = defaultX;
@@ -644,17 +633,13 @@ class MapViewport extends React.Component {
     // Update the scene when the map state changes
     reactToSceneUpdate = reaction(
         () => this.props.matchStore.territories,
-        () => {
-            console.log('reactToSceneUpdate');
-            this.updateScene();
-        }
+        this.updateScene
     );
 
     reactToEmpireUpdate = reaction(
         () => (this.props.matchStore.empires && this.props.matchStore.empires),
         () => {
             if (this.props.matchStore.territories) {
-                console.log('reactToEmpireUpdate');
                 this.updateScene();
             }
         }

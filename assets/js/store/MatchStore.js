@@ -119,7 +119,6 @@ class MatchStore {
 
     @action updateTerritory = (newTerritory) => {
         let empiresById = this.empiresById;
-        let map = this.map;
         let index = newTerritory.id;
         let oldTerritory = Object.assign(this.territoriesById[index]);
 
@@ -135,6 +134,31 @@ class MatchStore {
             empiresById[newTerritory.empire_id].territory_count++;
         }
     };
+
+    // Update multiple territories at once, only triggering one reaction
+    @action updateTerritories = (newTerritories) => {
+        let empiresById = this.empiresById;
+        let territoriesByIdTemp = Object.assign(this.territoriesById);
+
+        newTerritories.forEach(newTerritory => {
+            let index = newTerritory.id;
+            let oldTerritory = Object.assign(this.territoriesById[index]);
+
+            // Update teritory empire from empire_id
+            newTerritory.empire = newTerritory.empire_id ? this.empiresById[newTerritory.empire_id] : null;
+            territoriesByIdTemp[index] = newTerritory;
+
+            // Update empire territory counts in case territory changed hands
+            if (empiresById[oldTerritory.empire_id]) {
+                empiresById[oldTerritory.empire_id].territory_count--;
+            }
+            if (empiresById[newTerritory.empire_id]) {
+                empiresById[newTerritory.empire_id].territory_count++;
+            }
+        });
+
+        this.territoriesById = territoriesByIdTemp;
+    }
 
     @action updateSupply = (supply) => {
         this.supply = supply;

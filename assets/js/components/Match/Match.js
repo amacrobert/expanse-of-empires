@@ -67,7 +67,7 @@ class Match extends Component {
                 }
 
                 if (updates.territories) {
-                    updates.territories.forEach(territory => matchStore.updateTerritory(territory));
+                    matchStore.updateTerritories(updates.territories);
                 }
 
                 if (updates.resources) {

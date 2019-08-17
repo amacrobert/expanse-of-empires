@@ -104,6 +104,8 @@ class BattleService
             throw new VisibleException('Not enough Tide');
         }
 
+        $socket_message = [];
+
         // If the defending territory has no state, create it
         if (!$defending_state) {
             $defending_state = (new TerritoryState)
@@ -289,6 +291,14 @@ class BattleService
             $attacking_army->setSize($attacking_army->getSize() - $attacking_units_left);
             $new_territory_army = $this->match_service->getEmpireArmyInTerritory($attacking_empire, $defending_territory, true);
             $new_territory_army->setSize($attacking_units_left);
+
+            $socket_message['ui_action'] = [
+                'action' => 'units-moved',
+                'empire_id' => $attacking_empire->getId(),
+                'from_id' => $attacking_territory->getId(),
+                'to_id' => $defending_territory->getId(),
+                'units_moved' => $attacking_units_left,
+            ];
         }
 
         // Subtract tide from the attacker, at a rate dependent upon whether or not the territory was won
@@ -300,7 +310,7 @@ class BattleService
             $defending_armies->toArray()
         ));
 
-        $this->socket_controller->broadcastToUser($match->getId(), $user->getId(), [
+        $socket_message += [
             'action' => 'territory-attacked',
             'output' => [
                 'territory_taken' => $attacker_takes_territory,
@@ -315,7 +325,9 @@ class BattleService
                     'tide' => $attacking_empire->getTide(),
                 ],
             ],
-        ]);
+        ];
+
+        $this->socket_controller->broadcastToUser($match->getId(), $user->getId(), $socket_message);
 
         $this->socket_controller->broadcastToMatch($match->getId(), [
             'action' => 'territory-attacked-in-match',
