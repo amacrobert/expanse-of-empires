@@ -2,9 +2,9 @@ import React from 'react';
 import MapUtil from '../../services/map-util';
 import GraphicsUtil from '../../services/graphics-util';
 import MatchUtil from '../../services/match-util';
+import Animation from '../../services/animation';
 import { reaction } from 'mobx';
 const THREE = require('three');
-const TWEEN = require('@tweenjs/tween.js');
 const assets = new GraphicsUtil();
 
 require('../../three/controls/OrbitControls.js');
@@ -31,23 +31,14 @@ class MapViewport extends React.Component {
         this.stats = new Stats();
         this.stats.showPanel(0);
         document.body.appendChild(this.stats.dom);
-
     }
 
     lookAtTerritory = (q, r, duration = null) => {
         let {x, z} = MapUtil.axialToReal(q, r);
 
         if (duration) {
-
-            var cameraPositionTween = new TWEEN.Tween(this.camera.position)
-                .to(new THREE.Vector3(x, 20, z + 20), duration)
-                .easing(TWEEN.Easing.Quadratic.Out)
-                .start();
-
-            var targetPositionTween = new TWEEN.Tween(this.controls.target)
-                .to(new THREE.Vector3(x, 0, z), duration)
-                .easing(TWEEN.Easing.Quadratic.Out)
-                .start();
+            Animation.animateVector(this.camera, this.camera.position, new THREE.Vector3(x, 20, z + 20), duration);
+            Animation.animateVector(this.controls, this.controls.target, new THREE.Vector3(x, 0, z), duration);
         }
         else {
             this.camera.position.set(x, 20, z + 20);
@@ -56,6 +47,7 @@ class MapViewport extends React.Component {
     }
 
     componentDidMount() {
+        console.log('AAA:', Animation.animateVector);
         const phase = MatchUtil.getPhase(this.props.matchStore.match);
 
         this.renderer = new THREE.WebGLRenderer({
@@ -295,7 +287,7 @@ class MapViewport extends React.Component {
         this.controls.update();
         this.renderScene()
         this.frameId = window.requestAnimationFrame(this.animate);
-        TWEEN.update(time);
+        Animation.update(time);
 
         this.stats.end();
     };
@@ -328,8 +320,8 @@ class MapViewport extends React.Component {
                         toArmyModels.unshift(fromArmyModels.pop());
                     }
 
-                    this.arrangeUnits(fromHex, 5000);
-                    this.arrangeUnits(toHex, 5000);
+                    Animation.arrangeUnits(fromHex, 500);
+                    Animation.arrangeUnits(toHex, 1500);
 
                     break;
 
@@ -486,7 +478,7 @@ class MapViewport extends React.Component {
                         this.scene.add(building);
 
                         // arrange units after building load in case this happens after initial unit placement
-                        this.arrangeUnits(hex);
+                        Animation.arrangeUnits(hex);
                     })
                 }
                 // Remove destroyed building
@@ -523,7 +515,7 @@ class MapViewport extends React.Component {
                                 }
                             }
 
-                            this.arrangeUnits(hex);
+                            Animation.arrangeUnits(hex, 500);
                         }
 
                         // Remove units
@@ -538,96 +530,12 @@ class MapViewport extends React.Component {
                                 }
                             }
 
-                            this.arrangeUnits(hex);
+                            Animation.arrangeUnits(hex, 500);
                         }
                     });
                 }
             }
         });
-    };
-
-    // arrange the unit models in a territory
-    arrangeUnits = (hex, duration = 500) => {
-        let hexGraphics = hex.userData.graphics;
-        let realCoords = MapUtil.axialToReal(hex.userData.coordinates.q, hex.userData.coordinates.r);
-        let self = this;
-
-        Object.keys(hexGraphics.armies).forEach(armyKey => {
-
-            let army = hexGraphics.armies[armyKey];
-            let armySize = army.unitModels.length;
-
-            if (armySize) {
-
-                // territory has building -- render army in circle surrounding it
-                if (hexGraphics.building) {
-
-                    let radius = .5;
-                    let innerCircleLimit = 20;
-                    let innerCircleUnits = Math.min(innerCircleLimit, armySize);
-                    let outerCircleUnits = armySize - innerCircleUnits;
-                    let spacing = 2 * Math.PI / innerCircleUnits;
-
-
-                    for (var i = 0; i < armySize; i++) {
-                        let model = army.unitModels[i];
-
-                        if (i >= innerCircleUnits) {
-                            radius = .7;
-                            spacing = 2 * Math.PI / outerCircleUnits;
-                        }
-
-                        let newX = realCoords.x + (radius * Math.cos(i * spacing));
-                        let newZ = realCoords.z + (radius * Math.sin(i * spacing));
-
-                        this.animateUnitRearrangement(model, newX, newZ, realCoords.x, realCoords.z, duration);
-                    }
-                }
-                // No building -- render army in grid
-                else {
-                    let armyWidth = Math.ceil(Math.sqrt(armySize));
-                    let armyDepth = Math.ceil(armySize / armyWidth);
-                    let spacing = 0.15;
-
-                    for (var i = 0; i < armySize; i++) {
-
-                        let model = army.unitModels[i];
-                        let row = Math.ceil((i + 1) / armyWidth);
-                        let col = i % armyWidth;
-
-                        let newX = realCoords.x + (col * spacing) - (spacing * armyWidth / 2) - (spacing * 0.5 * (row % 2)) + spacing;
-                        let newZ = realCoords.z - (row * spacing) + (spacing * armyDepth / 2) + (spacing / 2);
-
-                        this.animateUnitRearrangement(model, newX, newZ, realCoords.x, realCoords.z, duration);
-                    }
-                }
-            }
-        });
-    };
-
-    animateUnitRearrangement = (model, newX, newZ, defaultX, defaultZ, duration = 500) => {
-
-        let currentX = model.position.x;
-        let currentZ = model.position.z;
-
-        if (!currentX && !currentZ) {
-            model.position.x = defaultX;
-            model.position.z = defaultZ;
-            currentX = defaultX;
-            currentZ = defaultZ;
-        }
-
-        // animate rearrangement
-        if (newX != currentX || newZ != currentZ) {
-            new TWEEN.Tween(model.position)
-                .to(new THREE.Vector3(newX, model.position.y, newZ), duration)
-                .easing(TWEEN.Easing.Quadratic.Out)
-                .start();
-        }
-        else {
-            model.position.x = newX;
-            model.position.z = newZ;
-        }
     };
 
     // Update the scene when the map state changes
