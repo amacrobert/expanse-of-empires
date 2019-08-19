@@ -1,6 +1,6 @@
 import React from 'react';
 import MapUtil from '../../services/map-util';
-import GraphicsUtil, { getHex } from '../../services/graphics-util';
+import GraphicsUtil, { getHex, getHexByTerritoryId } from '../../services/graphics-util';
 import MatchUtil from '../../services/match-util';
 import Animation from '../../services/animation';
 import GraphicsManager from '../../services/graphics-manager';
@@ -147,13 +147,6 @@ class MapViewport extends React.Component {
         this.hexes[q][r] = hexMesh;
     };
 
-    getHexByTerritoryId = (id) => {
-        let territory = this.props.matchStore.territoriesById[id];
-        if (territory) {
-            return getHex(this.hexes, territory.q, territory.r);
-        }
-    };
-
     componentWillUnmount() {
         this.stop();
         if (this.renderer) {
@@ -283,7 +276,7 @@ class MapViewport extends React.Component {
 
     updateScene = () => {
 
-        let {actionQueue} = this.props.uiStore;
+        let { actionQueue } = this.props.uiStore;
 
         while (actionQueue.length) {
             console.log('Reading action queue');
@@ -293,20 +286,30 @@ class MapViewport extends React.Component {
                 case 'units-moved':
                     let armyKey = action.empire_id;
                     let unitsMoved = action.units_moved;
-                    let fromHex = this.getHexByTerritoryId(action.from_id);
-                    let toHex = this.getHexByTerritoryId(action.to_id);
+                    let fromHex = getHexByTerritoryId(this.hexes, this.props.matchStore.territoriesById, action.from_id);
+                    let toHex = getHexByTerritoryId(this.hexes, this.props.matchStore.territoriesById, action.to_id);
                     let fromArmyModels = fromHex.userData.graphics.armies[armyKey].unitModels;
+                    let movedUnitModels = [];
+
                     if (!toHex.userData.graphics.armies[armyKey]) {
                         toHex.userData.graphics.armies[armyKey] = {unitModels: []}
                     }
+
                     let toArmyModels = toHex.userData.graphics.armies[armyKey].unitModels;
 
                     for (var i = 0; i < action.units_moved; i++) {
-                        toArmyModels.unshift(fromArmyModels.pop());
+                        let movedUnitModel = fromArmyModels.pop();
+                        toArmyModels.unshift(movedUnitModel);
+                        movedUnitModels.push(movedUnitModel);
                     }
 
-                    Animation.arrangeUnits(fromHex, 500);
-                    Animation.arrangeUnits(toHex, 1500);
+                    if (action.path) {
+                        Animation.animateUnitMovement(movedUnitModels, action.path, this.hexes, this.props.matchStore.territoriesById);
+                    }
+                    else {
+                        Animation.arrangeUnits(fromHex, 500);
+                        Animation.arrangeUnits(toHex, 1500);
+                    }
 
                     break;
 

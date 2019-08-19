@@ -167,11 +167,16 @@ class ArmyService
         // Save everything
         $this->em->flush([$user_army_start, $user_army_end, $empire]);
 
+        $territory_path_ids = array_map(function($territory) {
+            return $territory->getId();
+        }, $territory_path);
+
         // Broadcast unit move to user. @TODO: broadcast to alliance
         $this->socket_controller->broadcastToUser($match->getId(), $user->getId(), [
             'action' => 'units-moved',
             'ui_action' => [
                 'action' => 'units-moved',
+                'path' => $territory_path_ids,
                 'empire_id' => $empire->getId(),
                 'from_id' => $territory_start->getId(),
                 'to_id' => $territory_end->getId(),

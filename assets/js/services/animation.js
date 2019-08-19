@@ -1,6 +1,7 @@
 const TWEEN = require('@tweenjs/tween.js');
 const THREE = require('three');
 import MapUtil from './map-util';
+import { getHexByTerritoryId } from './graphics-util';
 
 const animateVector = (model, fromVector, toVector, duration = 500) => {
     if (!model.userData) {
@@ -19,6 +20,51 @@ const animateVector = (model, fromVector, toVector, duration = 500) => {
 };
 
 const update = (time) => TWEEN.update(time);
+
+const animateUnitMovement = (unitModels, path, hexes, territoriesById) => {
+
+    console.log('unitModels', unitModels);
+    let territoryId = path.shift();
+    let territory = territoriesById[territoryId];
+    let {q, r} = territory;
+    let {x, z} = MapUtil.axialToReal(q, r);
+
+    arrangeUnits(getHexByTerritoryId(hexes, territoriesById, territoryId));
+
+    unitModels.forEach(unitModel => {
+        let offsetX = unitModel.position.x - x;
+        let offsetZ = unitModel.position.z - z;
+
+        let tween = animateSingleUnitMovement(unitModel, path.slice(), offsetX, offsetZ, hexes, territoriesById);
+        unitModel.userData.tween = tween;
+        tween.start();
+    });
+};
+
+const animateSingleUnitMovement = (unitModel, path, offsetX, offsetZ, hexes, territoriesById) => {
+    let territoryId = path.shift();
+    let territory = territoriesById[territoryId];
+    let {q, r} = territory;
+    let {x, z} = MapUtil.axialToReal(q, r);
+
+    let toVector = new THREE.Vector3(
+        x + offsetX,
+        unitModel.position.y,
+        z + offsetZ,
+    );
+
+    let tween = new TWEEN.Tween(unitModel.position).to(toVector, 100);
+    if (path.length) {
+        tween.chain(animateSingleUnitMovement(unitModel, path, offsetX, offsetZ, hexes, territoriesById));
+    }
+    else {
+        tween.onComplete(() => {
+            arrangeUnits(getHexByTerritoryId(hexes, territoriesById, territoryId));
+        });
+    }
+
+    return tween;
+};
 
 // arrange the unit models in a territory
 const arrangeUnits = (hex, duration = 500) => {
@@ -104,6 +150,7 @@ const animateUnitRearrangement = (model, newX, newZ, defaultX, defaultZ, duratio
 const Animation = {
     animateVector,
     arrangeUnits,
+    animateUnitMovement,
     update,
 };
 

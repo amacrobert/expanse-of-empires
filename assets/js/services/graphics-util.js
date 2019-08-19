@@ -274,8 +274,16 @@ const getHex = (hexes, q, r) => {
     return hexes[q][r];
 };
 
+const getHexByTerritoryId = (hexes, territoriesById, id) => {
+    let territory = territoriesById[id];
+    if (territory) {
+        return getHex(hexes, territory.q, territory.r);
+    }
+};
+
 
 export default GraphicsUtil;
 export {
     getHex,
+    getHexByTerritoryId,
 }
