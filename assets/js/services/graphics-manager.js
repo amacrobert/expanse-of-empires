@@ -1,8 +1,11 @@
 const THREE = require('three');
 import MatchUtil from './match-util';
 import { getHex } from './graphics-util';
+import Animation from './animation';
 
-const startingPositionSprites = (scene, graphics, match, territory) => {
+const startingPositionSprites = (scene, hex, match, territory) => {
+    let graphics = hex.userData.graphics;
+
     // Delete starting position sprite
     if (!MatchUtil.showStartPosition(match, territory)
         && graphics.startingPositionSprite
@@ -30,8 +33,8 @@ const startingPositionSprites = (scene, graphics, match, territory) => {
     }
 }
 
-// BORDERS
-const borders = (scene, graphics, territory, hexes, territoriesByAxial, getBorderSectionMesh, empireColor) => {
+const borders = (scene, hex, territory, hexes, territoriesByAxial, getBorderSectionMesh, empireColor) => {
+    let graphics = hex.userData.graphics;
     let borderMeshUpdated = false;
     let {q, r} = territory;
 
@@ -115,7 +118,93 @@ const borders = (scene, graphics, territory, hexes, territoriesByAxial, getBorde
     }
 };
 
+const buildings = (scene, hex, territory, assets) => {
+    let graphics = hex.userData.graphics;
+    let {q, r} = territory;
+    let buildingName = territory.building ? territory.building.machine_name : null;
+
+    // Add or replace building if it's missing
+    if (territory.building
+        && (!graphics.building || graphics.building.name !== buildingName)
+    ) {
+        // Remove building to be replaced
+        if (graphics.building) {
+            console.debug('Replacing building ' + graphics.building.name.toUpperCase() + ' from territory ' + territody.id);
+            scene.remove(graphics.building);
+            delete graphics.building;
+        }
+
+        // Place a building
+        assets.getBuilding(buildingName, q, r).then(building => {
+            console.debug('Adding building ' + building.name.toUpperCase() + ' to territory ' + territory.id);
+            graphics.building = building;
+            scene.add(building);
+
+            // arrange units after building load in case this happens after initial unit placement
+            Animation.arrangeUnits(hex);
+        })
+    }
+    // Remove destroyed building
+    else if (!territory.building && graphics.building) {
+        console.debug('Removing building ' + graphics.building.name.toUpperCase() + ' from territory ' + territory.id);
+        scene.remove(graphics.building);
+        delete graphics.building;
+    }
+};
+
+const units = (scene, hex, territory, assets, empireColor) => {
+    let graphics = hex.userData.graphics;
+
+    if (territory.armies) {
+        territory.armies.forEach(army => {
+
+            let armyKey = army.empire_id ? army.empire_id : 'npc';
+
+            if (!graphics.armies[armyKey]) {
+                graphics.armies[armyKey] = {
+                    unitModels: [],
+                };
+            }
+
+            let renderedUnitCount = graphics.armies[armyKey].unitModels.length;
+
+            // Add missing units
+            if (army.size > renderedUnitCount) {
+
+                for (var i = 0; i < army.size; i++) {
+
+                    if ((i + 1) > renderedUnitCount) {
+                        console.log('ADDING UNIT');
+                        let model = assets.getUnitModel(empireColor);
+                        scene.add(model);
+                        graphics.armies[armyKey].unitModels[i] = model;
+                    }
+                }
+
+                Animation.arrangeUnits(hex, 500);
+            }
+
+            // Remove units
+            if (army.size < renderedUnitCount) {
+
+                for (var i = 0; i < renderedUnitCount; i++) {
+
+                    if ((i + 1) > army.size) {
+                        console.log('REMOVING UNIT');
+                        let model = graphics.armies[armyKey].unitModels.pop();
+                        scene.remove(model);
+                    }
+                }
+
+                Animation.arrangeUnits(hex, 500);
+            }
+        });
+    }}
+
+
 export default {
     startingPositionSprites,
     borders,
+    buildings,
+    units,
 };

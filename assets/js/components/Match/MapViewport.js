@@ -90,18 +90,12 @@ class MapViewport extends React.Component {
 
         // light
         this.scene.add(new THREE.AmbientLight(0xFFFFFF, 1));
-        // var sun = new THREE.PointLight(0xFFFFFF, 1, 150, 1);
-        // sun.castShadow = true;
-        // sun.position.x = 0;
-        // sun.position.y = 50;
-        // sun.position.z = 0;
-        // this.scene.add(sun);
         var sun = new THREE.DirectionalLight(0xFFFFFF, .5);
         sun.position.set(20, 10, -10);
-        sun.shadow.mapSize.width = 2048;  // default
-        sun.shadow.mapSize.height = 2048; // default
-        sun.shadow.camera.near = 0.0;    // default
-        sun.shadow.camera.far = 500;     // default
+        sun.shadow.mapSize.width = 2048;
+        sun.shadow.mapSize.height = 2048;
+        sun.shadow.camera.near = 0.0;
+        sun.shadow.camera.far = 90;
         sun.shadow.camera.left = -30;
         sun.shadow.camera.bottom = -30;
         sun.shadow.camera.right = 30;
@@ -121,13 +115,12 @@ class MapViewport extends React.Component {
 
             let territory = this.props.matchStore.territoriesById[territoryId];
 
-            let q = territory.q;
-            let r = territory.r;
+            let { q, r } = territory;
             let hexMesh = assets.getHexMesh(territory);
             this.targetList.push(hexMesh);
             this.scene.add(hexMesh);
 
-            hexMesh.userData.coordinates = {q: q, r: r};
+            hexMesh.userData.coordinates = {q, r};
 
             this.addHex(hexMesh, q, r);
         });
@@ -159,7 +152,7 @@ class MapViewport extends React.Component {
         if (territory) {
             return getHex(this.hexes, territory.q, territory.r);
         }
-    }
+    };
 
     componentWillUnmount() {
         this.stop();
@@ -339,90 +332,13 @@ class MapViewport extends React.Component {
                         armies: {},
                     };
                 }
-                let graphics = hex.userData.graphics;
 
                 let empireColor = territory.empire ? territory.empire.color : '777777';
 
-                GraphicsManager.startingPositionSprites(this.scene, graphics, this.props.matchStore.match, territory);
-                GraphicsManager.borders(this.scene, graphics, territory, this.hexes, this.props.matchStore.territoriesByAxial, assets.getBorderSectionMesh, empireColor);
-
-                // BUILDINGS
-                // Add or replace building if it's missing
-                let buildingName = territory.building ? territory.building.machine_name : null;
-
-                if (territory.building
-                    && (!graphics.building || graphics.building.name !== buildingName)
-                ) {
-                    // Remove building to be replaced
-                    if (graphics.building) {
-                        console.debug('Replacing building ' + graphics.building.name.toUpperCase() + ' from territory ' + territody.id);
-                        this.scene.remove(graphics.building);
-                        delete graphics.building;
-                    }
-
-                    // Place a building
-                    assets.getBuilding(buildingName, q, r).then(building => {
-                        console.debug('Adding building ' + building.name.toUpperCase() + ' to territory ' + territory.id);
-                        graphics.building = building;
-                        this.scene.add(building);
-
-                        // arrange units after building load in case this happens after initial unit placement
-                        Animation.arrangeUnits(hex);
-                    })
-                }
-                // Remove destroyed building
-                else if (!territory.building && graphics.building) {
-                    console.debug('Removing building ' + graphics.building.name.toUpperCase() + ' from territory ' + territory.id);
-                    this.scene.remove(graphics.building);
-                    delete graphics.building;
-                }
-
-                // UNITS
-                if (territory.armies) {
-                    territory.armies.forEach(army => {
-
-                        let armyKey = army.empire_id ? army.empire_id : 'npc';
-
-                        if (!graphics.armies[armyKey]) {
-                            graphics.armies[armyKey] = {
-                                unitModels: [],
-                            };
-                        }
-
-                        let renderedUnitCount = graphics.armies[armyKey].unitModels.length;
-
-                        // Add missing units
-                        if (army.size > renderedUnitCount) {
-
-                            for (var i = 0; i < army.size; i++) {
-
-                                if ((i + 1) > renderedUnitCount) {
-                                    console.log('ADDING UNIT');
-                                    let model = assets.getUnitModel(empireColor);
-                                    this.scene.add(model);
-                                    graphics.armies[armyKey].unitModels[i] = model;
-                                }
-                            }
-
-                            Animation.arrangeUnits(hex, 500);
-                        }
-
-                        // Remove units
-                        if (army.size < renderedUnitCount) {
-
-                            for (var i = 0; i < renderedUnitCount; i++) {
-
-                                if ((i + 1) > army.size) {
-                                    console.log('REMOVING UNIT');
-                                    let model = graphics.armies[armyKey].unitModels.pop();
-                                    this.scene.remove(model);
-                                }
-                            }
-
-                            Animation.arrangeUnits(hex, 500);
-                        }
-                    });
-                }
+                GraphicsManager.startingPositionSprites(this.scene, hex, this.props.matchStore.match, territory);
+                GraphicsManager.borders(this.scene, hex, territory, this.hexes, this.props.matchStore.territoriesByAxial, assets.getBorderSectionMesh, empireColor);
+                GraphicsManager.buildings(this.scene, hex, territory, assets);
+                GraphicsManager.units(this.scene, hex, territory, assets, empireColor);
             }
         });
     };
