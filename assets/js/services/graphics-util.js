@@ -263,6 +263,19 @@ class GraphicsUtil {
 
         return borderMesh;
     };
+
 };
 
+const getHex = (hexes, q, r) => {
+    if (hexes[q] == null || hexes[q][r] == null) {
+        return null;
+    }
+
+    return hexes[q][r];
+};
+
+
 export default GraphicsUtil;
+export {
+    getHex,
+}

@@ -1,8 +1,9 @@
 import React from 'react';
 import MapUtil from '../../services/map-util';
-import GraphicsUtil from '../../services/graphics-util';
+import GraphicsUtil, { getHex } from '../../services/graphics-util';
 import MatchUtil from '../../services/match-util';
 import Animation from '../../services/animation';
+import GraphicsManager from '../../services/graphics-manager';
 import { reaction } from 'mobx';
 const THREE = require('three');
 const assets = new GraphicsUtil();
@@ -47,7 +48,6 @@ class MapViewport extends React.Component {
     }
 
     componentDidMount() {
-        console.log('AAA:', Animation.animateVector);
         const phase = MatchUtil.getPhase(this.props.matchStore.match);
 
         this.renderer = new THREE.WebGLRenderer({
@@ -154,18 +154,10 @@ class MapViewport extends React.Component {
         this.hexes[q][r] = hexMesh;
     };
 
-    getHex = (q, r) => {
-        if (this.hexes[q] == null || this.hexes[q][r] == null) {
-            return null;
-        }
-
-        return this.hexes[q][r];
-    };
-
     getHexByTerritoryId = (id) => {
         let territory = this.props.matchStore.territoriesById[id];
         if (territory) {
-            return this.getHex(territory.q, territory.r);
+            return getHex(this.hexes, territory.q, territory.r);
         }
     }
 
@@ -336,7 +328,7 @@ class MapViewport extends React.Component {
             let territory = this.props.matchStore.territoriesById[territoryId];
             const q = territory.q;
             const r = territory.r;
-            let hex = this.getHex(q, r);
+            let hex = getHex(this.hexes, q, r);
 
             if (hex) {
                 // Add graphics object to userData if none exists
@@ -347,115 +339,12 @@ class MapViewport extends React.Component {
                         armies: {},
                     };
                 }
-                let borderMeshUpdated = false;
                 let graphics = hex.userData.graphics;
 
                 let empireColor = territory.empire ? territory.empire.color : '777777';
 
-                // Delete starting position sprite
-                if (!MatchUtil.showStartPosition(this.props.matchStore.match, territory)
-                    && graphics.startingPositionSprite
-                ) {
-                    console.debug('Removing starting position sprite from territory ' + territory.id);
-                    this.scene.remove(graphics.startingPositionSprite);
-                    delete graphics.startingPositionSprite;
-
-                    this.scene.remove(graphics.simpleShadow);
-                    delete graphics.simpleShadow;
-                }
-                // Add starting position sprite
-                else if (MatchUtil.showStartPosition(this.props.matchStore.match, territory)
-                    && !graphics.startingPositionSprite
-                ) {
-                    console.debug('Adding starting position sprite to territory ' + territory.id);
-                    assets.getSprite('startingPosition', territory.q, territory.r).then(sprite => {
-                        graphics.startingPositionSprite = sprite;
-                        this.scene.add(sprite);
-
-                        let simpleShadow = assets.getSimpleShadow(territory);
-                        graphics.simpleShadow = simpleShadow;
-                        this.scene.add(simpleShadow);
-                    });
-                }
-
-                // BORDERS
-                let borderingHexes = {
-                    left: this.getHex(q - 1, r),
-                    topLeft: this.getHex(q, r - 1),
-                    topRight: this.getHex(q + 1, r - 1),
-                    right: this.getHex(q + 1, r),
-                    bottomRight: this.getHex(q, r + 1),
-                    bottomLeft: this.getHex(q - 1, r + 1),
-                };
-
-                Object.keys(borderingHexes).forEach((rotation) => {
-                    let borderingHex = borderingHexes[rotation];
-                    let borderingTerritory;
-
-                    if (borderingHex) {
-                        borderingTerritory = MatchUtil.getTerritory(
-                            this.props.matchStore.territoriesByAxial,
-                            borderingHex.userData.coordinates.q,
-                            borderingHex.userData.coordinates.r
-                        );
-                    }
-
-                    let bordersMatch = (borderingTerritory && borderingTerritory.empire_id == territory.empire_id);
-
-                    // Add missing border sections
-                    if (territory.empire_id && (!borderingHex || !bordersMatch)) {
-                        if (!graphics.borders[rotation]) {
-                            console.debug('Adding ' + rotation + ' border to territory ' + territory.id);
-                            let newBorderSection = assets.getBorderSectionMesh(territory, rotation);
-                            graphics.borders[rotation] = newBorderSection;
-                            borderMeshUpdated = true;
-                        }
-                    }
-
-                    // Remove border sections that shouldn't exist anymore
-                    if (!territory.empire_id || (territory.empire_id && bordersMatch)) {
-                        if (graphics.borders[rotation]) {
-                            console.debug('Removing ' + rotation + ' border from territory ' + territory.id)
-                            delete graphics.borders[rotation];
-                            borderMeshUpdated = true;
-                        }
-                    }
-                });
-
-                // Remove old border mesh if it was updated
-                if (borderMeshUpdated) {
-                    if (graphics.borderMerged) {
-                        console.debug('Removing border mesh from territory ' + territory.id);
-                        this.scene.remove(graphics.borderMerged);
-                        delete graphics.borderMerged;
-                    }
-                }
-
-                // merge border meshes and add to scene
-                if (Object.keys(graphics.borders).length && !graphics.borderMerged) {
-                    var borderMergedGeo = new THREE.Geometry();
-
-                    Object.keys(graphics.borders).forEach(key => {
-                        let borderMesh = graphics.borders[key];
-                        borderMergedGeo.merge(borderMesh.geometry, borderMesh.matrix);
-                    });
-
-                    var borderMerged = new THREE.Mesh(
-                        borderMergedGeo,
-                        new THREE.MeshPhongMaterial({ color: parseInt(empireColor, 16) })
-                    );
-
-                    console.debug('Adding border mesh to territory ' + territory.id);
-                    graphics.borderMerged = borderMerged;
-                    this.scene.add(borderMerged);
-                }
-
-                // update border mesh color if needed
-                let borderColor = graphics.borderMerged ? graphics.borderMerged.material.color.getHexString() : null;
-                if (borderColor && borderColor != empireColor) {
-                    console.log('Updating border mesh color from ' + graphics.borderMerged.material.color.getHexString() + ' to ' + empireColor);
-                    graphics.borderMerged.material.color.setHex(parseInt(empireColor, 16));
-                }
+                GraphicsManager.startingPositionSprites(this.scene, graphics, this.props.matchStore.match, territory);
+                GraphicsManager.borders(this.scene, graphics, territory, this.hexes, this.props.matchStore.territoriesByAxial, assets.getBorderSectionMesh, empireColor);
 
                 // BUILDINGS
                 // Add or replace building if it's missing
