@@ -104,7 +104,7 @@ class BattleService
             throw new VisibleException('Not enough Tide');
         }
 
-        $socket_message = [];
+        $socket_message_for_match = $socket_message_for_alliance = [];
 
         // If the defending territory has no state, create it
         if (!$defending_state) {
@@ -292,7 +292,7 @@ class BattleService
             $new_territory_army = $this->match_service->getEmpireArmyInTerritory($attacking_empire, $defending_territory, true);
             $new_territory_army->setSize($attacking_units_left);
 
-            $socket_message['ui_action'] = [
+            $socket_message_for_match['ui_action'] = [
                 'action' => 'units-moved',
                 'empire_id' => $attacking_empire->getId(),
                 'from_id' => $attacking_territory->getId(),
@@ -310,7 +310,7 @@ class BattleService
             $defending_armies->toArray()
         ));
 
-        $socket_message += [
+        $socket_message_for_alliance += [
             'action' => 'territory-attacked',
             'output' => [
                 'territory_taken' => $attacker_takes_territory,
@@ -327,16 +327,17 @@ class BattleService
             ],
         ];
 
-        $this->socket_controller->broadcastToUser($match->getId(), $user->getId(), $socket_message);
-
-        $this->socket_controller->broadcastToMatch($match->getId(), [
+        $socket_message_for_match += [
             'action' => 'territory-attacked-in-match',
             'updates' => [
                 'territories' => array_values(array_unique(array_merge(
                     ($updated_territories ?? []),
                     [$defending_territory, $attacking_territory]
                 ))),
-            ],
-        ]);
+            ]
+        ];
+
+        $this->socket_controller->broadcastToUser($match->getId(), $user->getId(), $socket_message_for_alliance);
+        $this->socket_controller->broadcastToMatch($match->getId(), $socket_message_for_match);
     }
 }
