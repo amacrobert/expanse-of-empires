@@ -22,26 +22,34 @@ const animateVector = (model, fromVector, toVector, duration = 500) => {
 const update = (time) => TWEEN.update(time);
 
 const animateUnitMovement = (unitModels, path, hexes, territoriesById) => {
-
-    console.log('unitModels', unitModels);
     let territoryId = path.shift();
     let territory = territoriesById[territoryId];
+    let lastTerritoryId = path[path.length - 1];
+    let lastHex = getHexByTerritoryId(hexes, territoriesById, lastTerritoryId);
     let {q, r} = territory;
     let {x, z} = MapUtil.axialToReal(q, r);
 
     arrangeUnits(getHexByTerritoryId(hexes, territoriesById, territoryId));
 
+    if (path.length == 1) {
+        arrangeUnits(lastHex);
+        return;
+    }
+
+    let i = 0;
+
     unitModels.forEach(unitModel => {
         let offsetX = unitModel.position.x - x;
         let offsetZ = unitModel.position.z - z;
 
-        let tween = animateSingleUnitMovement(unitModel, path.slice(), offsetX, offsetZ, hexes, territoriesById);
+        let tween = animateSingleUnitMovement(unitModel, path.slice(), offsetX, offsetZ, territoriesById, i, lastHex);
         unitModel.userData.tween = tween;
         tween.start();
+        i++;
     });
 };
 
-const animateSingleUnitMovement = (unitModel, path, offsetX, offsetZ, hexes, territoriesById) => {
+const animateSingleUnitMovement = (unitModel, path, offsetX, offsetZ, territoriesById, i, lastHex) => {
     let territoryId = path.shift();
     let territory = territoriesById[territoryId];
     let {q, r} = territory;
@@ -54,13 +62,15 @@ const animateSingleUnitMovement = (unitModel, path, offsetX, offsetZ, hexes, ter
     );
 
     let tween = new TWEEN.Tween(unitModel.position).to(toVector, 100);
-    if (path.length) {
-        tween.chain(animateSingleUnitMovement(unitModel, path, offsetX, offsetZ, hexes, territoriesById));
+    if (path.length > 1) {
+        tween.chain(animateSingleUnitMovement(unitModel, path, offsetX, offsetZ, territoriesById, i, lastHex));
     }
     else {
-        tween.onComplete(() => {
-            arrangeUnits(getHexByTerritoryId(hexes, territoriesById, territoryId));
-        });
+        if (i == 0) {
+            tween.onComplete(() => {
+                arrangeUnits(lastHex);
+            });
+        }
     }
 
     return tween;
