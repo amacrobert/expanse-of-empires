@@ -3,7 +3,7 @@ import MatchUtil from './match-util';
 import { getHex } from './graphics-util';
 import Animation from './animation';
 
-const startingPositionSprites = (scene, hex, match, territory) => {
+const startingPositionSprites = (scene, assets, hex, match, territory) => {
     let graphics = hex.userData.graphics;
 
     // Delete starting position sprite

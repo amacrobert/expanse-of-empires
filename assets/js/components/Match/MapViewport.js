@@ -338,7 +338,7 @@ class MapViewport extends React.Component {
 
                 let empireColor = territory.empire ? territory.empire.color : '777777';
 
-                GraphicsManager.startingPositionSprites(this.scene, hex, this.props.matchStore.match, territory);
+                GraphicsManager.startingPositionSprites(this.scene, assets, hex, this.props.matchStore.match, territory);
                 GraphicsManager.borders(this.scene, hex, territory, this.hexes, this.props.matchStore.territoriesByAxial, assets.getBorderSectionMesh, empireColor);
                 GraphicsManager.buildings(this.scene, hex, territory, assets);
                 GraphicsManager.units(this.scene, hex, territory, assets, empireColor);

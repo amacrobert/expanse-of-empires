@@ -47,7 +47,8 @@ class Intel implements JsonSerializable
         return $this->army_empire;
     }
 
-    public function setArmyEmpire(Empire $army_empire): self {
+    public function setArmyEmpire(?Empire $army_empire): self {
+        // null means NPC
         $this->army_empire = $army_empire;
         return $this;
     }

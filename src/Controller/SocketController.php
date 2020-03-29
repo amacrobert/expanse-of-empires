@@ -19,18 +19,20 @@ class SocketController implements MessageComponentInterface {
     protected $connections_by_match = [];
     protected $verbose = false;
 
-    public function getConnections() {
+    public function getConnections()
+    {
         return $this->connections;
     }
 
-    public function __construct(EventDispatcherInterface $dispatcher, EntityManagerInterface $em, $verbose = false) {
+    public function __construct(EventDispatcherInterface $dispatcher, EntityManagerInterface $em, $verbose = false)
+    {
         $this->dispatcher = $dispatcher;
         $this->verbose = $verbose;
         $this->em = $em;
     }
 
-    public function broadcastToMatch($match_id, $message, $exclude_user_ids = []) {
-
+    public function broadcastToMatch($match_id, $message, $exclude_user_ids = [])
+    {
         $message = json_encode($message);
         print 'Sending: ' . $message . PHP_EOL;
 
@@ -43,7 +45,8 @@ class SocketController implements MessageComponentInterface {
         }
     }
 
-    public function broadcastToUser($match_id, $user_id, $message) {
+    public function broadcastToUser($match_id, $user_id, $message)
+    {
         $message = json_encode($message);
 
         if (!empty($this->connections_by_match[$match_id][$user_id])) {
@@ -55,19 +58,21 @@ class SocketController implements MessageComponentInterface {
 
     }
 
-    public function broadcastToConnection($connection, $message) {
+    public function broadcastToConnection($connection, $message)
+    {
         $message = json_encode($message);
         print '[' . date('c') . '] Sending: ' . $message . PHP_EOL;
         $connection->send($message);
     }
 
-    public function onOpen(ConnectionInterface $connection) {
+    public function onOpen(ConnectionInterface $connection)
+    {
         $this->connections[] = $connection;
         print '[' . date('c') . '] New connection' . PHP_EOL;
     }
 
-    public function onMessage(ConnectionInterface $from_connection, $message) {
-
+    public function onMessage(ConnectionInterface $from_connection, $message)
+    {
         print 'Received: ' . $message . PHP_EOL;
         $message = json_decode($message);
 
@@ -126,7 +131,8 @@ class SocketController implements MessageComponentInterface {
         $this->em->clear();
     }
 
-    public function onClose(ConnectionInterface $closed_connection) {
+    public function onClose(ConnectionInterface $closed_connection)
+    {
         foreach ($this->connections as $key => $connection) {
             if ($closed_connection === $connection) {
                 print '[' . date('c') . '] Connection closed' . PHP_EOL;
@@ -147,7 +153,8 @@ class SocketController implements MessageComponentInterface {
         }
     }
 
-    public function onError(ConnectionInterface $connection, Exception $e) {
+    public function onError(ConnectionInterface $connection, Exception $e)
+    {
         if ($this->verbose) {
             print (string)$e;
         }
