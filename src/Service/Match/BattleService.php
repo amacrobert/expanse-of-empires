@@ -3,12 +3,12 @@
 namespace App\Service\Match;
 
 use App\Controller\SocketController;
-use Doctrine\ORM\EntityManagerInterface;
-use App\Entity\User\User;
-use App\Entity\Match\{Match, Empire, TerritoryState, Army};
 use App\Entity\Map\Territory;
+use App\Entity\Match\{Match, Empire, TerritoryState, Army, Intel};
+use App\Entity\User\User;
 use App\Exception\VisibleException;
 use App\Service\Map\MapService;
+use Doctrine\ORM\EntityManagerInterface;
 
 class BattleService
 {
@@ -212,7 +212,6 @@ class BattleService
             }
 
             if ($attack_roll !== null) {
-
                 // Add bonuses
                 $attack_score = $attack_roll;
                 foreach ($attack_bonuses as $bonus) {
@@ -238,13 +237,13 @@ class BattleService
             }
 
             $outcomes[] = [
-                'attack_roll' => $attack_roll,
-                'defense_roll' => $defense_roll,
-                'attack_bonuses' => $attack_bonuses,
-                'defense_bonuses' => $defense_bonuses,
-                'attack_score' => $attack_score,
-                'defense_score' => $defense_score,
-                'winner' => $winner,
+                'attack_roll'       => $attack_roll,
+                'defense_roll'      => $defense_roll,
+                'attack_bonuses'    => $attack_bonuses,
+                'defense_bonuses'   => $defense_bonuses,
+                'attack_score'      => $attack_score,
+                'defense_score'     => $defense_score,
+                'winner'            => $winner,
             ];
         }
 
@@ -269,6 +268,7 @@ class BattleService
         $attacking_army->setSize($attacking_army->getSize() - $defeated_attack_units);
 
         // If all defending armies were defeated, the attacker takes the territory
+        // @TODO: the attacked must have a remaining unit to win the terrirory (a deadly tie doesn't win)
         $attacker_takes_territory = true;
         foreach ($defending_armies as $defending_army) {
             if ($defending_army->getSize() > 0) {

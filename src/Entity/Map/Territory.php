@@ -5,10 +5,10 @@ namespace App\Entity\Map;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use JsonSerializable;
-use App\Entity\Match\{Building, TerritoryState};
+use App\Entity\Match\{Building, TerritoryState, Intel};
 
-class Territory implements JsonSerializable {
-
+class Territory implements JsonSerializable
+{
     protected $id;
     protected $map;
     protected $terrain;
@@ -20,9 +20,12 @@ class Territory implements JsonSerializable {
 
     // unmapped -- hydrated by MatchService#hydrateMapState()
     private $state;
+    private $intel;
 
-    public function jsonSerialize() {
+    public function jsonSerialize()
+    {
         $state = $this->getState();
+        $intel = $this->getIntel();
 
         return [
             'id'                => $this->getId(),
@@ -37,6 +40,7 @@ class Territory implements JsonSerializable {
             'building'          => $state ? $state->getBuilding() : null,
             'fortification'     => $state ? $state->getFortification() : 0,
             'armies'            => $state ? $state->getArmies()->toArray() : [],
+            'intel'             => $intel ?: [],
             'support'           => $state ? $state->getSupport() : null,
         ];
     }
@@ -55,6 +59,15 @@ class Territory implements JsonSerializable {
 
     public function setState(?TerritoryState $state): Territory {
         $this->state = $state;
+        return $this;
+    }
+
+    public function getIntel(): ?Intel {
+        return $this->intel;
+    }
+
+    public function setIntel(?Intel $intel): self {
+        $this->intel = $intel;
         return $this;
     }
 

@@ -121,7 +121,6 @@ class MapViewport extends React.Component {
             this.scene.add(hexMesh);
 
             hexMesh.userData.coordinates = {q, r};
-
             this.addHex(hexMesh, q, r);
         });
 
@@ -333,6 +332,7 @@ class MapViewport extends React.Component {
                         borders: {},
                         building: null,
                         armies: {},
+                        support: null,
                     };
                 }
 
@@ -342,6 +342,7 @@ class MapViewport extends React.Component {
                 GraphicsManager.borders(this.scene, hex, territory, this.hexes, this.props.matchStore.territoriesByAxial, assets.getBorderSectionMesh, empireColor);
                 GraphicsManager.buildings(this.scene, hex, territory, assets);
                 GraphicsManager.units(this.scene, hex, territory, assets, empireColor);
+                GraphicsManager.support(this.scene, hex, territory, assets);
             }
         });
     };

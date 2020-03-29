@@ -135,8 +135,10 @@ class ApiController extends AbstractController {
      */
     public function getMatchDetails($match_id, MatchService $match_service, EntityManagerInterface $em)
     {
+        $user = $this->getUser();
+
         if ($match = $em->getRepository(Match::class)->find($match_id)) {
-            $details = $match_service->getDetails($match);
+            $details = $match_service->getDetails($match, $user);
             return new JsonResponse($details);
         }
 

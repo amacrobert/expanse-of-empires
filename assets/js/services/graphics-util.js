@@ -23,7 +23,13 @@ class GraphicsUtil {
         this.hexShape.lineTo(points.topRight.x, points.topRight.z);
         this.hexShape.lineTo(points.top.x, points.top.z);
         this.hexGeometry = new THREE.ShapeGeometry(this.hexShape);
-        this.hexMaterial = new THREE.MeshPhongMaterial({ color: 0x78AB46 });
+        this.hexMaterials = {
+            '20': new THREE.MeshPhongMaterial({ color: 0x98be61 }),
+            '10': new THREE.MeshPhongMaterial({ color: 0x8cb74f }),
+            '5': new THREE.MeshPhongMaterial({ color: 0x7faf49 }),
+            '-20': new THREE.MeshPhongMaterial({ color: 0x8c923c }),
+            '0': new THREE.MeshPhongMaterial({ color: 0x78AB46 }),
+        };
 
         // Simple shadow object
         let shadowTexture = this.textureLoader.load(require('../../img/shadow.png'));
@@ -198,7 +204,7 @@ class GraphicsUtil {
     };
 
     getHexMesh = (territory) => {
-        var hexMesh = new THREE.Mesh(this.hexGeometry, this.hexMaterial);
+        var hexMesh = new THREE.Mesh(this.hexGeometry, this.hexMaterials[+territory.support]);
 
         // Rotate from x/y coordinates to x/z
         hexMesh.rotation.x = -Math.PI / 2;

@@ -16,8 +16,8 @@ class MatchService
     const MED_SUPPLY = 10;
     const LOW_SUPPLY = 5;
     const NO_SUPPLY = -20;
-    const HIGH_SUPPLY_RADIUS = 3;
-    const MED_SUPPLY_RADIUS = 6;
+    const HIGH_SUPPLY_RADIUS = 2;
+    const MED_SUPPLY_RADIUS = 5;
 
     private $em;
     private $map_service;
@@ -126,7 +126,7 @@ class MatchService
         return null;
     }
 
-    public function hydrateMapState(Match $match, array $territories = null): void
+    public function hydrateMapState(Match $match, array $territories = null, ?User $user = null): void
     {
         $search_params = ['match' => $match];
         if (!empty($territories)) {
@@ -141,9 +141,9 @@ class MatchService
         }
     }
 
-    public function getDetails($match): array
+    public function getDetails(Match $match, ?User $user): array
     {
-        $this->hydrateMapState($match);
+        $this->hydrateMapState($match, null, $user);
 
         $empires = $match->getEmpires();
         $territories = $match->getMap()->getTerritories();

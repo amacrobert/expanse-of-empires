@@ -7,8 +7,8 @@ use Doctrine\Common\Collections\Collection;
 use JsonSerializable, DateTime, DateTimeInterface;
 use App\Entity\Map\Map;
 
-class Match implements JsonSerializable {
-
+class Match implements JsonSerializable
+{
     private $id;
     private $visible = true;
     private $name;

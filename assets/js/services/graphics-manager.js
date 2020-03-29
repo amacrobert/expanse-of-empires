@@ -199,7 +199,17 @@ const units = (scene, hex, territory, assets, empireColor) => {
                 Animation.arrangeUnits(hex, 500);
             }
         });
-    }}
+    }
+}
+
+const support = (scene, hex, territory, assets) => {
+    let graphics = hex.userData.graphics;
+
+    if (!graphics.support || territory.support != graphics.support) {
+        hex.material = assets.hexMaterials[+territory.support];
+        graphics.support = territory.support;
+    }
+}
 
 
 export default {
@@ -207,4 +217,5 @@ export default {
     borders,
     buildings,
     units,
+    support,
 };

@@ -7,8 +7,8 @@ use Doctrine\Common\Collections\Collection;
 use DateTime;
 use App\Entity\Map\Territory;
 
-class TerritoryState {
-
+class TerritoryState
+{
     private $id;
     private $match;
     private $empire;
