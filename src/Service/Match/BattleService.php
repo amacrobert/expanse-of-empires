@@ -269,47 +269,24 @@ class BattleService
         $attacking_units_left = $attacking_units - $defeated_attack_units;
         $attacking_army->setSize($attacking_army->getSize() - $defeated_attack_units);
 
-        // --- INTEL -----------------------
+        // --- INTEL --------------------
         // Add a new piece of Intel for the attacker showing the number of remaining defending units
-        $intel_of_defense = $this->em->getRepository(Intel::class)->findOneBy([
-            'empire'            => $attacking_empire,
-            'territory_state'   => $defending_state,
-            'army_empire'       => $defending_empire,
-        ]);
-
-        if (!$intel_of_defense) {
-            $intel_of_defense = (new Intel)
-                ->setEmpire($attacking_empire)
-                ->setTerritoryState($defending_state)
-                ->setArmyEmpire($defending_empire);
-            $this->em->persist($intel_of_defense);
-        }
-
-        $intel_of_defense
-            ->setSize($defending_units - $defeated_defense_units)
-            ->setDateToNow();
+        $intel_of_defense = $this->giveIntel(
+            $attacking_empire,
+            $defending_empire,
+            $defending_state,
+            $defending_units - $defeated_defense_units
+        );
 
         if (!$npc_is_defending) {
-            // Add a new piece of Intel for the defender showing the remaining attacking units
-            $intel_of_offense = $this->em->getRepository(Intel::class)->findOneBy([
-                'empire'            => $defending_empire,
-                'territory_state'   => $attacking_territory->getState(),
-                'army_empire'       => $attacking_empire,
-            ]);
-
-            if (!$intel_of_offense) {
-                $intel_of_offense = (new Intel)
-                    ->setEmpire($defending_empire)
-                    ->setTerritoryState($attacking_territory->getState())
-                    ->setArmyEmpire($attacking_empire);
-                $this->em->persist($intel_of_offense);
-            }
-
-            $intel_of_offense
-                ->setSize($attacking_units_left)
-                ->setDateToNow();
+            $intel_of_offense = $this->giveIntel(
+                $defending_empire,
+                $attacking_empire,
+                $attacking_territory->getState(),
+                $attacking_units_left
+            );
         }
-        // --- /INTEL -----------------
+        // --- /INTEL --------------------
 
         // If all defending armies were defeated, the attacker takes the territory
         // @TODO: the attacked must have a remaining unit to win the terrirory (a deadly tie doesn't win)
@@ -391,5 +368,29 @@ class BattleService
 
         $this->socket_controller->broadcastToUser($match->getId(), $user->getId(), $socket_message_for_alliance);
         $this->socket_controller->broadcastToMatch($match->getId(), $socket_message_for_match);
+    }
+
+    // Give a piece of intel for the spyer, revealing something about subject in state
+    private function giveIntel(Empire $spyer, ?Empire $subject, TerritoryState $state, int $army_size)
+    {
+        $intel = $this->em->getRepository(Intel::class)->findOneBy([
+            'empire'            => $spyer,
+            'territory_state'   => $state,
+            'army_empire'       => $subject,
+        ]);
+
+        if (!$intel) {
+            $intel = (new Intel)
+                ->setEmpire($spyer)
+                ->setTerritoryState($state)
+                ->setArmyEmpire($subject);
+            $this->em->persist($intel);
+        }
+
+        $intel
+            ->setSize($army_size)
+            ->setDateToNow();
+
+        return $intel;
     }
 }
