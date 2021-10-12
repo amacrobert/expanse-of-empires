@@ -35,7 +35,7 @@
         "react-dom": "^16.3.2",
         "react-router-dom": "^4.3.1",
         "three": "^0.125.0",
-        "underscore": "^1.9.1",
+        "underscore": "^1.12.1",
         "universal-cookie": "^2.1.2"
     }
 }
