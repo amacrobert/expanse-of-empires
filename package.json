@@ -23,7 +23,7 @@
         "buckets-js": "^1.98.2",
         "immutability-helper": "^2.7.1",
         "jquery": "^3.5.0",
-        "lodash": "^4.17.19",
+        "lodash": "^4.17.21",
         "mem": "^4.0.0",
         "mobx": "^5.0.4",
         "mobx-react": "^5.2.5",
